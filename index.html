@@ -5,53 +5,56 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Wayang Tangan</title>
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;height:100%}
-body{font-family:system-ui,sans-serif;color:#f3dcae;display:flex;flex-direction:column;align-items:center;gap:12px;padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));
-background:
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;user-select:none;-webkit-user-select:none;font-family:system-ui,sans-serif;color:#f3dcae}
+body{background:
 radial-gradient(ellipse 260px 120px at 8% 6%,#3a1a05 40%,transparent 41%),
 radial-gradient(ellipse 300px 140px at 95% 92%,#3a1a05 40%,transparent 41%),
-radial-gradient(ellipse 240px 110px at 4% 96%,#3a1a05 40%,transparent 41%),
-radial-gradient(ellipse at 50% 35%,#c9801a 0%,#7a3d0a 55%,#2a1203 100%);}
-#kelir{position:relative;width:min(96vw,900px);aspect-ratio:4/3;border-radius:10px;overflow:hidden;border:2px solid #1b1008;
+radial-gradient(ellipse at 50% 35%,#c9801a 0%,#7a3d0a 55%,#2a1203 100%)}
+#kelir{position:fixed;inset:max(6px,env(safe-area-inset-top)) max(6px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left));border-radius:10px;overflow:hidden;border:2px solid #1b1008;
 background:radial-gradient(ellipse at 50% 40%,#fff3cf 0%,#f0dca4 70%,#d9bd7c 100%);box-shadow:0 10px 40px #000a}
-#kelir::before{content:"";position:absolute;inset:0 0 auto 0;height:7%;z-index:2;
-background:repeating-linear-gradient(90deg,#6b1f12 0 14px,#b8862b 14px 18px);border-bottom:3px solid #3b1208}
-#kelir::after{content:"";position:absolute;inset:auto 0 0 0;height:6%;z-index:2;background:repeating-linear-gradient(90deg,#5a1a10 0 10px,#c08a2e 10px 13px,#2a1410 13px 24px)}
-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;touch-action:none}
-@media (orientation:portrait){#kelir{aspect-ratio:3/4}}
-#cap{position:absolute;left:10px;bottom:8%;z-index:3;font-size:12px;background:#000a;padding:4px 10px;border-radius:99px}
-#snd{position:absolute;right:10px;top:9%;z-index:3;border:0;border-radius:50%;width:34px;height:34px;background:#000a;color:#fff;font-size:16px;cursor:pointer}
-#bar{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-items:center}
-button,label.b{background:#f3dcae;color:#3b1208;border:0;border-radius:8px;padding:8px 14px;font-weight:600;cursor:pointer;font-size:14px}
+:fullscreen #kelir{inset:0;border-radius:0;border:0}
+#kelir::before{content:"";position:absolute;inset:0 0 auto 0;height:8%;min-height:14px;z-index:2;background:repeating-linear-gradient(90deg,#6b1f12 0 14px,#b8862b 14px 18px);border-bottom:3px solid #3b1208}
+#kelir::after{content:"";position:absolute;inset:auto 0 0 0;height:6%;min-height:10px;z-index:2;background:repeating-linear-gradient(90deg,#5a1a10 0 10px,#c08a2e 10px 13px,#2a1410 13px 24px)}
+#cv{position:absolute;inset:0;width:100%;height:100%;z-index:1;touch-action:none}
+.ov{position:absolute;z-index:3}
+#st{left:8px;top:calc(8% + 8px);font-size:12px;background:#000b;padding:4px 10px;border-radius:99px;max-width:62%}
+#tools{right:8px;top:calc(8% + 8px);display:flex;flex-direction:column;gap:6px}
+.ic{width:38px;height:38px;border:0;border-radius:50%;background:#000b;color:#fff;font-size:17px}
+#dock{left:50%;transform:translateX(-50%);bottom:calc(6% + 8px);display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:92%}
+#dock[hidden]{display:none}
+.b{background:#f3dcae;color:#3b1208;border:0;border-radius:8px;padding:8px 12px;font-weight:600;font-size:13px}
+.b:disabled{opacity:.6}
 input[type=file]{display:none}
-video{width:150px;border-radius:8px;transform:scaleX(-1);border:2px solid #f3dcae55;display:none}
-#st{font-size:13px;opacity:.85;text-align:center}
+#pip{right:8px;bottom:calc(6% + 58px);width:min(30vw,150px);aspect-ratio:4/3;border-radius:8px;overflow:hidden;border:2px solid #f3dcae88;display:none;transform:scaleX(-1)}
+#pip video,#pip canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}
 </style>
 </head>
 <body>
 <div id="kelir">
   <canvas id="cv"></canvas>
-  <button id="snd" title="Suara gamelan">🔇</button>
-  <div id="cap">Dua wayang · satu per tangan</div>
+  <div id="st" class="ov">Dua wayang · satu per tangan</div>
+  <div id="tools" class="ov">
+    <button class="ic" id="fs" title="Layar penuh">⛶</button>
+    <button class="ic" id="snd" title="Suara gamelan">🔇</button>
+    <button class="ic" id="menu" title="Tampil/sembunyi menu">☰</button>
+  </div>
+  <div id="pip" class="ov"><video id="vid" playsinline muted></video><canvas id="oc"></canvas></div>
+  <div id="dock" class="ov">
+    <button class="b" id="cam">📷 Kamera</button>
+    <label class="b">🎭 Kiri<input type="file" id="fl" accept="image/*"></label>
+    <label class="b">🎭 Kanan<input type="file" id="fr" accept="image/*"></label>
+  </div>
 </div>
-<div id="bar">
-  <button id="cam">Aktifkan kamera</button>
-  <label class="b">Karakter kiri<input type="file" id="fl" accept="image/*"></label>
-  <label class="b">Karakter kanan<input type="file" id="fr" accept="image/*"></label>
-  <video id="vid" playsinline muted></video>
-</div>
-<div id="st">Tanpa kamera pun bisa: geser satu atau dua jari (atau mouse) di kelir. Untuk karakter sendiri, unggah PNG berlatar transparan.</div>
 
 <script type="module">
-
-const cv = document.getElementById('cv'), g = cv.getContext('2d');
-const vid = document.getElementById('vid'), st = document.getElementById('st');
+const $ = id => document.getElementById(id);
+const cv = $('cv'), g = cv.getContext('2d'), vid = $('vid'), st = $('st');
 let W = 0, H = 0;
 function resize(){ const d = devicePixelRatio || 1; W = cv.clientWidth; H = cv.clientHeight; cv.width = W*d; cv.height = H*d; g.setTransform(d,0,0,d,0,0); }
-addEventListener('resize', resize); resize();
+new ResizeObserver(resize).observe(cv); resize();
 
-// Karakter bawaan (placeholder asli) — ganti lewat tombol unggah
+// Karakter bawaan (placeholder) — ganti lewat tombol 🎭
 function bawaan(c1, c2){
   const c = document.createElement('canvas'); c.width = 300; c.height = 520; const x = c.getContext('2d');
   x.lineJoin = 'round'; x.strokeStyle = '#d9a441'; x.lineWidth = 6;
@@ -61,7 +64,7 @@ function bawaan(c1, c2){
   x.lineWidth = 11; x.beginPath(); x.moveTo(185,205); x.lineTo(255,120); x.stroke();
   x.lineWidth = 6; x.fillStyle = '#e8b04a';
   x.beginPath(); x.arc(150,125,48,0,7); x.fill(); x.stroke();
-  x.beginPath(); x.moveTo(104,125); x.lineTo(70,150); x.lineTo(106,150); x.fillStyle = '#e8b04a'; x.fill(); x.stroke();
+  x.beginPath(); x.moveTo(104,125); x.lineTo(70,150); x.lineTo(106,150); x.fill(); x.stroke();
   x.beginPath(); x.moveTo(102,90); x.lineTo(150,20); x.lineTo(198,90); x.fillStyle = c2; x.fill(); x.stroke();
   x.fillStyle = '#2a1203'; x.beginPath(); x.arc(125,118,5,0,7); x.fill();
   return c;
@@ -71,10 +74,10 @@ const P = [
   {img: bawaan('#1f3f8f','#a3231b'), x:.75, y:.55, r:0, s:1, tx:.75, ty:.55, tr:0, ts:1}
 ];
 function muat(file, i){ if(!file) return; const im = new Image(); im.onload = () => P[i].img = im; im.src = URL.createObjectURL(file); }
-document.getElementById('fl').onchange = e => muat(e.target.files[0], 0);
-document.getElementById('fr').onchange = e => muat(e.target.files[0], 1);
+$('fl').onchange = e => muat(e.target.files[0], 0);
+$('fr').onchange = e => muat(e.target.files[0], 1);
 
-// Kontrol mouse (cadangan)
+// Sentuh / mouse (cadangan, mendukung dua jari)
 let handsOn = 0;
 cv.addEventListener('pointermove', e => {
   if(performance.now() - handsOn < 500) return;
@@ -82,26 +85,64 @@ cv.addEventListener('pointermove', e => {
   const p = P[nx < .5 ? 0 : 1]; p.tr = (nx - p.tx)*2; p.tx = nx; p.ty = ny;
 });
 
-// Kamera + deteksi tangan
-let lm = null;
-document.getElementById('cam').onclick = async e => {
+// Tombol layar penuh, menu, suara
+$('fs').onclick = async () => {
+  try{
+    if(document.fullscreenElement) await document.exitFullscreen();
+    else { await document.documentElement.requestFullscreen({navigationUI:'hide'}); try{ await screen.orientation.lock('landscape'); }catch(_){} }
+  }catch(_){ st.textContent = 'Layar penuh tidak didukung browser ini.'; }
+};
+$('menu').onclick = () => { $('dock').hidden = !$('dock').hidden; };
+let ac, on = false, tm; const nada = [261.6,293.7,349.2,392,440,523.3,587.3];
+function bunyi(){
+  const o = ac.createOscillator(), a = ac.createGain(), n = ac.currentTime;
+  o.type = 'sine'; o.frequency.value = nada[Math.random()*nada.length|0]*(Math.random()<.3?.5:1);
+  a.gain.setValueAtTime(.0001,n); a.gain.exponentialRampToValueAtTime(.12,n+.01); a.gain.exponentialRampToValueAtTime(.0001,n+1.6);
+  o.connect(a).connect(ac.destination); o.start(); o.stop(n+1.7);
+}
+$('snd').onclick = () => { ac = ac || new AudioContext(); on = !on; $('snd').textContent = on ? '🔊' : '🔇'; clearInterval(tm); if(on) tm = setInterval(bunyi, 650); };
+
+// Kamera + pelacakan tangan
+const V = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+const MODEL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
+async function ambil(url, label){
+  const r = await fetch(url); if(!r.ok) throw new Error('unduhan gagal (' + r.status + ')');
+  const rd = r.body.getReader(), parts = []; let got = 0;
+  for(;;){ const {done, value} = await rd.read(); if(done) break; parts.push(value); got += value.length; st.textContent = label + ' ' + (got/1048576).toFixed(1) + ' MB'; }
+  return new Uint8Array(await new Blob(parts).arrayBuffer());
+}
+const batas = (p, ms) => Promise.race([p, new Promise((_,j) => setTimeout(() => j(new Error('timeout')), ms))]);
+let lm = null, lastT = -1;
+$('cam').onclick = async e => {
   e.target.disabled = true; st.textContent = 'Meminta izin kamera…';
   try{
-    vid.srcObject = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:640,height:480}});
-    await vid.play(); vid.style.display = 'block';
-    st.textContent = 'Memuat model pelacakan tangan…';
-    const {HandLandmarker, FilesetResolver} = await import("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/vision_bundle.mjs");
-    const fs = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm");
-    lm = await HandLandmarker.createFromOptions(fs, {
-      baseOptions:{modelAssetPath:"https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task", delegate:"GPU"},
-      runningMode:"VIDEO", numHands:2});
-    st.textContent = 'Angkat kedua tangan di depan kamera. Cubit jari untuk membuat wayang mengangguk.';
-  }catch(err){ st.textContent = 'Kamera/model gagal dimuat: ' + err.message + ' (buka lewat localhost dan pastikan internet aktif)'; e.target.disabled = false; }
+    vid.srcObject = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user', width:{ideal:480}, height:{ideal:360}}, audio:false});
+    await vid.play(); $('pip').style.display = 'block';
+    st.textContent = 'Memuat pustaka…';
+    const {HandLandmarker, FilesetResolver} = await import(V + "/vision_bundle.mjs");
+    await ambil(V + "/wasm/vision_wasm_internal.wasm", 'Mengunduh mesin (1/2)');
+    const buf = await ambil(MODEL, 'Mengunduh model (2/2)');
+    st.textContent = 'Menyiapkan pelacakan…';
+    const fs = await FilesetResolver.forVisionTasks(V + "/wasm");
+    const mk = d => HandLandmarker.createFromOptions(fs, {baseOptions:{modelAssetBuffer:buf.slice(), delegate:d}, runningMode:"VIDEO", numHands:2});
+    try{ lm = await batas(mk("GPU"), 20000); }catch(_){ lm = await mk("CPU"); }
+    st.textContent = 'Siap! Angkat kedua tangan. Cubit jari untuk mengangguk.';
+  }catch(err){ st.textContent = 'Gagal: ' + err.message; e.target.disabled = false; }
 };
+const oc = $('oc'), og = oc.getContext('2d'); oc.width = 160; oc.height = 120;
+const RANTAI = [[0,1,2,3,4],[0,5,6,7,8],[9,10,11,12],[13,14,15,16],[0,17,18,19,20],[5,9,13,17]];
+function lukis(ls){
+  og.clearRect(0,0,160,120); og.strokeStyle = '#fff'; og.lineWidth = 2; og.fillStyle = '#ffb43a';
+  for(const l of ls){
+    for(const ch of RANTAI){ og.beginPath(); ch.forEach((k,j) => { const x = l[k].x*160, y = l[k].y*120; j ? og.lineTo(x,y) : og.moveTo(x,y); }); og.stroke(); }
+    for(const q of l){ og.beginPath(); og.arc(q.x*160, q.y*120, 2.5, 0, 7); og.fill(); }
+  }
+}
 const dist = (a,b) => Math.hypot(a.x-b.x, a.y-b.y);
 function baca(){
-  if(!lm || vid.readyState < 2) return;
+  if(!lm || vid.readyState < 2 || vid.currentTime === lastT) return; lastT = vid.currentTime;
   const res = lm.detectForVideo(vid, performance.now());
+  lukis(res.landmarks);
   if(!res.landmarks.length) return;
   handsOn = performance.now();
   const hs = res.landmarks.map(l => {
@@ -112,7 +153,7 @@ function baca(){
   const asg = hs.length === 1 ? [[hs[0].x < .5 ? 0 : 1, hs[0]]] : [[0,hs[0]],[1,hs[1]]];
   for(const [i,h] of asg){
     const p = P[i];
-    p.tx = Math.min(.95, Math.max(.05, (h.x-.1)/.8)); p.ty = Math.min(.9, Math.max(.2, (h.y-.15)/.7));
+    p.tx = Math.min(.95, Math.max(.05, (h.x-.1)/.8)); p.ty = Math.min(.9, Math.max(.25, (h.y-.15)/.7));
     p.tr = h.rot + (h.pinch ? .3 : 0); p.ts = Math.min(1.4, Math.max(.7, h.size/.16));
   }
 }
@@ -121,7 +162,7 @@ function baca(){
 function gambar(p, t, i){
   const idle = performance.now() - handsOn > 500;
   const sway = idle ? Math.sin(t/900 + i*2)*.04 : 0;
-  const h = H*.62*p.s, w = h*p.img.width/p.img.height, px = p.x*W, py = p.y*H;
+  const h = Math.min(H*.62, W*.8)*p.s, w = h*p.img.width/p.img.height, px = p.x*W, py = p.y*H;
   g.save(); g.translate(px, py); g.rotate(p.r + sway);
   g.strokeStyle = '#2a1608'; g.lineWidth = 5; g.lineCap = 'round';
   g.beginPath(); g.moveTo(w*.05, h*.1); g.lineTo(w*.12, H*1.3); g.stroke();
@@ -130,24 +171,13 @@ function gambar(p, t, i){
   g.restore();
 }
 function loop(t){
-  baca();
+  try{ baca(); }catch(err){ st.textContent = 'Error pelacakan: ' + err.message; lm = null; }
   for(const p of P){ p.x += (p.tx-p.x)*.25; p.y += (p.ty-p.y)*.25; p.r += (p.tr-p.r)*.2; p.s += (p.ts-p.s)*.15; p.tr *= .96; }
   g.clearRect(0,0,W,H);
   P.forEach((p,i) => gambar(p,t,i));
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
-
-// Suara latar bergaya gamelan
-let ac, on = false, tm; const nada = [261.6,293.7,349.2,392,440,523.3,587.3];
-const snd = document.getElementById('snd');
-function bunyi(){
-  const o = ac.createOscillator(), a = ac.createGain(), n = ac.currentTime;
-  o.type = 'sine'; o.frequency.value = nada[Math.random()*nada.length|0]*(Math.random()<.3?.5:1);
-  a.gain.setValueAtTime(.0001,n); a.gain.exponentialRampToValueAtTime(.12,n+.01); a.gain.exponentialRampToValueAtTime(.0001,n+1.6);
-  o.connect(a).connect(ac.destination); o.start(); o.stop(n+1.7);
-}
-snd.onclick = () => { ac = ac || new AudioContext(); on = !on; snd.textContent = on ? '🔊' : '🔇'; clearInterval(tm); if(on) tm = setInterval(bunyi, 650); };
 </script>
 </body>
 </html>

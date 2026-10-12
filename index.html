@@ -20,10 +20,10 @@ background:radial-gradient(ellipse at 50% 40%,#fff3cf 0%,#f0dca4 70%,#d9bd7c 100
 .ov{position:absolute;z-index:3}
 #st{left:8px;top:calc(8% + 8px);font-size:12px;background:#000b;padding:4px 10px;border-radius:99px;max-width:62%}
 #tools{right:8px;top:calc(8% + 8px);display:flex;flex-direction:column;gap:6px}
-.ic{width:38px;height:38px;border:0;border-radius:50%;background:#000b;color:#fff;font-size:17px}
+.ic{width:44px;height:44px;border:0;border-radius:50%;background:#000b;color:#fff;font-size:17px}
 #dock{left:50%;transform:translateX(-50%);bottom:calc(6% + 8px);display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:92%}
 #dock[hidden]{display:none}
-.b{background:#f3dcae;color:#3b1208;border:0;border-radius:8px;padding:8px 12px;font-weight:600;font-size:13px}
+.b{background:#f3dcae;color:#3b1208;border:0;border-radius:8px;padding:10px 14px;font-weight:600;font-size:13px}
 .b:disabled{opacity:.6}
 input[type=file]{display:none}
 #pip{right:8px;bottom:calc(6% + 58px);width:min(30vw,150px);aspect-ratio:4/3;border-radius:8px;overflow:hidden;border:2px solid #f3dcae88;display:none;transform:scaleX(-1)}
@@ -35,15 +35,16 @@ input[type=file]{display:none}
   <canvas id="cv"></canvas>
   <div id="st" class="ov">Dua wayang · satu per tangan</div>
   <div id="tools" class="ov">
-    <button class="ic" id="fs" title="Layar penuh">⛶</button>
-    <button class="ic" id="snd" title="Suara gamelan">🔇</button>
-    <button class="ic" id="menu" title="Tampil/sembunyi menu">☰</button>
+    <button class="ic" id="fs" title="Layar penuh" aria-label="Layar penuh">⛶</button>
+    <button class="ic" id="snd" title="Suara gamelan" aria-label="Suara gamelan">🔇</button>
+    <button class="ic" id="menu" title="Tampil/sembunyi menu" aria-label="Tampil atau sembunyikan menu">☰</button>
   </div>
   <div id="pip" class="ov"><video id="vid" playsinline muted></video><canvas id="oc"></canvas></div>
   <div id="dock" class="ov">
     <button class="b" id="cam">📷 Kamera</button>
     <label class="b">🎭 Kiri<input type="file" id="fl" accept="image/*"></label>
     <label class="b">🎭 Kanan<input type="file" id="fr" accept="image/*"></label>
+    <button class="b" id="flip">🔁 Balik arah</button>
   </div>
 </div>
 
@@ -70,20 +71,40 @@ function bawaan(c1, c2){
   return c;
 }
 const P = [
-  {img: bawaan('#a3231b','#1f3f8f'), x:.25, y:.55, r:0, s:1, tx:.25, ty:.55, tr:0, ts:1},
-  {img: bawaan('#1f3f8f','#a3231b'), x:.75, y:.55, r:0, s:1, tx:.75, ty:.55, tr:0, ts:1}
+  {img: bawaan('#a3231b','#1f3f8f'), x:.25, y:.55, r:0, s:1, tx:.25, ty:.55, tr:0, ts:1, fx:1, ftx:1, inv:false, nod:-1e9, wasPinch:false, seen:-1e9, hx:.25, hy:.5},
+  {img: bawaan('#1f3f8f','#a3231b'), x:.75, y:.55, r:0, s:1, tx:.75, ty:.55, tr:0, ts:1, fx:-1, ftx:-1, inv:false, nod:-1e9, wasPinch:false, seen:-1e9, hx:.75, hy:.5}
 ];
-function muat(file, i){ if(!file) return; const im = new Image(); im.onload = () => P[i].img = im; im.src = URL.createObjectURL(file); }
-$('fl').onchange = e => muat(e.target.files[0], 0);
-$('fr').onchange = e => muat(e.target.files[0], 1);
+function muat(file, i){
+  if(!file) return; const u = URL.createObjectURL(file), im = new Image();
+  im.onload = () => { const k = Math.min(1, 800/Math.max(im.width, im.height)), c = document.createElement('canvas');
+    c.width = Math.round(im.width*k); c.height = Math.round(im.height*k); c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+    URL.revokeObjectURL(u); P[i].img = c; st.textContent = 'Wayang diganti.'; };
+  im.onerror = () => { URL.revokeObjectURL(u); st.textContent = 'Gambar tidak bisa dibuka.'; };
+  im.src = u;
+}
+$('fl').onchange = e => { muat(e.target.files[0], 0); e.target.value = ''; };
+$('fr').onchange = e => { muat(e.target.files[0], 1); e.target.value = ''; };
+$('flip').onclick = () => P.forEach(p => p.inv = !p.inv);
 
-// Sentuh / mouse (cadangan, mendukung dua jari)
-let handsOn = 0;
+// Sentuh / mouse: satu jari = satu wayang (per pointerId), ketuk = angguk
+let handsOn = -1e9; const ptr = new Map();
+const rel = e => { const b = cv.getBoundingClientRect(); return [(e.clientX-b.left)/b.width, (e.clientY-b.top)/b.height]; };
+const gerak = (p, nx, ny) => { p.tr = (nx - p.tx)*2; p.tx = nx; p.ty = ny; };
+cv.addEventListener('pointerdown', e => {
+  if(performance.now() - handsOn < 500) return;
+  const [nx] = rel(e), dipakai = [...ptr.values()];
+  const pilih = P.map((p,i) => i).filter(i => !dipakai.includes(i)).sort((a,b) => Math.abs(P[a].x-nx) - Math.abs(P[b].x-nx))[0];
+  if(pilih === undefined) return;
+  ptr.set(e.pointerId, pilih); cv.setPointerCapture(e.pointerId); P[pilih].nod = performance.now();
+});
 cv.addEventListener('pointermove', e => {
   if(performance.now() - handsOn < 500) return;
-  const b = cv.getBoundingClientRect(), nx = (e.clientX-b.left)/b.width, ny = (e.clientY-b.top)/b.height;
-  const p = P[nx < .5 ? 0 : 1]; p.tr = (nx - p.tx)*2; p.tx = nx; p.ty = ny;
+  const [nx, ny] = rel(e);
+  if(ptr.has(e.pointerId)) gerak(P[ptr.get(e.pointerId)], nx, ny);
+  else if(e.pointerType === 'mouse' && !ptr.size) gerak(P[nx < .5 ? 0 : 1], nx, ny);
 });
+const lepas = e => ptr.delete(e.pointerId);
+cv.addEventListener('pointerup', lepas); cv.addEventListener('pointercancel', lepas);
 
 // Tombol layar penuh, menu, suara
 $('fs').onclick = async () => {
@@ -92,6 +113,7 @@ $('fs').onclick = async () => {
     else { await document.documentElement.requestFullscreen({navigationUI:'hide'}); try{ await screen.orientation.lock('landscape'); }catch(_){} }
   }catch(_){ st.textContent = 'Layar penuh tidak didukung browser ini.'; }
 };
+if(!document.documentElement.requestFullscreen) $('fs').style.display = 'none';
 $('menu').onclick = () => { $('dock').hidden = !$('dock').hidden; };
 let ac, on = false, tm; const nada = [261.6,293.7,349.2,392,440,523.3,587.3];
 function bunyi(){
@@ -102,13 +124,19 @@ function bunyi(){
 }
 $('snd').onclick = () => { ac = ac || new AudioContext(); on = !on; $('snd').textContent = on ? '🔊' : '🔇'; clearInterval(tm); if(on) tm = setInterval(bunyi, 650); };
 
+document.addEventListener('visibilitychange', () => {
+  const s = vid.srcObject; if(s) s.getTracks().forEach(t => t.enabled = !document.hidden);
+  if(ac) document.hidden ? ac.suspend() : (on && ac.resume());
+});
+
 // Kamera + pelacakan tangan
 const V = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 const MODEL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
 async function ambil(url, label){
   const r = await fetch(url); if(!r.ok) throw new Error('unduhan gagal (' + r.status + ')');
-  const rd = r.body.getReader(), parts = []; let got = 0;
-  for(;;){ const {done, value} = await rd.read(); if(done) break; parts.push(value); got += value.length; st.textContent = label + ' ' + (got/1048576).toFixed(1) + ' MB'; }
+  const tot = +r.headers.get('content-length') || 0, rd = r.body.getReader(), parts = []; let got = 0;
+  for(;;){ const {done, value} = await rd.read(); if(done) break; parts.push(value); got += value.length;
+    st.textContent = label + ' ' + (tot ? Math.round(got/tot*100) + '%' : (got/1048576).toFixed(1) + ' MB'); }
   return new Uint8Array(await new Blob(parts).arrayBuffer());
 }
 const batas = (p, ms) => Promise.race([p, new Promise((_,j) => setTimeout(() => j(new Error('timeout')), ms))]);
@@ -120,14 +148,14 @@ $('cam').onclick = async e => {
     await vid.play(); $('pip').style.display = 'block';
     st.textContent = 'Memuat pustaka…';
     const {HandLandmarker, FilesetResolver} = await import(V + "/vision_bundle.mjs");
-    await ambil(V + "/wasm/vision_wasm_internal.wasm", 'Mengunduh mesin (1/2)');
-    const buf = await ambil(MODEL, 'Mengunduh model (2/2)');
+    let buf = await ambil(MODEL, 'Mengunduh model');
     st.textContent = 'Menyiapkan pelacakan…';
     const fs = await FilesetResolver.forVisionTasks(V + "/wasm");
-    const mk = d => HandLandmarker.createFromOptions(fs, {baseOptions:{modelAssetBuffer:buf.slice(), delegate:d}, runningMode:"VIDEO", numHands:2});
-    try{ lm = await batas(mk("GPU"), 20000); }catch(_){ lm = await mk("CPU"); }
-    st.textContent = 'Siap! Angkat kedua tangan. Cubit jari untuk mengangguk.';
-  }catch(err){ st.textContent = 'Gagal: ' + err.message; e.target.disabled = false; }
+    const mk = (d, b) => HandLandmarker.createFromOptions(fs, {baseOptions:{modelAssetBuffer:b, delegate:d}, runningMode:"VIDEO", numHands:2});
+    try{ lm = await batas(mk("GPU", buf.slice()), 20000); }catch(_){ lm = await mk("CPU", buf); }
+    buf = null;
+    st.textContent = 'Siap! Angkat kedua tangan. Cubit jari agar wayang mengangguk.';
+  }catch(err){ st.textContent = 'Gagal: ' + err.message + (err.name === 'NotAllowedError' ? ' — izinkan kamera di pengaturan situs lalu coba lagi.' : ''); e.target.disabled = false; }
 };
 const oc = $('oc'), og = oc.getContext('2d'); oc.width = 160; oc.height = 120;
 const RANTAI = [[0,1,2,3,4],[0,5,6,7,8],[9,10,11,12],[13,14,15,16],[0,17,18,19,20],[5,9,13,17]];
@@ -139,40 +167,66 @@ function lukis(ls){
   }
 }
 const dist = (a,b) => Math.hypot(a.x-b.x, a.y-b.y);
+// Identitas tangan: tiap wayang "mengunci" tangan terdekat dari posisi terakhirnya, jadi tidak tertukar saat bersilang
+function bagi(hs){
+  const now = performance.now(), hidup = i => now - P[i].seen < 800, d = (h,i) => dist(h, {x:P[i].hx, y:P[i].hy});
+  if(hs.length >= 2){
+    const [a,b] = hs.slice(0,2).sort((p,q) => p.x-q.x);
+    if(hidup(0) && hidup(1)) return d(a,1)+d(b,0) < (d(a,0)+d(b,1))*.8 ? [[1,a],[0,b]] : [[0,a],[1,b]];
+    return [[0,a],[1,b]];
+  }
+  const h = hs[0], l0 = hidup(0), l1 = hidup(1);
+  if(l0 && l1) return [[d(h,0) <= d(h,1) ? 0 : 1, h]];
+  if(l0 || l1){ const j = l0 ? 0 : 1; return [[d(h,j) < .3 ? j : 1-j, h]]; }
+  return [[h.x < .5 ? 0 : 1, h]];
+}
+let lastDet = 0;
 function baca(){
-  if(!lm || vid.readyState < 2 || vid.currentTime === lastT) return; lastT = vid.currentTime;
-  const res = lm.detectForVideo(vid, performance.now());
+  const now = performance.now();
+  if(!lm || document.hidden || vid.readyState < 2 || vid.currentTime === lastT || now - lastDet < 33) return;
+  lastT = vid.currentTime; lastDet = now;
+  const res = lm.detectForVideo(vid, now);
   lukis(res.landmarks);
   if(!res.landmarks.length) return;
-  handsOn = performance.now();
+  handsOn = now;
   const hs = res.landmarks.map(l => {
     const cx = [0,5,9,13,17].reduce((a,i) => a + (1-l[i].x), 0)/5, cy = [0,5,9,13,17].reduce((a,i) => a + l[i].y, 0)/5;
     const size = dist(l[0], l[9]);
     return {x:cx, y:cy, size, rot:Math.atan2((1-l[9].x)-(1-l[0].x), -(l[9].y-l[0].y)), pinch: dist(l[4], l[8])/size < .35};
-  }).sort((a,b) => a.x-b.x);
-  const asg = hs.length === 1 ? [[hs[0].x < .5 ? 0 : 1, hs[0]]] : [[0,hs[0]],[1,hs[1]]];
-  for(const [i,h] of asg){
+  });
+  for(const [i,h] of bagi(hs)){
     const p = P[i];
+    p.seen = now; p.hx = h.x; p.hy = h.y;
     p.tx = Math.min(.95, Math.max(.05, (h.x-.1)/.8)); p.ty = Math.min(.9, Math.max(.25, (h.y-.15)/.7));
-    p.tr = h.rot + (h.pinch ? .3 : 0); p.ts = Math.min(1.4, Math.max(.7, h.size/.16));
+    p.tr = h.rot; p.ts = Math.min(1.4, Math.max(.7, h.size/.16));
+    if(h.pinch && !p.wasPinch) p.nod = now;   // cubit = satu kali angguk
+    p.wasPinch = h.pinch;
   }
 }
 
 // Gambar
 function gambar(p, t, i){
-  const idle = performance.now() - handsOn > 500;
+  const now = performance.now(), idle = now - handsOn > 500;
   const sway = idle ? Math.sin(t/900 + i*2)*.04 : 0;
-  const h = Math.min(H*.62, W*.8)*p.s, w = h*p.img.width/p.img.height, px = p.x*W, py = p.y*H;
-  g.save(); g.translate(px, py); g.rotate(p.r + sway);
+  const k = (now - p.nod)/520; let nr = 0, nd = 0;
+  if(k >= 0 && k < 1){ const e = Math.sin(k*Math.PI); nr = e*.28*Math.sign(p.ftx); nd = e*H*.03; }
+  const h = Math.min(H*.62, W*.8)*p.s, w = h*p.img.width/p.img.height, px = p.x*W, py = p.y*H + nd;
+  g.save(); g.translate(px, py); g.rotate(p.r + sway + nr);
   g.strokeStyle = '#2a1608'; g.lineWidth = 5; g.lineCap = 'round';
   g.beginPath(); g.moveTo(w*.05, h*.1); g.lineTo(w*.12, H*1.3); g.stroke();
   g.shadowColor = 'rgba(60,30,0,.45)'; g.shadowBlur = 14; g.shadowOffsetX = 22; g.shadowOffsetY = 14;
+  g.scale(p.inv ? p.fx : -p.fx, 1);   // gambar bawaan menghadap kiri
   g.drawImage(p.img, -w/2, -h/2, w, h);
   g.restore();
 }
 function loop(t){
   try{ baca(); }catch(err){ st.textContent = 'Error pelacakan: ' + err.message; lm = null; }
-  for(const p of P){ p.x += (p.tx-p.x)*.25; p.y += (p.ty-p.y)*.25; p.r += (p.tr-p.r)*.2; p.s += (p.ts-p.s)*.15; p.tr *= .96; }
+  const idle = performance.now() - handsOn > 500;
+  P.forEach((p,i) => {
+    const dx = P[1-i].x - p.x; if(Math.abs(dx) > .04) p.ftx = dx > 0 ? 1 : -1;   // saling berhadapan
+    p.x += (p.tx-p.x)*.25; p.y += (p.ty-p.y)*.25; p.r += (p.tr-p.r)*.2; p.s += (p.ts-p.s)*.15; p.fx += (p.ftx-p.fx)*.18;
+    if(idle) p.tr *= .96;
+  });
   g.clearRect(0,0,W,H);
   P.forEach((p,i) => gambar(p,t,i));
   requestAnimationFrame(loop);

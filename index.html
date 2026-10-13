@@ -91,7 +91,37 @@ function bakar(c){
   const z = d.getContext('2d'); z.drawImage(b, 0, 0, d.width, d.height); z.drawImage(d, 0, 0);
   return d;
 }
-function pasang(i, c){ P[i].img = c; P[i].sil = bakar(c); }
+/* Rig lengan memakai potongan dari gambar wayang ASLI (bukan menggambar tangan baru).
+   Koordinat sesuai dua sprite bawaan; gambar yang diunggah pengguna tetap tampil utuh. */
+const ARM_RIGS = [
+  [
+    {pivot:[91,222], side:-1, poly:[[91,220],[76,224],[63,237],[47,265],[24,308],[7,329],[8,344],[25,352],[69,374],[89,366],[99,352],[57,332],[58,309],[71,276],[91,251],[109,246]]},
+    {pivot:[260,222],side:1,poly:[[258,220],[278,219],[298,226],[317,245],[338,275],[351,305],[355,329],[349,342],[329,351],[289,371],[270,360],[264,345],[310,329],[313,307],[307,278],[286,252],[263,246]]}
+  ],
+  [
+    {pivot:[258,207],side:-1,poly:[[260,204],[238,204],[213,205],[183,207],[155,214],[123,229],[91,247],[53,265],[20,282],[2,294],[3,308],[19,330],[37,343],[52,345],[68,331],[61,316],[42,301],[73,285],[108,266],[148,248],[186,237],[220,236],[250,244]]},
+    {pivot:[297,207],side:1,poly:[[295,204],[317,208],[343,217],[368,236],[394,258],[412,283],[420,304],[416,319],[400,333],[383,340],[367,329],[374,313],[388,300],[371,277],[349,258],[326,246],[298,240]]},
+    {pivot:[254,270],side:-1,poly:[[254,267],[236,270],[221,282],[208,299],[192,326],[177,348],[171,364],[179,379],[196,390],[216,389],[231,378],[225,365],[207,364],[205,350],[220,329],[239,316],[258,307],[270,292]]},
+    {pivot:[307,230],side:1,poly:[[304,222],[321,224],[330,241],[331,279],[332,319],[333,358],[337,393],[348,430],[366,460],[385,478],[403,488],[415,498],[406,510],[387,516],[367,509],[352,496],[338,475],[326,450],[316,417],[311,380],[308,344],[305,302],[299,267]]}
+  ]
+];
+function buatRig(c, i){
+  const expected = i===0 ? (Math.abs(c.width-357)<3 && Math.abs(c.height-620)<3) : (Math.abs(c.width-422)<3 && Math.abs(c.height-620)<3);
+  if(!expected) return {body:c, arms:[]};
+  const body=document.createElement('canvas'); body.width=c.width; body.height=c.height;
+  const bg=body.getContext('2d'); bg.drawImage(c,0,0);
+  const arms=[];
+  for(const spec of ARM_RIGS[i]){
+    const mask=document.createElement('canvas'); mask.width=c.width; mask.height=c.height;
+    const mg=mask.getContext('2d'); mg.fillStyle='#fff'; mg.beginPath(); spec.poly.forEach(([x,y],n)=>n?mg.lineTo(x,y):mg.moveTo(x,y)); mg.closePath(); mg.fill();
+    const part=document.createElement('canvas'); part.width=c.width; part.height=c.height;
+    const pg=part.getContext('2d'); pg.drawImage(c,0,0); pg.globalCompositeOperation='destination-in'; pg.drawImage(mask,0,0);
+    bg.save(); bg.globalCompositeOperation='destination-out'; bg.drawImage(mask,0,0); bg.restore();
+    arms.push({...spec, img:part});
+  }
+  return {body,arms};
+}
+function pasang(i, c){ P[i].img = c; P[i].sil = bakar(c); const rig=buatRig(c,i); P[i].body=rig.body; P[i].arms=rig.arms; }
 function dariSrc(src, i){
   const im = new Image();
   im.onload = () => { const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; c.getContext('2d').drawImage(im, 0, 0); pasang(i, c); };
@@ -298,41 +328,24 @@ function gambar(p, G){
   g.save(); g.translate(G.px, G.py); g.rotate(G.rot);
   g.strokeStyle = 'rgba(42,22,8,.8)'; g.lineWidth = 4; g.lineCap = 'round';
   g.beginPath(); g.moveTo(G.w*.05, G.h*.1); g.lineTo(G.w*.12, H*1.3); g.stroke();
+  // Seluruh rig mengikuti transformasi wayang; lengan asli diputar dari titik sendinya.
   g.scale(G.sc, 1);
-  g.drawImage(p.img, -G.w/2, -G.h/2, G.w, G.h);
-  // Sendi tangan wayang digambar sebagai overlay tipis, mengikuti pose hasil hand tracking.
-  gambarTangan(p, G);
-  g.restore();
-}
-function gambarTangan(p, G){
-  const t = performance.now(), pose = p.gesture || 'open';
-  const pulse = Math.sin(t/150 + (p.x*5))*.025;
-  const armW = Math.max(2, G.h*.012), skin = '#d49a53', edge = '#3a1709';
-  // Koordinat relatif terhadap tubuh wayang; lengan kiri/kanan bergerak mengikuti kepalan atau telunjuk.
-  for(const side of [-1,1]){
-    const active = pose === 'one' ? side === (p.x < .5 ? 1 : -1) : false;
-    let sx = side*G.w*.105, sy = -G.h*.12;
-    let ex = side*G.w*(pose === 'fist' ? .16 : .205) + (pose === 'open' ? pulse*G.w : 0);
-    let ey = -G.h*(pose === 'fist' ? .02 : pose === 'one' && active ? .18 : .075);
-    let hx = ex + side*G.w*(pose === 'fist' ? .025 : .085);
-    let hy = ey + (pose === 'fist' ? G.h*.015 : pose === 'one' && active ? -G.h*.005 : G.h*.035);
-    g.save(); g.lineCap='round'; g.lineJoin='round';
-    g.strokeStyle=edge; g.lineWidth=armW+2; g.beginPath(); g.moveTo(sx,sy); g.lineTo(ex,ey); g.lineTo(hx,hy); g.stroke();
-    g.strokeStyle=skin; g.lineWidth=armW; g.beginPath(); g.moveTo(sx,sy); g.lineTo(ex,ey); g.lineTo(hx,hy); g.stroke();
-    g.fillStyle='#efc17a'; g.strokeStyle=edge; g.lineWidth=Math.max(1.5,armW*.45);
-    g.beginPath(); g.ellipse(hx,hy,G.h*.018,G.h*.022,0,0,Math.PI*2); g.fill(); g.stroke();
-    if(pose === 'fist'){
-      g.beginPath(); g.arc(hx,hy-G.h*.012,G.h*.021,0,Math.PI*2); g.fill(); g.stroke();
-      for(let j=0;j<3;j++){ g.beginPath(); g.moveTo(hx-G.h*.012,hy-G.h*(.02+j*.003)); g.lineTo(hx+G.h*.012,hy-G.h*(.02+j*.003)); g.stroke(); }
-    }else if(pose === 'one' && active){
-      g.beginPath(); g.moveTo(hx,hy); g.lineTo(hx+side*G.h*.012,hy-G.h*.075); g.stroke();
-      g.beginPath(); g.moveTo(hx+side*G.h*.012,hy-G.h*.075); g.lineTo(hx+side*G.h*.018,hy-G.h*.09); g.stroke();
-      g.beginPath(); g.moveTo(hx-side*G.h*.008,hy); g.lineTo(hx-side*G.h*.022,hy-G.h*.012); g.stroke();
-    }else{
-      for(let j=0;j<3;j++){ g.beginPath(); g.moveTo(hx+side*G.h*(.004+j*.008),hy+G.h*.005); g.lineTo(hx+side*G.h*(.012+j*.008),hy+G.h*.025); g.stroke(); }
-    }
-    g.restore();
+  g.translate(-G.w/2, -G.h/2);
+  const sx=G.w/p.img.width, sy=G.h/p.img.height;
+  g.scale(sx,sy);
+  g.drawImage(p.body || p.img, 0, 0);
+  if(p.arms && p.arms.length){
+    const t=performance.now(), pose=p.gesture||'open';
+    p.arms.forEach((arm,j)=>{
+      let angle=Math.sin(t/620+j*1.7)*.018;
+      if(pose==='fist') angle=arm.side*-.28;
+      else if(pose==='one') angle=arm.side*(j%2===0?-.52:.38);
+      // Ayunan kecil saat tangan terbuka memberi kesan wayang digerakkan dengan tangkai.
+      g.save(); g.translate(arm.pivot[0],arm.pivot[1]); g.rotate(angle);
+      g.drawImage(arm.img,-arm.pivot[0],-arm.pivot[1]); g.restore();
+    });
   }
+  g.restore();
 }
 let lt = 0;
 function loop(t){

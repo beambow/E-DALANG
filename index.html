@@ -40,6 +40,8 @@ input[type=file]{display:none}
 #pip.min video{object-fit:cover}
 #pip video,#pip canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}
 #pip.min canvas{display:none}
+#trk{position:absolute;left:0;right:0;bottom:0;font-size:9px;line-height:1.5;text-align:center;background:rgba(0,0,0,.62);color:#fff;transform:scaleX(-1);padding:1px 2px;z-index:2;white-space:nowrap}
+#pip.min #trk{display:none}
 .ic[hidden]{display:none}
 .ic.sm{width:36px;height:36px;font-size:16px}
 #volp{right:calc(env(safe-area-inset-right,0px) + 60px);top:calc(env(safe-area-inset-top,0px) + 60px);display:flex;align-items:center;gap:8px;background:rgba(30,12,3,.9);border:1px solid rgba(225,175,95,.5);border-radius:24px;padding:4px 12px 4px 4px}
@@ -78,7 +80,7 @@ input[type=file]{display:none}
     <div class="sb"><button class="b" id="splay">▶ Mulai</button><button class="b" id="sclose">Tutup</button></div>
     <div class="sn">Satu kalimat per baris: <b>Nama: kalimat</b>. "Narator:" = teks narasi. Arjuna / Kiri = wayang kiri, Hanoman / Kanan = wayang kanan; nama baru dibagi bergantian.</div>
   </div>
-  <div id="pip" class="ov"><video id="vid" playsinline muted></video><canvas id="oc"></canvas></div>
+  <div id="pip" class="ov"><video id="vid" playsinline muted></video><canvas id="oc"></canvas><div id="trk" title="Ketuk untuk ganti GPU/CPU"></div></div>
   <div id="dock" class="ov">
     <button class="b" id="cam">📷 Kamera</button>
     <label class="b">🎭 Kiri<input type="file" id="fl" accept="image/*"></label>
@@ -97,10 +99,12 @@ const $ = id => document.getElementById(id);
 const cv = $('cv'), g = cv.getContext('2d'), vid = $('vid'), st = $('st');
 const LEDGE = .856;                 // garis atas bingkai kayu di bagian bawah background (pecahan tinggi)
 let W = 0, H = 0;
+let dprCap = 1.5, curD = 1;
 function resize(){
-  const d = Math.min(devicePixelRatio || 1, 1.5);
   W = cv.clientWidth; H = cv.clientHeight; if(!W || !H) return;
-  cv.width = Math.round(W*d); cv.height = Math.round(H*d); g.setTransform(d,0,0,d,0,0);
+  // layar besar (PC) -> batasi jumlah piksel kanvas supaya GPU tidak keberatan
+  const d = Math.max(.7, Math.min(devicePixelRatio || 1, 1.5, dprCap, Math.max(.8, Math.sqrt(2.6e6/(W*H)))));
+  curD = d; cv.width = Math.round(W*d); cv.height = Math.round(H*d); g.setTransform(d,0,0,d,0,0);
 }
 new ResizeObserver(resize).observe(cv); resize();
 
@@ -132,7 +136,7 @@ const rotPt = (x, y, cx, cy, a) => { const c = Math.cos(a), s = Math.sin(a), dx 
 /* ---------- Wayang ---------- */
 // nat: arah hadap gambar aslinya (-1 = kiri, 1 = kanan)
 const mkP = (x, nat) => ({id:'', iw:0, ih:0, body:null, arms:[], sil:null, nat, x, y:.45, r:0, s:1, tx:x, ty:.45, tr:0, ts:1, fx:x < .5 ? 1 : -1, ftx:x < .5 ? 1 : -1,
-  inv:false, seen:-1e9, hx:x, hy:.5, G:null, o:[new OE(1.6,14), new OE(1.6,14), new OE(1.5,2), new OE(1,1), new OE(1.6,3), new OE(1.8,4)], mode:0, gc:0, gn:0, fistT:0, fistDone:false, sp:false});
+  inv:false, seen:-1e9, hx:x, hy:.5, G:null, o:[new OE(2.4,20), new OE(2.4,20), new OE(2.5,3), new OE(1,1), new OE(2.4,4), new OE(3,5)], mode:0, gc:0, gn:0, fistT:0, fistDone:false, sp:false});
 const P = [mkP(.28, -1), mkP(.72, 1)];
 const META = JSON.parse($('wmeta').textContent);
 const ASLI = ['arjuna', 'hanoman'];
@@ -406,12 +410,30 @@ async function ambil(url, label){
   return new Uint8Array(await new Blob(parts).arrayBuffer());
 }
 const batas = (p, ms) => Promise.race([p, new Promise((_,j) => setTimeout(() => j(new Error('timeout')), ms))]);
-let lm = null, lastT = -1, modelBuf = null, worker = null, wReady = false, wBusy = false, wSent = 0, wGagal = 0;
+let lm = null, lastT = -1, modelBuf = null, worker = null, wReady = false, wBusy = false, wSent = 0, wGagal = 0, wMacet = 0;
+let lastSentT = -1;
+let deleg = 'GPU'; try{ deleg = localStorage.getItem('wayang-deleg') === 'CPU' ? 'CPU' : 'GPU'; }catch(_){}
+const trk = {mode:'—', d:'', n:0, t0:0, fps:0, ms:0};
+const labelTrk = () => { $('trk').textContent = trk.mode + '·' + trk.d + ' ' + trk.fps + 'fps ' + trk.ms + 'ms'; };
+async function ulangiPelacak(){
+  wReady = false; wBusy = false; lm = null; if(worker){ try{ worker.terminate(); }catch(_){} worker = null; }
+  trk.mode = '…'; trk.fps = 0; labelTrk();
+  try{ if(!(await mulaiWorker(modelBuf))) await siapkanUtama(); say('Pelacak siap (' + trk.d + ').', 2200); }
+  catch(er){ say('Gagal: ' + er.message, 0); }
+}
+$('trk').onclick = e => {
+  e.stopPropagation(); if(!modelBuf) return;
+  deleg = deleg === 'GPU' ? 'CPU' : 'GPU'; try{ localStorage.setItem('wayang-deleg', deleg); }catch(_){}
+  say('Mode deteksi: ' + deleg + ' — memuat ulang pelacak…', 0); ulangiPelacak();
+};
 async function siapkanUtama(){
   const {HandLandmarker, FilesetResolver} = await import(V + "/vision_bundle.mjs");
   const fs = await FilesetResolver.forVisionTasks(V + "/wasm");
   const mk = (d, b) => HandLandmarker.createFromOptions(fs, {baseOptions:{modelAssetBuffer:b, delegate:d}, runningMode:"VIDEO", numHands:2});
-  try{ lm = await batas(mk("GPU", modelBuf.slice()), 20000); }catch(_){ lm = await mk("CPU", modelBuf.slice()); }
+  let dipakai = 'CPU';
+  if(deleg === 'GPU'){ try{ lm = await batas(mk("GPU", modelBuf.slice()), 20000); dipakai = 'GPU'; }catch(_){ lm = null; } }
+  if(!lm) lm = await mk("CPU", modelBuf.slice());
+  trk.mode = 'Utama'; trk.d = dipakai; labelTrk();
 }
 // Deteksi tangan berjalan di Web Worker: berat komputasinya tidak lagi menahan gambar wayang
 const WORKER_SRC = `
@@ -423,14 +445,16 @@ self.onmessage = async (e) => {
       const mod = await import(m.V + '/vision_bundle.mjs');
       const fs = await mod.FilesetResolver.forVisionTasks(m.V + '/wasm');
       const mk = d => mod.HandLandmarker.createFromOptions(fs, {baseOptions:{modelAssetBuffer:m.buf.slice(), delegate:d}, runningMode:'VIDEO', numHands:2});
-      try{ lm = await mk('GPU'); }catch(_){ lm = await mk('CPU'); }
-      self.postMessage({t:'ready'});
+      let dipakai = 'CPU';
+      if(m.pref !== 'CPU'){ try{ lm = await mk('GPU'); dipakai = 'GPU'; }catch(_){ lm = null; } }
+      if(!lm) lm = await mk('CPU');
+      self.postMessage({t:'ready', d:dipakai});
     }catch(err){ self.postMessage({t:'fail', msg:String(err && err.message || err)}); }
   } else if(m.t === 'frame'){
     try{
       if(!lm){ m.bmp.close(); self.postMessage({t:'res', ts:m.ts, lm:[]}); return; }
-      const r = lm.detectForVideo(m.bmp, m.ts); m.bmp.close();
-      self.postMessage({t:'res', ts:m.ts, lm:r.landmarks.map(h => h.map(p => [p.x, p.y]))});
+      const t0 = performance.now(), r = lm.detectForVideo(m.bmp, m.ts); m.bmp.close();
+      self.postMessage({t:'res', ts:m.ts, ms:performance.now() - t0, lm:r.landmarks.map(h => h.map(p => [p.x, p.y]))});
     }catch(err){ try{ m.bmp.close(); }catch(_){} self.postMessage({t:'fail', msg:String(err && err.message || err)}); }
   }
 };`;
@@ -443,23 +467,26 @@ function mulaiWorker(buf){
       w = new Worker(URL.createObjectURL(new Blob([WORKER_SRC], {type:'text/javascript'})));
       w.onmessage = e => {
         const m = e.data;
-        if(m.t === 'ready'){ worker = w; wReady = true; akhiri(true); }
-        else if(m.t === 'res'){ wBusy = false; wGagal = 0; proses(m.lm.map(h => h.map(([x, y]) => ({x, y}))), m.ts); }
+        if(m.t === 'ready'){ worker = w; wReady = true; trk.mode = 'Worker'; trk.d = m.d; labelTrk(); akhiri(true); }
+        else if(m.t === 'res'){ wBusy = false; wGagal = 0; wMacet = 0; trk.ms = Math.round(m.ms || 0); proses(m.lm.map(h => h.map(([x, y]) => ({x, y}))), m.ts); kirimFrame(); }   // langsung ambil frame terbaru, tanpa menunggu giliran
         else if(m.t === 'fail'){
           if(!selesai) akhiri(false);
           else { wBusy = false; if(++wGagal > 3 && wReady){ wReady = false; say('Pelacakan di latar gagal, pindah ke mode biasa…', 0); siapkanUtama().then(() => say('Pelacakan siap (mode biasa).', 2500)).catch(er => say('Gagal: ' + er.message, 0)); } }
         }
       };
       w.onerror = () => { if(!selesai) akhiri(false); else if(wReady){ wReady = false; siapkanUtama().catch(() => {}); } };
-      w.postMessage({t:'init', V, buf:buf.slice()});
+      w.postMessage({t:'init', V, buf:buf.slice(), pref:deleg});
     }catch(_){ akhiri(false); }
   });
 }
 function kirimFrame(){
   const now = performance.now();
-  if(wBusy && now - wSent > 1500) wBusy = false;               // penjaga bila worker macet
-  if(wBusy || !worker || document.hidden || vid.readyState < 2) return;
-  wBusy = true; wSent = now;
+  if(wBusy && now - wSent > 1500){                               // penjaga bila worker macet
+    wBusy = false;
+    if(++wMacet >= 3 && wReady){ wReady = false; say('Pelacak latar tidak merespons, pindah ke mode biasa…', 0); siapkanUtama().then(() => say('Pelacakan siap (mode biasa).', 2500)).catch(er => say('Gagal: ' + er.message, 0)); }
+  }
+  if(wBusy || !worker || document.hidden || vid.readyState < 2 || vid.currentTime === lastSentT) return;
+  wBusy = true; wSent = now; lastSentT = vid.currentTime;
   createImageBitmap(vid).then(bmp => {
     if(!wReady || !worker){ bmp.close(); wBusy = false; return; }
     worker.postMessage({t:'frame', bmp, ts:now}, [bmp]);
@@ -512,10 +539,12 @@ function baca(){
   const now = performance.now();
   if(!lm || document.hidden || vid.readyState < 2 || vid.currentTime === lastT) return;
   lastT = vid.currentTime; lastDet = now;
-  proses(lm.detectForVideo(vid, now).landmarks, now);
+  const t0 = performance.now(), r = lm.detectForVideo(vid, now); trk.ms = Math.round(performance.now() - t0);
+  proses(r.landmarks, now);
 }
 function proses(landmarks, tcap){
   const now = performance.now();
+  trk.n++; if(now - trk.t0 > 1000){ trk.fps = Math.round(trk.n*1000/(now - trk.t0)); trk.n = 0; trk.t0 = now; labelTrk(); }
   lukis(landmarks);
   if(!landmarks.length) return;
   handsOn = now;
@@ -533,8 +562,9 @@ function proses(landmarks, tcap){
     const p = P[i];
     if(now - p.seen > 800) p.o.forEach(f => f.reset());      // tangan baru muncul: jangan tarik dari posisi lama
     p.seen = now; p.hx = h.x; p.hy = h.y;
-    p.tx = .18 + .64*clamp(p.o[0].f((h.x-.1)/.8, ts), 0, 1);
-    p.ty = .4 + .12*clamp(p.o[1].f((h.y-.15)/.7, ts), 0, 1);
+    const fx = p.o[0].f((h.x-.1)/.8, ts), fy = p.o[1].f((h.y-.15)/.7, ts);       // + prediksi 50 ms ke depan menutup jeda deteksi
+    p.tx = .18 + .64*clamp(fx + p.o[0].dx*.05, 0, 1);
+    p.ty = .4 + .12*clamp(fy + p.o[1].dx*.05, 0, 1);
     // mode jari harus stabil beberapa frame supaya tidak berkedip
     if(h.jari === p.gc) p.gn++; else { p.gc = h.jari; p.gn = 1; }
     const mBaru = p.gn >= 2 ? (h.jari >= 1 && h.jari <= 3 ? h.jari : 0) : p.mode;
@@ -740,12 +770,16 @@ function gambar(p, G, t){
     });
   }
 }
-let lt = 0;
+let lt = 0, ema = 16, lambat = 0;
 function loop(t){
-  const dt = Math.min(.033, (t - lt)/1000 || .016); lt = t;
+  const raw = t - lt, dt = Math.min(.033, raw/1000 || .016); lt = t;
+  if(!document.hidden && raw > 0 && raw < 250){          // bila berat terus, turunkan resolusi gambar otomatis
+    ema = ema*.93 + raw*.07; lambat = ema > 26 ? lambat + 1 : 0;
+    if(lambat > 90 && curD > .75){ dprCap = curD*.8; lambat = 0; ema = 16; resize(); say('Resolusi gambar diturunkan agar lebih lancar', 2500); }
+  }
   if(!pakaiRVFC){ try{ if(wReady) kirimFrame(); else baca(); }catch(err){ say('Error pelacakan: ' + err.message, 0); lm = null; } }
   const now = performance.now(), idle = now - handsOn > 500;
-  const kp = 1 - Math.exp(-dt*24), kr = 1 - Math.exp(-dt*20), ks = 1 - Math.exp(-dt*14), kf = 1 - Math.exp(-dt*14);
+  const kp = 1 - Math.exp(-dt*((now - handsOn < 500) ? 36 : 24)), kr = 1 - Math.exp(-dt*20), ks = 1 - Math.exp(-dt*14), kf = 1 - Math.exp(-dt*14);
   P.forEach((p, i) => {
     const dx = P[1-i].x - p.x; if(Math.abs(dx) > .04) p.ftx = dx > 0 ? 1 : -1;   // saling berhadapan
     p.x += (p.tx-p.x)*kp; p.y += (p.ty-p.y)*kp; p.r += (p.tr-p.r)*kr; p.s += (p.ts-p.s)*ks; p.fx += (p.ftx-p.fx)*kf;

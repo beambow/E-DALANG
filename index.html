@@ -50,9 +50,17 @@ input[type=file]{display:none}
 #volv{font-size:12px;min-width:34px;text-align:right}
 #story{left:50%;top:50%;transform:translate(-50%,-50%);width:min(92%,480px);max-height:92%;overflow:auto;background:rgba(30,12,3,.95);border:1px solid rgba(225,175,95,.55);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;z-index:4}
 #story[hidden]{display:none}
-#stxt{width:100%;background:#f6e9c8;color:#3b1208;border:1px solid #7a4a1c;border-radius:8px;padding:8px;font:13px/1.4 system-ui,sans-serif;resize:none;user-select:text;-webkit-user-select:text;touch-action:auto}
+#story>*{flex-shrink:0}
+#stxt{min-height:88px;width:100%;background:#f6e9c8;color:#3b1208;border:1px solid #7a4a1c;border-radius:8px;padding:8px;font:13px/1.4 system-ui,sans-serif;resize:none;user-select:text;-webkit-user-select:text;touch-action:auto}
 .ck{font-size:13px;display:flex;align-items:center;gap:8px}
 .ck input{width:18px;height:18px;accent-color:#e1af5f;touch-action:auto}
+.row{display:flex;gap:6px}
+#sslot,#vnar,#sname{background:#f6e9c8;color:#3b1208;border:1px solid #7a4a1c;border-radius:8px;padding:7px;font:13px system-ui,sans-serif;user-select:text;-webkit-user-select:text;touch-action:auto;min-width:0}
+#sslot{flex:1}
+#sname{width:100%}
+#vnar{flex:1;max-width:62%}
+.b.sm{min-height:36px;padding:6px 12px}
+.ck{flex-wrap:wrap}
 .sb{display:flex;gap:8px;justify-content:flex-end}
 .sh{font-weight:700;font-size:14px}
 .sn{font-size:11px;opacity:.8;line-height:1.35}
@@ -74,10 +82,14 @@ input[type=file]{display:none}
   <div id="volp" class="ov" hidden><button class="ic sm" id="mute" aria-label="Bisukan musik">🔊</button><input type="range" id="vol" min="0" max="100" value="75" aria-label="Volume musik"><span id="volv">75%</span></div>
   <div id="story" class="ov" hidden>
     <div class="sh">💬 Teks cerita</div>
-    <textarea id="stxt" rows="5" spellcheck="false"></textarea>
+    <div class="row"><select id="sslot" aria-label="Pilih cerita"></select><button class="b sm" id="snew" title="Cerita baru">＋</button><button class="b sm" id="sdel" title="Hapus cerita">🗑</button></div>
+    <input id="sname" type="text" maxlength="40" placeholder="Nama cerita" aria-label="Nama cerita" autocomplete="off">
+    <textarea id="stxt" rows="4" spellcheck="false"></textarea>
     <label class="ck"><input type="checkbox" id="ttsOn" checked> 🗣️ Bacakan dengan suara</label>
     <label class="ck"><input type="checkbox" id="gmlOn" checked> 🔔 Efek gamelan saat bicara</label>
+    <label class="ck">🎙️ Suara narator <select id="vnar" aria-label="Suara narator"></select></label>
     <div class="sb"><button class="b" id="splay">▶ Mulai</button><button class="b" id="sclose">Tutup</button></div>
+    <div class="sn" id="snote"></div>
     <div class="sn">Satu kalimat per baris: <b>Nama: kalimat</b>. "Narator:" = teks narasi. Arjuna / Kiri = wayang kiri, Hanoman / Kanan = wayang kanan; nama baru dibagi bergantian.</div>
   </div>
   <div id="pip" class="ov"><video id="vid" playsinline muted></video><canvas id="oc"></canvas><div id="trk" title="Ketuk untuk ganti GPU/CPU"></div></div>
@@ -136,7 +148,7 @@ const rotPt = (x, y, cx, cy, a) => { const c = Math.cos(a), s = Math.sin(a), dx 
 /* ---------- Wayang ---------- */
 // nat: arah hadap gambar aslinya (-1 = kiri, 1 = kanan)
 const mkP = (x, nat) => ({id:'', iw:0, ih:0, body:null, arms:[], sil:null, nat, x, y:.45, r:0, s:1, tx:x, ty:.45, tr:0, ts:1, fx:x < .5 ? 1 : -1, ftx:x < .5 ? 1 : -1,
-  inv:false, seen:-1e9, hx:x, hy:.5, G:null, o:[new OE(2.4,20), new OE(2.4,20), new OE(2.5,3), new OE(1,1), new OE(2.4,4), new OE(3,5)], mode:0, gc:0, gn:0, fistT:0, fistDone:false, sp:false});
+  inv:false, seen:-1e9, hx:x, hy:.5, G:null, o:[new OE(2.4,20), new OE(2.4,20), new OE(2.5,3), new OE(1,1), new OE(2.4,4), new OE(3,5), new OE(2.4,6), new OE(2.4,6)], sw:0, sv:0, x0:x, vxs:0, mode:0, gc:0, gn:0, fistT:0, fistDone:false, sp:false});
 const P = [mkP(.28, -1), mkP(.72, 1)];
 const META = JSON.parse($('wmeta').textContent);
 const ASLI = ['arjuna', 'hanoman'];
@@ -162,8 +174,14 @@ async function pasangAsli(i){
   p.arms = m.arms.map((a, j) => ({
     S:a.S, E:a.E, dir:a.dir, tip:a.tip, rng:a.rng, hp:a.hp,
     U:{im:rest[j*2], x:a.U.x, y:a.U.y, w:a.U.w, h:a.U.h}, L:{im:rest[j*2+1], x:a.L.x, y:a.L.y, w:a.L.w, h:a.L.h},
-    a:0, va:0, e:0, ve:0, grab:false, gt:0, goff:0, cam:0, camT:-1e9, ph:i*2.3 + j*1.9
+    a:0, va:0, e:0, ve:0, grab:false, gt:0, ge:null, off:[0,0], ik:{a:0, e:0}, ikT:-1e9, cam:0, camT:-1e9, ph:i*2.3 + j*1.9,
+    lim:[1.7, 2.6]
   }));
+  p.arms.forEach(a => {                                   // panjang tulang & arah tekukan siku saat diam (untuk IK)
+    const ux = a.E[0] - a.S[0], uy = a.E[1] - a.S[1], vx = a.tip[0] - a.E[0], vy = a.tip[1] - a.E[1];
+    a.l1 = Math.hypot(ux, uy); a.l2 = Math.hypot(vx, vy); a.u0 = Math.atan2(uy, ux); a.v0 = Math.atan2(vy, vx);
+    a.bend = Math.sign(Math.sin(a.v0 - a.u0)) || 1;
+  });
   p.nat = i === 0 ? -1 : 1;
   bakarBayang(p);
 }
@@ -194,18 +212,18 @@ function geo(p, t, i){
   const now = performance.now(), idle = now - handsOn > 500;
   const sway = idle ? Math.sin(t/900 + i*2)*.04 : 0;
   const h = Math.min(H*.6, W*.6)*p.s;
-  return {h, w:h*p.iw/p.ih, k:h/p.ih, px:p.x*W, py:p.y*H + (p.sp ? Math.sin(t/85)*H*.004 : 0), rot:p.r + sway, sc:p.nat*p.fx*(p.inv ? -1 : 1)};
+  return {h, w:h*p.iw/p.ih, k:h/p.ih, pv:h*.3, px:p.x*W, py:p.y*H + (p.sp ? Math.sin(t/85)*H*.004 : 0), rot:p.r + sway + p.sw, sc:p.nat*p.fx*(p.inv ? -1 : 1)};
 }
 // titik pada gambar asli (px gambar) -> koordinat layar
 function keLayar(p, G, x, y){
-  const lx = (x - p.iw/2)*G.k*G.sc, ly = (y - p.ih/2)*G.k, c = Math.cos(G.rot), s = Math.sin(G.rot);
-  return [G.px + lx*c - ly*s, G.py + lx*s + ly*c];
+  const lx = (x - p.iw/2)*G.k*G.sc, ly = (y - p.ih/2)*G.k - G.pv, c = Math.cos(G.rot), s = Math.sin(G.rot);
+  return [G.px + lx*c - ly*s, G.py + G.pv + lx*s + ly*c];
 }
 // koordinat layar -> titik pada gambar asli
 function keGambar(p, G, X, Y){
-  const dx = X - G.px, dy = Y - G.py, c = Math.cos(G.rot), s = Math.sin(G.rot);
+  const dx = X - G.px, dy = Y - G.py - G.pv, c = Math.cos(G.rot), s = Math.sin(G.rot);
   const rx = dx*c + dy*s, ry = -dx*s + dy*c, lx = rx/G.sc;
-  return [lx/G.k + p.iw/2, ry/G.k + p.ih/2];
+  return [lx/G.k + p.iw/2, (ry + G.pv)/G.k + p.ih/2];
 }
 // titik pada lengan (sudah ikut berputar) dalam px gambar
 function titikLengan(a, x, y, bawah){
@@ -214,23 +232,41 @@ function titikLengan(a, x, y, bawah){
 }
 
 /* ---------- Lengan: pegas bersudut (bahu) + siku yang tertinggal ---------- */
+// IK dua tulang: letakkan ujung tangan di titik T (koordinat gambar); siku menekuk wajar seperti wayang kulit bertongkat
+function ikSolve(a, Tx, Ty){
+  const [sx, sy] = a.S, l1 = a.l1, l2 = a.l2, dx = Tx - sx, dy = Ty - sy;
+  const d = clamp(Math.hypot(dx, dy), Math.abs(l1 - l2) + 6, l1 + l2 - 2), base = Math.atan2(dy, dx);
+  const A = Math.acos(clamp((l1*l1 + d*d - l2*l2)/(2*l1*d), -1, 1));
+  let phi = base + A;
+  for(const f of [base + A, base - A]){
+    const ex = sx + l1*Math.cos(f), ey = sy + l1*Math.sin(f);
+    if((Math.sign(Math.sin(Math.atan2(Ty - ey, Tx - ex) - f)) || 1) === a.bend){ phi = f; break; }
+  }
+  const p1 = a.a*a.dir, p2 = a.e*a.dir;                      // lanjutkan dari sudut sekarang agar tidak melompat
+  let th1 = p1 + wrap(phi - a.u0 - p1);
+  const s1 = clamp(th1*a.dir, -a.lim[0], a.lim[1]); th1 = s1*a.dir;
+  const [ex, ey] = rotPt(a.E[0], a.E[1], sx, sy, th1);
+  const th2 = p2 + wrap(Math.atan2(Ty - ey, Tx - ex) - a.v0 - th1 - p2);
+  return {a:s1, e:clamp(th2*a.dir, -1.5, 1.5)};
+}
 function gerakLengan(p, a, dt, t, now){
-  let tg;
-  if(a.grab) tg = a.gt;
+  let tg, et = null;
+  if(a.grab){ tg = a.gt; et = a.ge; }
+  else if(now - a.ikT < 500){ tg = a.ik.a; et = a.ik.e; }
   else if(p.sp) tg = .28 + .3*Math.sin(t/230 + a.ph);
   else if(now - a.camT < 600) tg = a.cam;
   else {
     const idle = now - handsOn > 500;
     tg = idle ? .12 + .13*Math.sin(t/820 + a.ph) : .06;       // goyang pelan saat dibiarkan
   }
-  tg = clamp(tg, -a.rng[0], a.rng[1]);
-  const k1 = 230, c1 = 2*Math.sqrt(k1)*.92;
+  tg = et !== null ? clamp(tg, -a.lim[0], a.lim[1]) : clamp(tg, -a.rng[0], a.rng[1]);
+  const k1 = 260, c1 = 2*Math.sqrt(k1)*.9;
   a.va += (k1*(tg - a.a) - c1*a.va)*dt; a.a += a.va*dt;
-  a.a = clamp(a.a, -a.rng[0]*1.2, a.rng[1]*1.2);
-  const et = -.55*a.a - .045*a.va;                             // siku mengikuti bahu dengan sedikit "ngelag"
-  const k2 = 120, c2 = 2*Math.sqrt(k2)*.55;
-  a.ve += (k2*(et - a.e) - c2*a.ve)*dt; a.e += a.ve*dt;
-  a.e = clamp(a.e, -.95, .95);
+  a.a = clamp(a.a, -a.lim[0]*1.1, a.lim[1]*1.1);
+  const etg = (et !== null ? clamp(et, -1.5, 1.5) : -.55*a.a) - .04*a.va;     // siku mengikuti bahu dengan sedikit "ngelag"
+  const k2 = 150, c2 = 2*Math.sqrt(k2)*.6;
+  a.ve += (k2*(etg - a.e) - c2*a.ve)*dt; a.e += a.ve*dt;
+  a.e = clamp(a.e, -1.6, 1.6);
 }
 
 /* ---------- Sentuh / mouse ---------- */
@@ -252,12 +288,6 @@ function cariLengan(X, Y){
   });
   return best;
 }
-function sudutPointer(p, a, X, Y){
-  const G = p.G; if(!G || Math.abs(G.sc) < .3) return null;
-  const [u, v] = keGambar(p, G, X, Y);
-  if(Math.hypot(u - a.S[0], v - a.S[1]) < 8) return null;
-  return Math.atan2(v - a.S[1], u - a.S[0]) - Math.atan2(a.tip[1] - a.S[1], a.tip[0] - a.S[0]);
-}
 
 cv.addEventListener('pointerdown', e => {
   mulaiMusikSekali(); keepAwake(); tutupVol();
@@ -265,9 +295,11 @@ cv.addEventListener('pointerdown', e => {
   const [X, Y] = xy(e);
   const h = cariLengan(X, Y);
   if(h){
-    const p = P[h.i], a = p.arms[h.j], ph = sudutPointer(p, a, X, Y);
-    if(ph !== null){
-      a.grab = true; a.goff = ph - a.a*a.dir; a.gt = a.a;
+    const p = P[h.i], a = p.arms[h.j], G = p.G;
+    if(G && Math.abs(G.sc) > .3){
+      const [u, v] = keGambar(p, G, X, Y), [tu, tv] = titikLengan(a, a.tip[0], a.tip[1], true);
+      a.off = [u - tu, v - tv];                           // selisih jari ke ujung tangan: tidak ada loncatan saat menggenggam
+      a.grab = true; a.gt = a.a; a.ge = a.e;
       ptr.set(e.pointerId, {t:'arm', i:h.i, j:h.j}); cv.setPointerCapture(e.pointerId);
       armTouched = true; dung(.16); return;
     }
@@ -282,15 +314,15 @@ cv.addEventListener('pointermove', e => {
   const [X, Y] = xy(e), q = ptr.get(e.pointerId);
   if(q && q.t === 'arm'){
     const p = P[q.i], a = p.arms[q.j]; if(!a) return;
-    const ph = sudutPointer(p, a, X, Y);
-    if(ph !== null){                                   // sudut dibuka berkelanjutan (tidak melompat) lalu dijepit ke batas sendi
-      let r = (ph - a.goff)*a.dir; r += 6.2832*Math.round((a.gt - r)/6.2832);
-      a.gt = clamp(r, -a.rng[0], a.rng[1]);
+    const G = p.G;
+    if(G && Math.abs(G.sc) > .3){
+      const [u, v] = keGambar(p, G, X, Y), r = ikSolve(a, u - a.off[0], v - a.off[1]);
+      a.gt = r.a; a.ge = r.e;
     }
   } else if(q) gerak(P[q.i], X/W, Y/H);
   else if(e.pointerType === 'mouse' && !ptr.size) gerak(P[X/W < .5 ? 0 : 1], X/W, Y/H);
 });
-const lepas = e => { const q = ptr.get(e.pointerId); if(q && q.t === 'arm' && P[q.i].arms[q.j]) P[q.i].arms[q.j].grab = false; ptr.delete(e.pointerId); };
+const lepas = e => { const q = ptr.get(e.pointerId); if(q && q.t === 'arm' && P[q.i].arms[q.j]){ P[q.i].arms[q.j].grab = false; P[q.i].arms[q.j].ge = null; } ptr.delete(e.pointerId); };
 cv.addEventListener('pointerup', lepas); cv.addEventListener('pointercancel', lepas); cv.addEventListener('lostpointercapture', lepas);
 cv.addEventListener('contextmenu', e => e.preventDefault());
 
@@ -508,7 +540,7 @@ $('cam').onclick = async e => {
       const tick = () => { try{ if(wReady) kirimFrame(); else baca(); }catch(err){ say('Error pelacakan: ' + err.message, 0); lm = null; } vid.requestVideoFrameCallback(tick); };
       vid.requestVideoFrameCallback(tick);
     }
-    say('Siap! 1 jari = tangan kiri wayang, 2 jari = tangan kanan (miringkan jari untuk menggerakkan). Telapak terbuka = kedua lengan naik, kepal = turun.', 11000);
+    say('Siap! 1 jari = tangan kiri wayang, 2 jari = tangan kanan: arahkan ujung jari, tangan wayang mengikuti. Telapak terbuka = kedua lengan naik, kepal = turun.', 11000);
   }catch(err){ say('Gagal: ' + err.message + (err.name === 'NotAllowedError' ? ' — izinkan kamera di pengaturan situs lalu coba lagi.' : ''), 0); e.target.disabled = false; }
 };
 const oc = $('oc'), og = oc.getContext('2d'); oc.width = 160; oc.height = 120;
@@ -555,7 +587,7 @@ function proses(landmarks, tcap){
     const jari = [[8,6],[12,10],[16,14],[20,18]].filter(([tp, pp]) => dist(l[tp], l[0]) > dist(l[pp], l[0])*1.1).length;   // jari yang terulur (tanpa ibu jari)
     const tx = jari >= 2 ? ((1-l[8].x) + (1-l[12].x))/2 : (1-l[8].x), ty = jari >= 2 ? (l[8].y + l[12].y)/2 : l[8].y;
     return {x:cx, y:cy, size, rot:Math.atan2((1-l[9].x)-(1-l[0].x), -(l[9].y-l[0].y)), pr: dist(l[4], l[8])/size, buka, jari,
-            tilt:Math.atan2(tx - (1-l[0].x), -(ty - l[0].y))};
+            tilt:Math.atan2(tx - (1-l[0].x), -(ty - l[0].y)), fvx:(tx - (1-l[0].x))/size, fvy:(ty - l[0].y)/size};
   });
   const ts = tcap/1000;
   for(const [i,h] of bagi(hs)){
@@ -568,7 +600,7 @@ function proses(landmarks, tcap){
     // mode jari harus stabil beberapa frame supaya tidak berkedip
     if(h.jari === p.gc) p.gn++; else { p.gc = h.jari; p.gn = 1; }
     const mBaru = p.gn >= 2 ? (h.jari >= 1 && h.jari <= 3 ? h.jari : 0) : p.mode;
-    if(mBaru !== p.mode){ p.mode = mBaru; if(mBaru) say(['', '☝️ 1 jari: tangan KIRI wayang', '✌️ 2 jari: tangan KANAN wayang', '🤟 3 jari: kedua tangan bergantian'][mBaru], 1400); }
+    if(mBaru !== p.mode){ p.mode = mBaru; if(mBaru) say(['', '☝️ 1 jari: ujung jari = tangan KIRI wayang', '✌️ 2 jari: ujung jari = tangan KANAN wayang', '🤟 3 jari: kedua tangan bergantian'][mBaru], 1400); }
     // kepalan ditahan ±0,8 detik = wayang berbalik arah (sekali; buka tangan lagi untuk mengulang)
     if(h.jari === 0 && h.buka < 1.45){
       if(!p.fistT) p.fistT = now;
@@ -583,24 +615,77 @@ function proses(landmarks, tcap){
     } else if(p.mode && p.arms.length === 2 && p.G){
       // lengan kiri/kanan menurut posisi di layar; hanya lengan terpilih yang mengikuti kemiringan jari
       const xs = p.arms.map(a => keLayar(p, p.G, a.S[0], a.S[1])[0]), kiri = xs[0] <= xs[1] ? 0 : 1;
-      const pilih = p.mode === 1 ? kiri : 1 - kiri, tl = p.o[5].f(clamp(h.tilt, -1, 1), ts);
+      const pilih = p.mode === 1 ? kiri : 1 - kiri;
+      // arah & jauhnya ujung jari dari pergelangan = letak ujung tangan wayang terhadap bahunya (IK)
+      const sgn = Math.sign(p.G.sc) || 1, fvx = p.o[6].f(h.fvx, ts), fvy = p.o[7].f(h.fvy, ts), r = Math.hypot(fvx, fvy) || 1, kk = clamp(r/2, .3, 1);
       p.arms.forEach((a, j) => {
-        const sisiKiri = j === kiri;
-        a.cam = j === pilih ? clamp(.4 + (sisiKiri ? -tl : tl)*1.1, -.45, .95) : .04;
-        a.camT = now;
+        if(j === pilih){
+          const R = a.l1 + a.l2;
+          a.ik = ikSolve(a, a.S[0] + R*kk*fvx*sgn/r, a.S[1] + R*kk*fvy/r); a.ikT = now;
+        } else { a.cam = .04; a.camT = now; a.ikT = -1e9; }
       });
     } else p.arms.forEach((a, j) => { a.cam = (-.3 + 1.2*u)*(j ? .88 : 1); a.camT = now; });
   }
 }
 
 /* ---------- Teks cerita (balon kata & narasi) ---------- */
-const SKRIP = `Narator: Di tepi hutan Dandaka, dua kesatria bertemu di bawah cahaya rembulan.
+const SKRIP = `Narator: Kocap kacarita, ing pinggiring wana Dandaka, ana kalih satriya pinunjul kapanggih ing sangisoring rembulan.
 Arjuna: Wahai Hanoman, kera putih yang gagah, ke mana kakimu melangkah?
 Hanoman: Hamba mencari jalan pulang ke Ayodya, wahai Raden Arjuna.
 Arjuna: Marilah, kuantar engkau lewat jalan yang aman.
 Hanoman: Terima kasih, Raden. Semoga restu para dewa menyertai kita.
-Narator: Maka berjalanlah keduanya, ditemani gamelan yang mengalun lirih.`;
-$('stxt').value = SKRIP;
+Narator: Mangkana lampahipun kekalih, kairing gamelan ingkang ngalun lirih.`;
+// ---- cerita tersimpan otomatis (beberapa slot bernama) ----
+const KUNCI_CERITA = 'wayang-cerita', KUNCI_VNAR = 'wayang-vnar';
+let simpanOk = true, vnarNama = '';
+try{ vnarNama = localStorage.getItem(KUNCI_VNAR) || ''; }catch(_){}
+function muatDB(){
+  try{ const j = JSON.parse(localStorage.getItem(KUNCI_CERITA) || 'null'); if(j && Array.isArray(j.daftar) && j.daftar.length) return j; }catch(_){}
+  return {aktif:'c1', daftar:[{id:'c1', nama:'Arjuna & Hanoman (contoh)', teks:SKRIP}]};
+}
+let db = muatDB();
+const aktifCerita = () => db.daftar.find(c => c.id === db.aktif) || db.daftar[0];
+function simpanDB(){
+  try{ localStorage.setItem(KUNCI_CERITA, JSON.stringify(db)); simpanOk = true; }catch(_){ simpanOk = false; }
+  $('snote').textContent = simpanOk ? '✔ Tersimpan otomatis di perangkat ini.' : '⚠ Penyimpanan tidak tersedia di sini, cerita tidak akan tersimpan.';
+}
+function tampilCerita(){
+  const s = $('sslot'); s.innerHTML = '';
+  db.daftar.forEach(c => s.add(new Option(c.nama || '(tanpa nama)', c.id)));
+  const a = aktifCerita(); db.aktif = a.id; s.value = a.id; $('sname').value = a.nama; $('stxt').value = a.teks;
+}
+let simpanT = 0;
+const jadwalSimpan = () => { clearTimeout(simpanT); simpanT = setTimeout(simpanDB, 350); };
+$('stxt').oninput = () => { aktifCerita().teks = $('stxt').value; jadwalSimpan(); };
+$('sname').oninput = () => { const a = aktifCerita(); a.nama = $('sname').value; const o = $('sslot').selectedOptions[0]; if(o) o.textContent = a.nama || '(tanpa nama)'; jadwalSimpan(); };
+$('sslot').onchange = () => { db.aktif = $('sslot').value; tampilCerita(); simpanDB(); };
+$('snew').onclick = () => {
+  const id = 'c' + Date.now();
+  db.daftar.push({id, nama:'Cerita ' + (db.daftar.length + 1), teks:'Narator: Tulis narasi di sini.\nArjuna: Tulis ucapan Arjuna di sini.\nHanoman: Tulis ucapan Hanoman di sini.'});
+  db.aktif = id; tampilCerita(); simpanDB(); $('stxt').focus();
+};
+let hapusT = 0;
+$('sdel').onclick = () => {
+  if(!hapusT){ $('sdel').textContent = 'Yakin?'; hapusT = setTimeout(() => { hapusT = 0; $('sdel').textContent = '🗑'; }, 3000); return; }
+  clearTimeout(hapusT); hapusT = 0; $('sdel').textContent = '🗑';
+  if(db.daftar.length <= 1){ const a = aktifCerita(); a.nama = 'Cerita 1'; a.teks = ''; }
+  else { db.daftar = db.daftar.filter(c => c.id !== db.aktif); db.aktif = db.daftar[0].id; }
+  tampilCerita(); simpanDB();
+};
+tampilCerita(); simpanDB();
+// ---- suara narator: pria, dalam; utamakan suara Jawa bila ada di perangkat ----
+const NAMA_PRIA = /andika|ardi|male|pria|laki|bapak|rizki|jawa|java/i;
+const semuaSuara = () => { try{ return speechSynthesis.getVoices(); }catch(_){ return []; } };
+function isiSuara(){
+  const all = semuaSuara(), sel = $('vnar'), lokal = v => /^(jv|id|in|ms)[-_]/i.test(v.lang);
+  sel.innerHTML = ''; sel.add(new Option('Otomatis (pria, dalam)', ''));
+  all.filter(lokal).concat(all.filter(v => !lokal(v))).forEach(v => sel.add(new Option(v.name + ' (' + v.lang + ')', v.name)));
+  sel.value = vnarNama;
+  if(sel.value !== vnarNama) sel.value = '';
+}
+$('vnar').onchange = () => { vnarNama = $('vnar').value; try{ localStorage.setItem(KUNCI_VNAR, vnarNama); }catch(_){} };
+try{ speechSynthesis.addEventListener('voiceschanged', isiSuara); }catch(_){}
+isiSuara();
 let cerita = null;
 function urai(txt){
   const peta = new Map([['arjuna', 0], ['kiri', 0], ['hanoman', 1], ['kanan', 1]]); let baru = 0; const out = [];
@@ -624,8 +709,13 @@ function mulaiCerita(){
   mulaiBaris();
 }
 function pilihSuara(who){
-  const vs = speechSynthesis.getVoices().filter(v => /^(id|in|ms)[-_]/i.test(v.lang));
-  return vs.length ? vs[Math.max(0, who) % vs.length] : null;
+  const all = semuaSuara(), idv = all.filter(v => /^(id|in|ms)[-_]/i.test(v.lang));
+  if(who < 0){
+    const pilihan = vnarNama && all.find(v => v.name === vnarNama); if(pilihan) return pilihan;
+    const jv = all.find(v => /^jv/i.test(v.lang)); if(jv) return jv;
+    return idv.find(v => NAMA_PRIA.test(v.name)) || idv[0] || null;
+  }
+  return idv.length ? idv[who % idv.length] : null;
 }
 function mulaiBaris(){
   const L = cerita.baris[cerita.i];
@@ -637,7 +727,7 @@ function mulaiBaris(){
     try{
       const id = cerita.id, u = new SpeechSynthesisUtterance(L.teks), v = pilihSuara(L.who);
       if(v){ u.voice = v; u.lang = v.lang; } else u.lang = 'id-ID';
-      u.pitch = L.who === 0 ? 1.3 : L.who === 1 ? .65 : .9; u.rate = L.who < 0 ? .92 : 1;
+      u.pitch = L.who === 0 ? 1.3 : L.who === 1 ? .65 : .35; u.rate = L.who < 0 ? .8 : 1;      // narator: dalam & pelan ala dalang
       u.onstart = () => { if(cerita && cerita.id === id){ cerita.ttsMulai = true; cerita.tm = performance.now(); ducked = true; terapVol(); } };
       const akhir = () => { if(cerita && cerita.id === id && !cerita.ttsSelesai){ cerita.ttsSelesai = true; cerita.tEnd = performance.now(); ducked = false; terapVol(); } };
       u.onend = akhir; u.onerror = akhir; cerita.tts = true; speechSynthesis.speak(u);
@@ -658,7 +748,7 @@ function selesaiCerita(pesan){
   if(pesan){ say(pesan, 2200); if($('gmlOn').checked) gong(.2); }
 }
 function lanjutCerita(){ if(!cerita) return; cerita.i++; if(cerita.i >= cerita.baris.length) selesaiCerita('Cerita selesai.'); else mulaiBaris(); }
-$('cerita').onclick = () => { if(cerita) selesaiCerita(); else $('story').hidden = !$('story').hidden; };
+$('cerita').onclick = () => { if(cerita) selesaiCerita(); else { $('story').hidden = !$('story').hidden; if(!$('story').hidden){ isiSuara(); simpanDB(); } } };
 $('splay').onclick = mulaiCerita;
 $('sclose').onclick = () => { $('story').hidden = true; };
 $('nextb').onclick = lanjutCerita;
@@ -721,6 +811,12 @@ function lukisCerita(now){
 
 /* ---------- Gambar ---------- */
 const ORN = new Image(); ORN.src = 'data:image/webp;base64,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';   // ornamen emas bawah, dipotong dari background, digambar DI DEPAN wayang
+function batang(x1, y1, x2, y2, w1, w2, warna){            // tongkat lancip (kecil di ujung, besar di pegangan)
+  const dx = x2 - x1, dy = y2 - y1, l = Math.hypot(dx, dy) || 1, nx = -dy/l, ny = dx/l;
+  g.fillStyle = warna; g.beginPath();
+  g.moveTo(x1 + nx*w1/2, y1 + ny*w1/2); g.lineTo(x2 + nx*w2/2, y2 + ny*w2/2); g.lineTo(x2 - nx*w2/2, y2 - ny*w2/2); g.lineTo(x1 - nx*w1/2, y1 - ny*w1/2);
+  g.closePath(); g.fill();
+}
 function bayang(p, G, t){
   const s = p.sh, sg = s.g, ko = s.ko, iw = p.iw, ih = p.ih;
   sg.setTransform(1,0,0,1,0,0); sg.clearRect(0, 0, s.c.width, s.c.height);
@@ -737,7 +833,7 @@ function bayang(p, G, t){
   // Blencong tergantung di depan kelir, tengah atas; nyalanya bergoyang sehingga bayangan ikut bergoyang
   const lamp = .5 + .012*Math.sin(t/330) + .008*Math.sin(t/137 + 1);
   const ox = (p.x - lamp)*.15*W, oy = (p.y + .25)*.05*H + H*.015, up = G.k/ko;
-  g.save(); g.translate(G.px + ox, G.py + oy); g.rotate(G.rot); g.scale(G.sc*1.05, 1.05); g.globalAlpha = .34;
+  g.save(); g.translate(G.px + ox, G.py + oy + G.pv); g.rotate(G.rot); g.translate(0, -G.pv); g.scale(G.sc*1.05, 1.05); g.globalAlpha = .34;
   g.drawImage(s.c, -s.c.width/2*up, -s.c.height/2*up, s.c.width*up, s.c.height*up); g.restore();
 }
 function gambar(p, G, t){
@@ -745,12 +841,12 @@ function gambar(p, G, t){
   p.arms.forEach(a => {
     const [u, v] = titikLengan(a, a.tip[0], a.tip[1], true), [sx, sy] = keLayar(p, G, u, v);
     a.sx = sx; a.sy = sy;
-    g.strokeStyle = a.grab ? 'rgba(255,225,150,.95)' : 'rgba(42,22,8,.72)'; g.lineWidth = a.grab ? 3 : 2; g.lineCap = 'round';
-    g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx + (sx - G.px)*.05, H*1.1); g.stroke();
+    // tongkat berpangkal di pegangan dalang (bawah layar): makin jauh tangan digerakkan, makin miring tongkatnya
+    const hx = G.px + (sx < G.px ? -1 : 1)*G.w*.3 + (sx - G.px)*.2, hy = H*1.08;
+    batang(sx, sy, hx, hy, 2.4, 6, a.grab ? 'rgba(224,176,80,.95)' : 'rgba(34,18,8,.9)');
   });
-  g.save(); g.translate(G.px, G.py); g.rotate(G.rot);
-  g.strokeStyle = 'rgba(42,22,8,.8)'; g.lineWidth = 4; g.lineCap = 'round';
-  g.beginPath(); g.moveTo(G.w*.05, G.h*.1); g.lineTo(G.w*.12, H*1.3); g.stroke();
+  g.save(); g.translate(G.px, G.py + G.pv); g.rotate(G.rot); g.translate(0, -G.pv);
+  batang(G.w*.05, G.h*.1, G.w*.12, H*1.3, 4, 9, 'rgba(34,18,8,.92)');
   g.scale(G.sc, 1);
   g.drawImage(p.body, -G.w/2, -G.h/2, G.w, G.h);
   const k = G.k, iw = p.iw, ih = p.ih;
@@ -784,6 +880,10 @@ function loop(t){
     const dx = P[1-i].x - p.x; if(Math.abs(dx) > .04) p.ftx = dx > 0 ? 1 : -1;   // saling berhadapan
     p.x += (p.tx-p.x)*kp; p.y += (p.ty-p.y)*kp; p.r += (p.tr-p.r)*kr; p.s += (p.ts-p.s)*ks; p.fx += (p.ftx-p.fx)*kf;
     if(idle) p.tr *= .96;
+    // ayunan bandul: saat digeser cepat badan miring ke belakang lalu berayun balik (pegas kurang teredam)
+    const vx = (p.x - p.x0)/Math.max(dt, .001); p.x0 = p.x; p.vxs += (vx - p.vxs)*(1 - Math.exp(-dt*18));
+    const tgt = -clamp(p.vxs*.32, -.4, .4), w0 = 10, z0 = .3;
+    p.sv += (-w0*w0*(p.sw - tgt) - 2*z0*w0*p.sv)*dt; p.sw = clamp(p.sw + p.sv*dt, -.6, .6);
     p.arms.forEach((a, j) => { if(a.grab && ![...ptr.values()].some(q => q.t === 'arm' && q.i === i && q.j === j)) a.grab = false; gerakLengan(p, a, dt, t, now); });
   });
   if(cerita){

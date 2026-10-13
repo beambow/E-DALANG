@@ -9,57 +9,41 @@
 html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;user-select:none;-webkit-user-select:none;font-family:system-ui,sans-serif;color:#f3dcae}
 body{background:#1a0b03}
 #kelir{position:fixed;inset:max(6px,env(safe-area-inset-top)) max(6px,env(safe-area-inset-right)) max(6px,env(safe-area-inset-bottom)) max(6px,env(safe-area-inset-left));border-radius:10px;overflow:hidden;border:2px solid #1b1008;
-#kelir{position:fixed;inset:max(4px,env(safe-area-inset-top)) max(4px,env(safe-area-inset-right)) max(4px,env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-left));border-radius:10px;overflow:hidden;border:2px solid #1b1008;background:#3a1d0a url('background-wayang.jpg') center center / 100% 100% no-repeat;}
+background:#3a1d0a url('background-wayang.jpg') center center / 100% 100% no-repeat;
 :fullscreen #kelir{inset:0;border-radius:0;border:0}
 /* cahaya blencong: hanya opacity yang beranimasi (ringan untuk HP kentang) */
 #glow{position:absolute;inset:0;z-index:0;pointer-events:none;
 background:radial-gradient(ellipse 60% 70% at 50% 8%,rgba(255,210,110,.55),rgba(255,170,60,.18) 55%,transparent 80%);animation:kelip 3.7s ease-in-out infinite alternate}
 #vig{position:absolute;inset:0;z-index:0;pointer-events:none;box-shadow:inset 0 0 90px 10px rgba(30,10,0,.5)}
 @keyframes kelip{0%{opacity:.82}12%{opacity:.97}27%{opacity:.78}41%{opacity:1}58%{opacity:.88}73%{opacity:.99}100%{opacity:.84}}
-#cv{position:absolute;inset:0;width:100%;height:100%;z-index:1;touch-action:none}
+#cv{position:absolute;inset:0;width:100%;height:100%;z-index:1;touch-action:pan-y}
 .ov{position:absolute;z-index:3}
 #st{left:8px;top:calc(13% + 6px);font-size:12px;background:#000b;padding:4px 10px;border-radius:99px;max-width:62%}
 #tools{right:8px;top:calc(13% + 6px);display:flex;flex-direction:column;gap:6px}
-.ic{width:44px;height:44px;border:0;border-radius:50%;background:#000b;color:#fff;font-size:17px}
+.ic{width:48px;height:48px;border:0;border-radius:50%;background:#000c;color:#fff;font-size:19px;touch-action:manipulation;cursor:pointer}
 #dock{left:50%;transform:translateX(-50%);bottom:calc(5% + 6px);display:flex;gap:6px;flex-wrap:wrap;justify-content:center;width:92%}
 #dock[hidden]{display:none}
-.b{background:#f3dcae;color:#3b1208;border:0;border-radius:8px;padding:10px 14px;font-weight:600;font-size:13px}
+.b{background:#f3dcae;color:#3b1208;border:0;border-radius:8px;padding:12px 14px;min-height:44px;font-weight:700;font-size:13px;touch-action:manipulation;cursor:pointer}
 .b:disabled{opacity:.6}
 input[type=file]{display:none}
-button,label{touch-action:manipulation}
-#st{z-index:4;line-height:1.35}
-#tools{z-index:5}
-#dock{z-index:5;padding-bottom:env(safe-area-inset-bottom)}
-@media(max-width:600px){
- #kelir{border-width:1px;border-radius:0}
- #st{font-size:10px;max-width:65%;top:calc(7% + 4px);left:5px;padding:4px 7px}
- #tools{top:calc(7% + 4px);right:5px;gap:5px}
- .ic{width:40px;height:40px;font-size:16px}
- #dock{bottom:calc(2% + env(safe-area-inset-bottom));width:96%;gap:5px}
- .b{font-size:11px;padding:9px 10px;border-radius:7px}
- #pip{width:min(30vw,120px);right:5px;bottom:calc(15% + env(safe-area-inset-bottom))}
-}
-@media(max-height:420px) and (orientation:landscape){
- #st,#tools{top:5px}
- #dock{bottom:4px}
- .b{padding:7px 9px}
-}
 #pip{right:8px;bottom:calc(5% + 58px);width:min(26vw,140px);aspect-ratio:4/3;border-radius:8px;overflow:hidden;border:2px solid #f3dcae88;display:none;transform:scaleX(-1)}
 #pip video,#pip canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}
+@media(max-width:600px){#kelir{inset:0;border-radius:0;border:0}#st{font-size:11px;max-width:68%;top:max(8px,env(safe-area-inset-top))}#tools{top:max(8px,env(safe-area-inset-top));right:7px;gap:8px}.ic{width:44px;height:44px}#dock{bottom:max(10px,env(safe-area-inset-bottom));width:96%;gap:6px}.b{padding:10px 11px;font-size:12px}#pip{width:29vw;right:7px;bottom:calc(max(10px,env(safe-area-inset-bottom)) + 60px)}}
+@media(prefers-reduced-motion:reduce){#glow{animation:none}}
 </style>
 </head>
 <body>
 <div id="kelir">
   <div id="glow"></div><div id="vig"></div>
   <canvas id="cv"></canvas>
-  <div id="st" class="ov">Arjuna &amp; Hanoman · satu per tangan</div>
+  <div id="st" class="ov">Kamera: kepal = mengepal · telunjuk = menunjuk</div>
   <div id="tools" class="ov">
     <button class="ic" id="fs" title="Layar penuh" aria-label="Layar penuh">⛶</button>
     <button class="ic" id="snd" title="Suara gamelan" aria-label="Suara gamelan">🔇</button>
     <button class="ic" id="menu" title="Tampil/sembunyi menu" aria-label="Tampil atau sembunyikan menu">☰</button>
   </div>
   <div id="pip" class="ov"><video id="vid" playsinline muted></video><canvas id="oc"></canvas></div>
-  <audio id="bgAudio" src="sound_wayang.mp3" preload="metadata" loop></audio>
+  <audio id="backsound" src="sound_wayang.mp3" preload="auto" loop></audio>
   <div id="dock" class="ov">
     <button class="b" id="cam">📷 Kamera</button>
     <label class="b">🎭 Kiri<input type="file" id="fl" accept="image/*"></label>
@@ -92,7 +76,7 @@ class OE{
 /* ---------- Wayang ---------- */
 // nat: arah hadap gambar aslinya (-1 = kiri, 1 = kanan)
 const mkP = (x, nat) => ({img:null, sil:null, nat, x, y:.55, r:0, s:1, tx:x, ty:.55, tr:0, ts:1, fx:x < .5 ? 1 : -1, ftx:x < .5 ? 1 : -1,
-  inv:false, nod:-1e9, pinching:false, seen:-1e9, hx:x, hy:.5, o:[new OE(1,8), new OE(1,8), new OE(1,1.5), new OE(1,1)]});
+  inv:false, nod:-1e9, pinching:false, gesture:'open', gestureAt:0, seen:-1e9, hx:x, hy:.5, o:[new OE(1,8), new OE(1,8), new OE(1,1.5), new OE(1,1)]});
 const P = [mkP(.3, -1), mkP(.7, 1)];
 
 // Bayangan blencong: siluet gelap kecil yang di-blur sekali saja (turunkan resolusi lalu naikkan), jadi tidak berat tiap frame
@@ -127,26 +111,10 @@ $('fl').onchange = e => { muat(e.target.files[0], 0); e.target.value = ''; };
 $('fr').onchange = e => { muat(e.target.files[0], 1); e.target.value = ''; };
 $('flip').onclick = () => P.forEach(p => p.inv = !p.inv);
 
-/* ---------- Sentuh / mouse ---------- */
+/* ---------- Gerak posisi hanya dari hand tracking ---------- */
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
-let handsOn = -1e9; const ptr = new Map();
-const rel = e => { const b = cv.getBoundingClientRect(); return [(e.clientX-b.left)/b.width, (e.clientY-b.top)/b.height]; };
+let handsOn = -1e9;
 const gerak = (p, nx, ny) => { const x = clamp(nx, .2, .8); p.tr = (x - p.tx)*2; p.tx = x; p.ty = clamp(ny, .38, .66); };
-cv.addEventListener('pointerdown', e => {
-  if(performance.now() - handsOn < 500) return;
-  const [nx] = rel(e), dipakai = [...ptr.values()];
-  const pilih = P.map((p,i) => i).filter(i => !dipakai.includes(i)).sort((a,b) => Math.abs(P[a].x-nx) - Math.abs(P[b].x-nx))[0];
-  if(pilih === undefined) return;
-  ptr.set(e.pointerId, pilih); cv.setPointerCapture(e.pointerId); P[pilih].nod = performance.now(); dung(.32);
-});
-cv.addEventListener('pointermove', e => {
-  if(performance.now() - handsOn < 500) return;
-  const [nx, ny] = rel(e);
-  if(ptr.has(e.pointerId)) gerak(P[ptr.get(e.pointerId)], nx, ny);
-  else if(e.pointerType === 'mouse' && !ptr.size) gerak(P[nx < .5 ? 0 : 1], nx, ny);
-});
-const lepas = e => ptr.delete(e.pointerId);
-cv.addEventListener('pointerup', lepas); cv.addEventListener('pointercancel', lepas);
 
 /* ---------- Layar penuh & menu ---------- */
 $('fs').onclick = async () => {
@@ -209,27 +177,18 @@ function main(i, t){
   if(i % 8 === 7){ tak(t + BT/4, .07); tak(t + BT*.75, .07); }
 }
 function sched(){ while(nt < ac.currentTime + .35){ main(beat % 16, nt); nt += BT; beat++; } }
-const bgAudio = $('bgAudio');
-bgAudio.volume = 0.55;
+const backsound = $('backsound');
+backsound.volume = 0.65;
 $('snd').onclick = async () => {
-  if (bgAudio.paused) {
-    try {
-      await bgAudio.play();
-      $('snd').textContent = '🔊';
-      st.textContent = 'Backsound wayang aktif.';
-    } catch (_) {
-      st.textContent = 'Audio belum bisa diputar. Tekan tombol suara sekali lagi.';
-    }
-  } else {
-    bgAudio.pause();
-    $('snd').textContent = '🔇';
-  }
+  try {
+    if (backsound.paused) { await backsound.play(); $('snd').textContent = '🔊'; st.textContent = 'Backsound wayang aktif.'; }
+    else { backsound.pause(); $('snd').textContent = '🔇'; st.textContent = 'Backsound dijeda.'; }
+  } catch (err) { st.textContent = 'Audio belum bisa diputar. Sentuh tombol suara sekali lagi.'; }
 };
 document.addEventListener('visibilitychange', () => {
   const s = vid.srcObject; if(s) s.getTracks().forEach(t => t.enabled = !document.hidden);
   if(ac) document.hidden ? ac.suspend() : (on && ac.resume());
-  if(document.hidden && !bgAudio.paused) bgAudio.pause();
-  else if(!document.hidden && $('snd').textContent === '🔊' && bgAudio.paused) bgAudio.play().catch(()=>{});
+  if(document.hidden && backsound) backsound.pause();
 });
 
 /* ---------- Kamera + pelacakan tangan ---------- */
@@ -257,7 +216,7 @@ $('cam').onclick = async e => {
     const mk = (d, b) => HandLandmarker.createFromOptions(fs, {baseOptions:{modelAssetBuffer:b, delegate:d}, runningMode:"VIDEO", numHands:2});
     try{ lm = await batas(mk("GPU", buf.slice()), 20000); }catch(_){ lm = await mk("CPU", buf); }
     buf = null;
-    st.textContent = 'Siap! Angkat kedua tangan. Cubit jari agar wayang mengangguk.';
+    st.textContent = 'Siap! Kepal tangan untuk mengepal, angkat telunjuk untuk menunjuk.';
   }catch(err){ st.textContent = 'Gagal: ' + err.message + (err.name === 'NotAllowedError' ? ' — izinkan kamera di pengaturan situs lalu coba lagi.' : ''); e.target.disabled = false; }
 };
 const oc = $('oc'), og = oc.getContext('2d'); oc.width = 160; oc.height = 120;
@@ -295,19 +254,26 @@ function baca(){
   const hs = res.landmarks.map(l => {
     const cx = [0,5,9,13,17].reduce((a,i) => a + (1-l[i].x), 0)/5, cy = [0,5,9,13,17].reduce((a,i) => a + l[i].y, 0)/5;
     const size = dist(l[0], l[9]);
-    return {x:cx, y:cy, size, rot:Math.atan2((1-l[9].x)-(1-l[0].x), -(l[9].y-l[0].y)), pr: dist(l[4], l[8])/size};
+    const up = (tip, pip) => l[tip].y < l[pip].y - size*.12;
+    const indexUp = up(8,6), middleUp = up(12,10), ringUp = up(16,14), pinkyUp = up(20,18);
+    const foldedCount = [indexUp,middleUp,ringUp,pinkyUp].filter(v => !v).length;
+    let gesture = 'open';
+    if(foldedCount >= 4) gesture = 'fist';
+    else if(indexUp && !middleUp && !ringUp && !pinkyUp) gesture = 'one';
+    return {x:cx, y:cy, size, rot:Math.atan2((1-l[9].x)-(1-l[0].x), -(l[9].y-l[0].y)), pr: dist(l[4], l[8])/size, gesture};
   });
   const ts = now/1000;
   for(const [i,h] of bagi(hs)){
     const p = P[i];
     if(now - p.seen > 800) p.o.forEach(f => f.reset());      // tangan baru muncul: jangan tarik dari posisi lama
     p.seen = now; p.hx = h.x; p.hy = h.y;
+    if(h.gesture !== p.gesture){ p.gesture = h.gesture; p.gestureAt = now; if(h.gesture === 'fist' || h.gesture === 'one') dung(.18); st.textContent = h.gesture === 'fist' ? 'Kepalan terdeteksi · tangan wayang mengepal.' : h.gesture === 'one' ? 'Telunjuk terdeteksi · tangan wayang menunjuk.' : 'Tangan terbuka · gerakkan tangan untuk mengendalikan wayang.'; }
     p.tx = .2 + .6*clamp(p.o[0].f((h.x-.1)/.8, ts), 0, 1);
     p.ty = .38 + .28*clamp(p.o[1].f((h.y-.15)/.7, ts), 0, 1);
     p.tr = p.o[2].f(h.rot, ts);
     p.ts = clamp(p.o[3].f(h.size/.16, ts), .75, 1.35);
     const pinch = p.pinching ? h.pr < .5 : h.pr < .32;          // histeresis: tidak "berkedip" di ambang
-    if(pinch && !p.pinching){ p.nod = now; dung(.32); }         // cubit = satu kali angguk + tabuh kendang
+    if(pinch && !p.pinching){ p.nod = now; }         // cubit = anggukan ringan
     p.pinching = pinch;
   }
 }
@@ -328,31 +294,45 @@ function bayang(p, G, t){
   g.save(); g.translate(G.px + ox, G.py + oy); g.rotate(G.rot); g.scale(G.sc*1.05, 1.05); g.globalAlpha = .36;
   const sw = p.sil.width*k, sh = p.sil.height*k; g.drawImage(p.sil, -sw/2, -sh/2, sw, sh); g.restore();
 }
-function gambar(p, G, t, i){
+function gambar(p, G){
   g.save(); g.translate(G.px, G.py); g.rotate(G.rot);
-  // Tongkat utama wayang
-  g.strokeStyle = 'rgba(42,22,8,.8)'; g.lineWidth = Math.max(2, G.h*.009); g.lineCap = 'round';
+  g.strokeStyle = 'rgba(42,22,8,.8)'; g.lineWidth = 4; g.lineCap = 'round';
   g.beginPath(); g.moveTo(G.w*.05, G.h*.1); g.lineTo(G.w*.12, H*1.3); g.stroke();
   g.scale(G.sc, 1);
   g.drawImage(p.img, -G.w/2, -G.h/2, G.w, G.h);
-  // Dua lengan/tangan artikulasi ringan; ikut gerak sentuhan atau rotasi tangan kamera.
-  const idle = performance.now() - handsOn > 500;
-  const wave = idle ? Math.sin(t/430 + i*1.7)*.16 : Math.sin(t/170)*.035;
-  const gesture = clamp(p.tr*1.5, -.55, .55);
-  const shoulderY = -G.h*.075, shoulderX = G.w*.055;
-  const armLen = G.h*.19;
-  g.lineWidth = Math.max(2, G.h*.012);
-  g.strokeStyle = 'rgba(45,20,8,.95)';
-  g.fillStyle = '#bd8a4b';
-  for (const side of [-1,1]) {
-    const a = side*(.52 + wave + gesture);
-    const ex = side*shoulderX + Math.sin(a)*armLen;
-    const ey = shoulderY + Math.cos(a)*armLen;
-    g.beginPath(); g.moveTo(side*shoulderX, shoulderY); g.lineTo(ex, ey); g.stroke();
-    g.beginPath(); g.arc(ex, ey, Math.max(3,G.h*.018), 0, Math.PI*2); g.fill();
-    g.strokeStyle = 'rgba(45,20,8,.95)';
-  }
+  // Sendi tangan wayang digambar sebagai overlay tipis, mengikuti pose hasil hand tracking.
+  gambarTangan(p, G);
   g.restore();
+}
+function gambarTangan(p, G){
+  const t = performance.now(), pose = p.gesture || 'open';
+  const pulse = Math.sin(t/150 + (p.x*5))*.025;
+  const armW = Math.max(2, G.h*.012), skin = '#d49a53', edge = '#3a1709';
+  // Koordinat relatif terhadap tubuh wayang; lengan kiri/kanan bergerak mengikuti kepalan atau telunjuk.
+  for(const side of [-1,1]){
+    const active = pose === 'one' ? side === (p.x < .5 ? 1 : -1) : false;
+    let sx = side*G.w*.105, sy = -G.h*.12;
+    let ex = side*G.w*(pose === 'fist' ? .16 : .205) + (pose === 'open' ? pulse*G.w : 0);
+    let ey = -G.h*(pose === 'fist' ? .02 : pose === 'one' && active ? .18 : .075);
+    let hx = ex + side*G.w*(pose === 'fist' ? .025 : .085);
+    let hy = ey + (pose === 'fist' ? G.h*.015 : pose === 'one' && active ? -G.h*.005 : G.h*.035);
+    g.save(); g.lineCap='round'; g.lineJoin='round';
+    g.strokeStyle=edge; g.lineWidth=armW+2; g.beginPath(); g.moveTo(sx,sy); g.lineTo(ex,ey); g.lineTo(hx,hy); g.stroke();
+    g.strokeStyle=skin; g.lineWidth=armW; g.beginPath(); g.moveTo(sx,sy); g.lineTo(ex,ey); g.lineTo(hx,hy); g.stroke();
+    g.fillStyle='#efc17a'; g.strokeStyle=edge; g.lineWidth=Math.max(1.5,armW*.45);
+    g.beginPath(); g.ellipse(hx,hy,G.h*.018,G.h*.022,0,0,Math.PI*2); g.fill(); g.stroke();
+    if(pose === 'fist'){
+      g.beginPath(); g.arc(hx,hy-G.h*.012,G.h*.021,0,Math.PI*2); g.fill(); g.stroke();
+      for(let j=0;j<3;j++){ g.beginPath(); g.moveTo(hx-G.h*.012,hy-G.h*(.02+j*.003)); g.lineTo(hx+G.h*.012,hy-G.h*(.02+j*.003)); g.stroke(); }
+    }else if(pose === 'one' && active){
+      g.beginPath(); g.moveTo(hx,hy); g.lineTo(hx+side*G.h*.012,hy-G.h*.075); g.stroke();
+      g.beginPath(); g.moveTo(hx+side*G.h*.012,hy-G.h*.075); g.lineTo(hx+side*G.h*.018,hy-G.h*.09); g.stroke();
+      g.beginPath(); g.moveTo(hx-side*G.h*.008,hy); g.lineTo(hx-side*G.h*.022,hy-G.h*.012); g.stroke();
+    }else{
+      for(let j=0;j<3;j++){ g.beginPath(); g.moveTo(hx+side*G.h*(.004+j*.008),hy+G.h*.005); g.lineTo(hx+side*G.h*(.012+j*.008),hy+G.h*.025); g.stroke(); }
+    }
+    g.restore();
+  }
 }
 let lt = 0;
 function loop(t){
@@ -369,7 +349,7 @@ function loop(t){
   if(P.every(p => p.img)){
     const Gs = P.map((p,i) => geo(p, t, i));
     P.forEach((p,i) => bayang(p, Gs[i], t));
-    P.forEach((p,i) => gambar(p, Gs[i], t, i));
+    P.forEach((p,i) => gambar(p, Gs[i]));
   }
   requestAnimationFrame(loop);
 }

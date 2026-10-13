@@ -40,6 +40,19 @@ input[type=file]{display:none}
 #pip.min video{object-fit:cover}
 #pip video,#pip canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:fill}
 #pip.min canvas{display:none}
+.ic[hidden]{display:none}
+.ic.sm{width:36px;height:36px;font-size:16px}
+#volp{right:calc(env(safe-area-inset-right,0px) + 60px);top:calc(env(safe-area-inset-top,0px) + 60px);display:flex;align-items:center;gap:8px;background:rgba(30,12,3,.9);border:1px solid rgba(225,175,95,.5);border-radius:24px;padding:4px 12px 4px 4px}
+#volp[hidden]{display:none}
+#vol{width:min(34vw,150px);accent-color:#e1af5f;touch-action:pan-x}
+#volv{font-size:12px;min-width:34px;text-align:right}
+#story{left:50%;top:50%;transform:translate(-50%,-50%);width:min(92%,480px);max-height:92%;overflow:auto;background:rgba(30,12,3,.95);border:1px solid rgba(225,175,95,.55);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;z-index:4}
+#story[hidden]{display:none}
+#stxt{width:100%;background:#f6e9c8;color:#3b1208;border:1px solid #7a4a1c;border-radius:8px;padding:8px;font:13px/1.4 system-ui,sans-serif;resize:none;user-select:text;-webkit-user-select:text;touch-action:auto}
+.sb{display:flex;gap:8px;justify-content:flex-end}
+.sh{font-weight:700;font-size:14px}
+.sn{font-size:11px;opacity:.8;line-height:1.35}
+#dock{width:min(96%,660px)}
 @media (max-height:420px){.b{padding:7px 10px;min-height:36px;font-size:12px}.ic{width:40px;height:40px}}
 </style>
 </head>
@@ -52,6 +65,14 @@ input[type=file]{display:none}
     <button class="ic" id="menu" title="Tampil/sembunyi menu" aria-label="Tampil atau sembunyikan menu">☰</button>
     <button class="ic" id="snd" title="Musik latar" aria-label="Musik latar">🔇</button>
     <button class="ic" id="fs" title="Layar penuh" aria-label="Layar penuh">⛶</button>
+    <button class="ic" id="nextb" title="Kalimat berikutnya" aria-label="Kalimat berikutnya" hidden>⏭</button>
+  </div>
+  <div id="volp" class="ov" hidden><button class="ic sm" id="mute" aria-label="Bisukan musik">🔊</button><input type="range" id="vol" min="0" max="100" value="75" aria-label="Volume musik"><span id="volv">75%</span></div>
+  <div id="story" class="ov" hidden>
+    <div class="sh">💬 Teks cerita</div>
+    <textarea id="stxt" rows="6" spellcheck="false"></textarea>
+    <div class="sb"><button class="b" id="splay">▶ Mulai</button><button class="b" id="sclose">Tutup</button></div>
+    <div class="sn">Satu kalimat per baris: <b>Nama: kalimat</b>. "Narator:" = teks narasi. Arjuna / Kiri = wayang kiri, Hanoman / Kanan = wayang kanan; nama baru dibagi bergantian.</div>
   </div>
   <div id="pip" class="ov"><video id="vid" playsinline muted></video><canvas id="oc"></canvas></div>
   <div id="dock" class="ov">
@@ -60,6 +81,7 @@ input[type=file]{display:none}
     <label class="b">🎭 Kanan<input type="file" id="fr" accept="image/*"></label>
     <button class="b" id="flip">🔁 Balik arah</button>
     <button class="b" id="reset">↺ Wayang asli</button>
+    <button class="b" id="cerita">💬 Cerita</button>
   </div>
 </div>
 
@@ -106,7 +128,7 @@ const rotPt = (x, y, cx, cy, a) => { const c = Math.cos(a), s = Math.sin(a), dx 
 /* ---------- Wayang ---------- */
 // nat: arah hadap gambar aslinya (-1 = kiri, 1 = kanan)
 const mkP = (x, nat) => ({id:'', iw:0, ih:0, body:null, arms:[], sil:null, nat, x, y:.45, r:0, s:1, tx:x, ty:.45, tr:0, ts:1, fx:x < .5 ? 1 : -1, ftx:x < .5 ? 1 : -1,
-  inv:false, nod:-1e9, pinching:false, seen:-1e9, hx:x, hy:.5, G:null, o:[new OE(1,8), new OE(1,8), new OE(1,1.5), new OE(1,1), new OE(1,2), new OE(1,2)], mode:0, gc:0, gn:0});
+  inv:false, seen:-1e9, hx:x, hy:.5, G:null, o:[new OE(1.6,14), new OE(1.6,14), new OE(1.5,2), new OE(1,1), new OE(1.6,3), new OE(1.8,4)], mode:0, gc:0, gn:0, fistT:0, fistDone:false, sp:false});
 const P = [mkP(.28, -1), mkP(.72, 1)];
 const META = JSON.parse($('wmeta').textContent);
 const ASLI = ['arjuna', 'hanoman'];
@@ -163,10 +185,8 @@ $('reset').onclick = async () => { await pasangSemua(); P.forEach(p => p.inv = f
 function geo(p, t, i){
   const now = performance.now(), idle = now - handsOn > 500;
   const sway = idle ? Math.sin(t/900 + i*2)*.04 : 0;
-  const k = (now - p.nod)/520; let nr = 0, nd = 0;
-  if(k >= 0 && k < 1){ const e = Math.sin(k*Math.PI); nr = e*.28*Math.sign(p.ftx); nd = e*H*.03; }
   const h = Math.min(H*.6, W*.6)*p.s;
-  return {h, w:h*p.iw/p.ih, k:h/p.ih, px:p.x*W, py:p.y*H + nd, rot:p.r + sway + nr, sc:p.nat*p.fx*(p.inv ? -1 : 1)};
+  return {h, w:h*p.iw/p.ih, k:h/p.ih, px:p.x*W, py:p.y*H + (p.sp ? Math.sin(t/85)*H*.004 : 0), rot:p.r + sway, sc:p.nat*p.fx*(p.inv ? -1 : 1)};
 }
 // titik pada gambar asli (px gambar) -> koordinat layar
 function keLayar(p, G, x, y){
@@ -189,17 +209,18 @@ function titikLengan(a, x, y, bawah){
 function gerakLengan(p, a, dt, t, now){
   let tg;
   if(a.grab) tg = a.gt;
+  else if(p.sp) tg = .28 + .3*Math.sin(t/230 + a.ph);
   else if(now - a.camT < 600) tg = a.cam;
   else {
     const idle = now - handsOn > 500;
     tg = idle ? .12 + .13*Math.sin(t/820 + a.ph) : .06;       // goyang pelan saat dibiarkan
   }
   tg = clamp(tg, -a.rng[0], a.rng[1]);
-  const k1 = 130, c1 = 2*Math.sqrt(k1)*.78;
+  const k1 = 230, c1 = 2*Math.sqrt(k1)*.92;
   a.va += (k1*(tg - a.a) - c1*a.va)*dt; a.a += a.va*dt;
   a.a = clamp(a.a, -a.rng[0]*1.2, a.rng[1]*1.2);
   const et = -.55*a.a - .045*a.va;                             // siku mengikuti bahu dengan sedikit "ngelag"
-  const k2 = 75, c2 = 2*Math.sqrt(k2)*.42;
+  const k2 = 120, c2 = 2*Math.sqrt(k2)*.55;
   a.ve += (k2*(et - a.e) - c2*a.ve)*dt; a.e += a.ve*dt;
   a.e = clamp(a.e, -.95, .95);
 }
@@ -231,7 +252,7 @@ function sudutPointer(p, a, X, Y){
 }
 
 cv.addEventListener('pointerdown', e => {
-  mulaiMusikSekali(); keepAwake();
+  mulaiMusikSekali(); keepAwake(); tutupVol();
   if(performance.now() - handsOn < 500) return;
   const [X, Y] = xy(e);
   const h = cariLengan(X, Y);
@@ -247,8 +268,6 @@ cv.addEventListener('pointerdown', e => {
   const pilih = P.map((p, i) => i).filter(i => !dipakai.includes(i)).sort((a, b) => Math.abs(P[a].x*W - X) - Math.abs(P[b].x*W - X))[0];
   if(pilih === undefined) return;
   ptr.set(e.pointerId, {t:'body', i:pilih}); cv.setPointerCapture(e.pointerId);
-  P[pilih].nod = performance.now(); dung(.32);
-  P[pilih].arms.forEach((a, j) => a.va += (j ? 1 : -1)*2.4);      // lengan ikut bergetar saat badan dicolek
 });
 cv.addEventListener('pointermove', e => {
   if(performance.now() - handsOn < 500) return;
@@ -278,34 +297,55 @@ if(!document.documentElement.requestFullscreen) $('fs').style.display = 'none';
 $('menu').onclick = () => { $('dock').hidden = !$('dock').hidden; };
 
 /* ---------- Musik latar (sound_wayang.mp3) + efek kendang ---------- */
-let audioEl = null, musicOn = false, musicAsked = false, ac = null, mst = null;
+let audioEl = null, musicOn = false, musicAsked = false, ac = null, mst = null, vol = .75, volTimer = 0;
+try{ const v = localStorage.getItem('wayang-vol'); if(v !== null) vol = clamp(+v/100, 0, 1); }catch(_){}
+$('vol').value = Math.round(vol*100);
+function ikonSuara(){
+  const ik = (!musicOn || vol === 0) ? '🔇' : vol < .4 ? '🔉' : '🔊';
+  $('snd').textContent = ik; $('mute').textContent = ik; $('volv').textContent = Math.round(vol*100) + '%';
+}
+const tutupVol = () => { $('volp').hidden = true; };
+const jagaVol = () => { clearTimeout(volTimer); volTimer = setTimeout(tutupVol, 4500); };
 function siapAudio(){
   if(audioEl) return audioEl;
   const bin = atob($('sndb64').textContent.trim()), u8 = new Uint8Array(bin.length);
   for(let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
   audioEl = new Audio(URL.createObjectURL(new Blob([u8], {type:'audio/mpeg'})));
-  audioEl.loop = true; audioEl.volume = .75; audioEl.preload = 'auto';
+  audioEl.loop = true; audioEl.volume = vol; audioEl.preload = 'auto';
   return audioEl;
 }
 function initSfx(){
   if(ac){ if(ac.state === 'suspended') ac.resume(); return; }
   try{
     ac = new (window.AudioContext || window.webkitAudioContext)();
-    mst = ac.createGain(); mst.gain.value = .9;
+    mst = ac.createGain(); mst.gain.value = .9*vol;
     const cmp = ac.createDynamicsCompressor(); mst.connect(cmp); cmp.connect(ac.destination);
   }catch(_){ ac = null; }
 }
 function setMusik(on){
-  musicOn = on; musicAsked = true; $('snd').textContent = on ? '🔊' : '🔇';
+  musicOn = on; musicAsked = true; ikonSuara();
   const a = siapAudio();
   if(on){
     initSfx();
     const pr = a.play();
-    if(pr && pr.catch) pr.catch(() => { musicOn = false; $('snd').textContent = '🔇'; say('Ketuk tombol 🔇 untuk memutar musik.'); });
+    if(pr && pr.catch) pr.catch(() => { musicOn = false; ikonSuara(); say('Ketuk tombol 🔇 untuk memutar musik.'); });
   } else a.pause();
 }
 function mulaiMusikSekali(){ if(!musicAsked) setMusik(true); }        // sentuhan pertama di panggung menyalakan musik
-$('snd').onclick = () => setMusik(!musicOn);
+$('snd').onclick = () => {                 // buka/tutup panel volume (musik ikut menyala bila belum)
+  if(!musicAsked) setMusik(true);
+  $('volp').hidden = !$('volp').hidden; if(!$('volp').hidden) jagaVol();
+};
+$('mute').onclick = () => { setMusik(!musicOn); jagaVol(); };
+$('vol').oninput = e => {
+  vol = clamp(+e.target.value/100, 0, 1);
+  if(audioEl) audioEl.volume = vol; if(mst) mst.gain.value = .9*vol;
+  try{ localStorage.setItem('wayang-vol', String(Math.round(vol*100))); }catch(_){}
+  if(!musicAsked) musicAsked = true;
+  if(vol > 0 && !musicOn) setMusik(true); else ikonSuara();
+  jagaVol();
+};
+ikonSuara();
 function dung(v = .3){
   if(!musicOn || !ac) return;
   const t = ac.currentTime, o = ac.createOscillator(), e = ac.createGain();
@@ -339,7 +379,7 @@ let lm = null, lastT = -1;
 $('cam').onclick = async e => {
   e.target.disabled = true; say('Meminta izin kamera…', 0);
   try{
-    vid.srcObject = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user', width:{ideal:320}, height:{ideal:240}, frameRate:{ideal:30}}, audio:false});
+    vid.srcObject = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user', width:{ideal:320}, height:{ideal:240}, frameRate:{ideal:60}}, audio:false});
     await vid.play(); $('pip').style.display = 'block';
     say('Memuat pustaka…', 0);
     const {HandLandmarker, FilesetResolver} = await import(V + "/vision_bundle.mjs");
@@ -349,7 +389,12 @@ $('cam').onclick = async e => {
     const mk = (d, b) => HandLandmarker.createFromOptions(fs, {baseOptions:{modelAssetBuffer:b, delegate:d}, runningMode:"VIDEO", numHands:2});
     try{ lm = await batas(mk("GPU", buf.slice()), 20000); }catch(_){ lm = await mk("CPU", buf); }
     buf = null;
-    say('Siap! 1 jari = tangan kiri wayang, 2 jari = tangan kanan (miringkan jari untuk menggerakkan). Telapak terbuka/kepal = kedua lengan, cubit = mengangguk.', 11000);
+    if(vid.requestVideoFrameCallback && !pakaiRVFC){
+      pakaiRVFC = true;
+      const tick = () => { try{ baca(); }catch(err){ say('Error pelacakan: ' + err.message, 0); lm = null; } vid.requestVideoFrameCallback(tick); };
+      vid.requestVideoFrameCallback(tick);
+    }
+    say('Siap! 1 jari = tangan kiri wayang, 2 jari = tangan kanan (miringkan jari untuk menggerakkan). Telapak terbuka = kedua lengan naik, kepal = turun.', 11000);
   }catch(err){ say('Gagal: ' + err.message + (err.name === 'NotAllowedError' ? ' — izinkan kamera di pengaturan situs lalu coba lagi.' : ''), 0); e.target.disabled = false; }
 };
 const oc = $('oc'), og = oc.getContext('2d'); oc.width = 160; oc.height = 120;
@@ -375,10 +420,10 @@ function bagi(hs){
   if(l0 || l1){ const j = l0 ? 0 : 1; return [[d(h,j) < .3 ? j : 1-j, h]]; }
   return [[h.x < .5 ? 0 : 1, h]];
 }
-let lastDet = 0;
+let lastDet = 0, pakaiRVFC = false;
 function baca(){
   const now = performance.now();
-  if(!lm || document.hidden || vid.readyState < 2 || vid.currentTime === lastT || now - lastDet < 33) return;
+  if(!lm || document.hidden || vid.readyState < 2 || vid.currentTime === lastT) return;
   lastT = vid.currentTime; lastDet = now;
   const res = lm.detectForVideo(vid, now);
   lukis(res.landmarks);
@@ -402,12 +447,20 @@ function baca(){
     p.ty = .4 + .12*clamp(p.o[1].f((h.y-.15)/.7, ts), 0, 1);
     // mode jari harus stabil beberapa frame supaya tidak berkedip
     if(h.jari === p.gc) p.gn++; else { p.gc = h.jari; p.gn = 1; }
-    const mBaru = p.gn >= 3 ? (h.jari === 1 ? 1 : h.jari === 2 ? 2 : 0) : p.mode;
-    if(mBaru !== p.mode){ p.mode = mBaru; if(mBaru) say(mBaru === 1 ? '☝️ 1 jari: tangan KIRI wayang' : '✌️ 2 jari: tangan KANAN wayang', 1400); }
+    const mBaru = p.gn >= 2 ? (h.jari >= 1 && h.jari <= 3 ? h.jari : 0) : p.mode;
+    if(mBaru !== p.mode){ p.mode = mBaru; if(mBaru) say(['', '☝️ 1 jari: tangan KIRI wayang', '✌️ 2 jari: tangan KANAN wayang', '🤟 3 jari: kedua tangan bergantian'][mBaru], 1400); }
+    // kepalan ditahan ±0,8 detik = wayang berbalik arah (sekali; buka tangan lagi untuk mengulang)
+    if(h.jari === 0 && h.buka < 1.45){
+      if(!p.fistT) p.fistT = now;
+      else if(!p.fistDone && now - p.fistT > 800){ p.fistDone = true; p.inv = !p.inv; say('✊ Kepalan ditahan: wayang berbalik arah', 1400); }
+    } else { p.fistT = 0; p.fistDone = false; }
     p.tr = p.o[2].f(p.mode ? h.rot*.3 : h.rot, ts);
     p.ts = clamp(p.o[3].f(h.size/.16, ts), .75, 1.15);
     const u = clamp(p.o[4].f(clamp((h.buka - 1.2)/.7, 0, 1), ts), 0, 1);
-    if(p.mode && p.arms.length === 2 && p.G){
+    if(p.mode === 3 && p.arms.length === 2){
+      // 3 jari: kedua lengan melambai bergantian
+      p.arms.forEach((a, j) => { a.cam = clamp(.42 + .5*Math.sin(ts*6.2 + j*Math.PI), -.45, .95); a.camT = now; });
+    } else if(p.mode && p.arms.length === 2 && p.G){
       // lengan kiri/kanan menurut posisi di layar; hanya lengan terpilih yang mengikuti kemiringan jari
       const xs = p.arms.map(a => keLayar(p, p.G, a.S[0], a.S[1])[0]), kiri = xs[0] <= xs[1] ? 0 : 1;
       const pilih = p.mode === 1 ? kiri : 1 - kiri, tl = p.o[5].f(clamp(h.tilt, -1, 1), ts);
@@ -417,9 +470,100 @@ function baca(){
         a.camT = now;
       });
     } else p.arms.forEach((a, j) => { a.cam = (-.3 + 1.2*u)*(j ? .88 : 1); a.camT = now; });
-    const pinch = p.pinching ? h.pr < .5 : h.pr < .32;          // histeresis: tidak "berkedip" di ambang
-    if(pinch && !p.pinching){ p.nod = now; dung(.32); p.arms.forEach((a, j) => a.va += (j ? 1 : -1)*2.4); }
-    p.pinching = pinch;
+  }
+}
+
+/* ---------- Teks cerita (balon kata & narasi) ---------- */
+const SKRIP = `Narator: Di tepi hutan Dandaka, dua kesatria bertemu di bawah cahaya rembulan.
+Arjuna: Wahai Hanoman, kera putih yang gagah, ke mana kakimu melangkah?
+Hanoman: Hamba mencari jalan pulang ke Ayodya, wahai Raden Arjuna.
+Arjuna: Marilah, kuantar engkau lewat jalan yang aman.
+Hanoman: Terima kasih, Raden. Semoga restu para dewa menyertai kita.
+Narator: Maka berjalanlah keduanya, ditemani gamelan yang mengalun lirih.`;
+$('stxt').value = SKRIP;
+let cerita = null;
+function urai(txt){
+  const peta = new Map([['arjuna', 0], ['kiri', 0], ['hanoman', 1], ['kanan', 1]]); let baru = 0; const out = [];
+  for(const raw of txt.split(/\n/)){
+    const s = raw.trim(); if(!s) continue;
+    const m = /^([^:：]{1,24})[:：]\s*(.+)$/.exec(s);
+    if(!m){ out.push({who:-1, nama:'', teks:s}); continue; }
+    const nama = m[1].trim(), kunci = nama.toLowerCase();
+    if(kunci === 'narator' || kunci === 'narasi'){ out.push({who:-1, nama:'', teks:m[2].trim()}); continue; }
+    if(!peta.has(kunci)) peta.set(kunci, baru++ % 2);
+    out.push({who:peta.get(kunci), nama, teks:m[2].trim()});
+  }
+  return out;
+}
+function mulaiCerita(){
+  const baris = urai($('stxt').value);
+  if(!baris.length){ say('Tulis dulu ceritanya.'); return; }
+  cerita = {baris, i:0, t0:performance.now()};
+  $('story').hidden = true; $('nextb').hidden = false; $('cerita').textContent = '⏹ Henti';
+}
+function selesaiCerita(pesan){
+  cerita = null; $('nextb').hidden = true; $('cerita').textContent = '💬 Cerita'; P.forEach(p => { p.sp = false; });
+  if(pesan) say(pesan, 2200);
+}
+function lanjutCerita(){ if(!cerita) return; cerita.i++; cerita.t0 = performance.now(); if(cerita.i >= cerita.baris.length) selesaiCerita('Cerita selesai.'); }
+$('cerita').onclick = () => { if(cerita) selesaiCerita(); else $('story').hidden = !$('story').hidden; };
+$('splay').onclick = mulaiCerita;
+$('sclose').onclick = () => { $('story').hidden = true; };
+$('nextb').onclick = lanjutCerita;
+const lamaKetik = L => L.teks.length/30;                         // 30 huruf per detik
+const lamaBaris = L => lamaKetik(L) + 1.6 + L.teks.length*.03;
+const cacheBungkus = new Map();
+function bungkus(teks, maxW){
+  const kunci = teks + '|' + Math.round(maxW) + '|' + g.font; if(cacheBungkus.has(kunci)) return cacheBungkus.get(kunci);
+  const out = []; let cur = '';
+  for(const k of teks.split(/\s+/)){ const c = cur ? cur + ' ' + k : k; if(g.measureText(c).width > maxW && cur){ out.push(cur); cur = k; } else cur = c; }
+  if(cur) out.push(cur);
+  if(cacheBungkus.size > 80) cacheBungkus.clear(); cacheBungkus.set(kunci, out); return out;
+}
+function kotak(x, y, w, h, r){
+  g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath();
+}
+function lukisCerita(now){
+  if(!cerita) return;
+  const L = cerita.baris[cerita.i], n = Math.floor((now - cerita.t0)/1000*30);
+  const fs = clamp(H*.036, 11, 16), lh = fs*1.34, pad = fs*.75, port = W/H < 1.3;
+  const fnt = (b, it) => `${it ? 'italic ' : ''}${b ? 700 : 500} ${fs}px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif`;
+  g.textBaseline = 'top'; g.font = fnt(false, L.who < 0);
+  const maxW = L.who < 0 ? Math.min(W*.74, 560) : Math.min(W*(port ? .6 : .27), 250);
+  const lines = bungkus(L.teks, maxW - pad*2);
+  let lebar = 0; for(const s of lines) lebar = Math.max(lebar, g.measureText(s).width);
+  if(L.who >= 0){ g.font = fnt(true); lebar = Math.max(lebar, g.measureText(L.nama).width); }
+  const bw = lebar + pad*2, bh = (lines.length + (L.who >= 0 ? 1 : 0))*lh + pad*2;
+  let bx, by, sisa = n;
+  g.lineWidth = 2;
+  if(L.who < 0){
+    bx = (W - bw)/2; by = H*.09;
+    g.fillStyle = 'rgba(34,16,6,.88)'; g.strokeStyle = 'rgba(225,175,95,.7)'; kotak(bx, by, bw, bh, 10); g.fill(); g.stroke();
+    g.fillStyle = '#f6e3b8'; g.font = fnt(false, true);
+  } else {
+    const p = P[L.who], G = p.G; if(!G) return;
+    let tail;
+    if(port){
+      bx = clamp(G.px - bw/2, 6, W - bw - 62); by = Math.max(6, G.py - G.h*.5 - bh - 16);
+      const tx = clamp(G.px, bx + 16, bx + bw - 16); tail = [[tx - 8, by + bh], [tx + 8, by + bh], [tx, by + bh + 12]];
+    } else {
+      const dir = p.ftx > 0 ? 1 : -1;
+      bx = clamp(dir > 0 ? G.px + G.w*.34 : G.px - G.w*.34 - bw, 6, W - bw - 62); by = clamp(G.py - G.h*.46, 8, H*.8 - bh);
+      const ty = by + Math.min(bh*.5, 28), ex = dir > 0 ? bx : bx + bw;
+      tail = [[ex, ty - 8], [ex, ty + 8], [ex - dir*12, ty + 2]];
+    }
+    g.fillStyle = 'rgba(255,246,222,.97)'; g.strokeStyle = '#7a4a1c';
+    kotak(bx, by, bw, bh, 12); g.fill(); g.stroke();
+    g.beginPath(); g.moveTo(...tail[0]); g.lineTo(...tail[1]); g.lineTo(...tail[2]); g.closePath(); g.fill(); g.stroke();
+    // tutup garis batas balon di pangkal ekor
+    g.fillStyle = 'rgba(255,246,222,.97)'; g.beginPath(); g.moveTo(...tail[0]); g.lineTo(...tail[1]); g.lineTo(tail[2][0]*.15 + (tail[0][0]+tail[1][0])*.425, tail[2][1]*.15 + (tail[0][1]+tail[1][1])*.425); g.closePath(); g.fill();
+    g.font = fnt(true); g.fillStyle = '#9a2f12'; g.fillText(L.nama, bx + pad, by + pad);
+    g.font = fnt(false); g.fillStyle = '#3b1208';
+  }
+  let y = by + pad + (L.who >= 0 ? lh : 0);
+  for(const s of lines){
+    if(sisa <= 0) break;
+    g.fillText(s.slice(0, sisa), bx + pad, y); sisa -= s.length + 1; y += lh;
   }
 }
 
@@ -477,15 +621,20 @@ function gambar(p, G, t){
 let lt = 0;
 function loop(t){
   const dt = Math.min(.033, (t - lt)/1000 || .016); lt = t;
-  try{ baca(); }catch(err){ say('Error pelacakan: ' + err.message, 0); lm = null; }
+  if(!pakaiRVFC){ try{ baca(); }catch(err){ say('Error pelacakan: ' + err.message, 0); lm = null; } }
   const now = performance.now(), idle = now - handsOn > 500;
-  const kp = 1 - Math.exp(-dt*16), kr = 1 - Math.exp(-dt*14), ks = 1 - Math.exp(-dt*10), kf = 1 - Math.exp(-dt*11);
+  const kp = 1 - Math.exp(-dt*24), kr = 1 - Math.exp(-dt*20), ks = 1 - Math.exp(-dt*14), kf = 1 - Math.exp(-dt*14);
   P.forEach((p, i) => {
     const dx = P[1-i].x - p.x; if(Math.abs(dx) > .04) p.ftx = dx > 0 ? 1 : -1;   // saling berhadapan
     p.x += (p.tx-p.x)*kp; p.y += (p.ty-p.y)*kp; p.r += (p.tr-p.r)*kr; p.s += (p.ts-p.s)*ks; p.fx += (p.ftx-p.fx)*kf;
     if(idle) p.tr *= .96;
     p.arms.forEach((a, j) => { if(a.grab && ![...ptr.values()].some(q => q.t === 'arm' && q.i === i && q.j === j)) a.grab = false; gerakLengan(p, a, dt, t, now); });
   });
+  if(cerita){
+    const L = cerita.baris[cerita.i];
+    if((now - cerita.t0)/1000 > lamaBaris(L)) lanjutCerita();
+    else P.forEach((p, i) => { p.sp = !!cerita && L.who === i && (now - cerita.t0)/1000 < lamaKetik(L) + .4; });
+  }
   g.clearRect(0, 0, W, H);
   if(P.every(p => p.body && p.sh)){
     g.save(); g.beginPath(); g.rect(0, 0, W, H*LEDGE); g.clip();          // wayang "di balik" bingkai kayu bawah
@@ -494,6 +643,7 @@ function loop(t){
     P.forEach((p, i) => gambar(p, Gs[i], t));
     g.restore();
     if(ORN.naturalWidth){ const s = Math.max(W/1308, H/736), ox = (W - 1308*s)/2, oy = (H - 736*s)/2; g.drawImage(ORN, ox + 340*s, oy + 500*s, 630*s, 140*s); }
+    lukisCerita(now);
   }
   requestAnimationFrame(loop);
 }

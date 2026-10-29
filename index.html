@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Wayang Tangan</title>
-<meta name="description" content="Main wayang digital: gerakkan Arjuna, Hanoman, Semar, Gatotkaca, dan Cakil dengan sentuhan atau kamera. Rekam dan bagikan pertunjukanmu.">
+<meta name="description" content="Main wayang digital: gerakkan Arjuna, Hanoman, Semar, Gatotkaca, Rahwana, dan Werkudara dengan sentuhan atau kamera. Rekam dan bagikan pertunjukanmu.">
 <meta property="og:title" content="Wayang Tangan">
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -92,7 +92,8 @@ input[type=file]{display:none}
     <textarea id="stxt" rows="4" spellcheck="false"></textarea>
     <label class="ck"><input type="checkbox" id="ttsOn" checked> 🗣️ Bacakan dengan suara</label>
     <label class="ck"><input type="checkbox" id="gmlOn" checked> 🔔 Efek gamelan saat bicara</label>
-    <label class="ck">🎙️ Suara narator <select id="vnar" aria-label="Suara narator"></select></label>
+    <button class="b" id="tesv">🔊 Tes suara</button>
+    <label class="ck">🎙️ Suara mas Jawa <select id="vnar" aria-label="Suara narator"></select></label>
     <div class="sb"><button class="b" id="splay">▶ Mulai</button><button class="b" id="sclose">Tutup</button></div>
     <div class="sn" id="snote"></div>
     <div class="sn">Satu kalimat per baris: <b>Nama: kalimat</b>. "Narator:" = teks narasi. Arjuna / Kiri = wayang kiri, Hanoman / Kanan = wayang kanan; nama baru dibagi bergantian.</div>
@@ -102,6 +103,8 @@ input[type=file]{display:none}
     <label class="ck">Tokoh kiri <select id="tkL"></select></label>
     <label class="ck">Tokoh kanan <select id="tkR"></select></label>
     <label class="ck">Latar kelir <select id="latar"></select></label>
+    <label class="ck"><input type="checkbox" id="tukar"> Tukar jempol ↔ telunjuk</label>
+    <button class="b" id="kalib">🎯 Kalibrasi ulang tangan</button>
     <label class="ck">Lakon <select id="lakon"></select></label>
     <div class="sb"><button class="b" id="pmain">▶ Mainkan lakon</button><button class="b" id="pclose">Tutup</button></div>
     <div class="sn">Lakon otomatis memasang tokoh, latar, dan gunungan pembuka/penutup. Lengan yang bisa digerakkan baru ada pada Arjuna &amp; Hanoman; tokoh lain bergoyang mengikuti geseran.</div>
@@ -163,7 +166,7 @@ const rotPt = (x, y, cx, cy, a) => { const c = Math.cos(a), s = Math.sin(a), dx 
 /* ---------- Wayang ---------- */
 // nat: arah hadap gambar aslinya (-1 = kiri, 1 = kanan)
 const mkP = (x, nat) => ({id:'', iw:0, ih:0, body:null, arms:[], sil:null, nat, x, y:.45, r:0, s:1, tx:x, ty:.45, tr:0, ts:1, fx:x < .5 ? 1 : -1, ftx:x < .5 ? 1 : -1,
-  inv:false, seen:-1e9, hx:x, hy:.5, G:null, o:[new OE(5,60,5), new OE(5,60,5), new OE(3.5,8,3), new OE(1.5,2), new OE(4,10,3), new OE(3,5), new OE(4,14,4), new OE(4,14,4)], sw:0, sv:0, x0:x, vxs:0, mode:0, gc:0, gn:0, fistT:0, fistDone:false, sp:false});
+  inv:false, seen:-1e9, hx:x, hy:.5, G:null, o:[new OE(5,60,5), new OE(5,60,5), new OE(3.5,8,3), new OE(1.5,2), new OE(4,10,3), new OE(3,5), new OE(4,14,4), new OE(4,14,4), new OE(2.2,5,3), new OE(2,4,3), new OE(3,8,3), new OE(2.5,6,3)], sw:0, sv:0, x0:x, vxs:0, mode:0, gc:0, gn:0, fistT:0, fistDone:false, sp:false});
 const P = [mkP(.28, -1), mkP(.72, 1)];
 const META = JSON.parse($('wmeta').textContent);
 const ASLI = ['gatotkaca', 'semar'];
@@ -540,7 +543,7 @@ function kirimFrame(){
   }).catch(() => { wBusy = false; });
 }
 $('cam').onclick = async e => {
-  e.target.disabled = true; say('Meminta izin kamera…', 0);
+  initSfx(); e.target.disabled = true; say('Meminta izin kamera…', 0);
   try{
     vid.srcObject = await navigator.mediaDevices.getUserMedia({video:{facingMode:'user', width:{ideal:640}, height:{ideal:480}, frameRate:{ideal:60}}, audio:false});
     await vid.play(); $('pip').style.display = 'block';
@@ -555,7 +558,7 @@ $('cam').onclick = async e => {
       const tick = () => { try{ if(wReady) kirimFrame(); else baca(); }catch(err){ say('Error pelacakan: ' + err.message, 0); lm = null; } vid.requestVideoFrameCallback(tick); };
       vid.requestVideoFrameCallback(tick);
     }
-    say('Siap! 1 jari = tangan kiri wayang, 2 jari = tangan kanan: arahkan ujung jari, tangan wayang mengikuti. Telapak terbuka = kedua lengan naik, kepal = turun.', 11000);
+    say('Siap! Tahan tangan santai ±1 detik (kalibrasi), lalu 👍 jempol = tangan kiri wayang, ☝️ telunjuk = tangan kanan wayang.', 11000);
   }catch(err){ say('Gagal: ' + err.message + (err.name === 'NotAllowedError' ? ' — izinkan kamera di pengaturan situs lalu coba lagi.' : ''), 0); e.target.disabled = false; }
 };
 const oc = $('oc'), og = oc.getContext('2d'); oc.width = 160; oc.height = 120;
@@ -598,47 +601,45 @@ function proses(landmarks, tcap){
   const hs = landmarks.map(l => {
     const cx = [0,5,9,13,17].reduce((a,i) => a + (1-l[i].x), 0)/5, cy = [0,5,9,13,17].reduce((a,i) => a + l[i].y, 0)/5;
     const size = dist(l[0], l[9]);
+    const sudut = (b, t) => Math.atan2((1-l[t].x) - (1-l[b].x), -(l[t].y - l[b].y));
     const buka = [8,12,16,20].reduce((a,k) => a + dist(l[k], l[0]), 0)/4/size;       // telapak terbuka ≈ 1.9, mengepal ≈ 1.1
     const jari = [[8,6],[12,10],[16,14],[20,18]].filter(([tp, pp]) => dist(l[tp], l[0]) > dist(l[pp], l[0])*1.1).length;   // jari yang terulur (tanpa ibu jari)
     const tx = jari >= 2 ? ((1-l[8].x) + (1-l[12].x))/2 : (1-l[8].x), ty = jari >= 2 ? (l[8].y + l[12].y)/2 : l[8].y;
-    return {x:cx, y:cy, size, rot:Math.atan2((1-l[9].x)-(1-l[0].x), -(l[9].y-l[0].y)), pr: dist(l[4], l[8])/size, buka, jari,
+    return {x:cx, y:cy, size, rot:Math.atan2((1-l[9].x)-(1-l[0].x), -(l[9].y-l[0].y)), pr: dist(l[4], l[8])/size, buka, jari, jem:{a:sudut(2,4), c:dist(l[4], l[5])/size}, tel:{a:sudut(5,8), c:dist(l[8], l[0])/dist(l[5], l[0])},
             tilt:Math.atan2(tx - (1-l[0].x), -(ty - l[0].y)), fvx:(tx - (1-l[0].x))/size, fvy:(ty - l[0].y)/size};
   });
   const ts = tcap/1000;
   for(const [i,h] of bagi(hs)){
     const p = P[i];
-    if(now - p.seen > 800) p.o.forEach(f => f.reset());      // tangan baru muncul: jangan tarik dari posisi lama
+    if(now - p.seen > 800){ p.o.forEach(f => f.reset()); p.cal = {t0:now, n:0, js:0, jc:0, ts:0, tc:0, je:0, te:0, ok:false}; say('🎯 Tahan tangan santai ±1 detik, posisi awal lengan dikunci', 1300); }      // tangan baru muncul: jangan tarik dari posisi lama
     p.seen = now; p.hx = h.x; p.hy = h.y;
     const fx = p.o[0].f((h.x-.1)/.8, ts), fy = p.o[1].f((h.y-.15)/.7, ts);       // + prediksi 50 ms ke depan menutup jeda deteksi
     p.tx = .18 + .64*clamp(fx + p.o[0].dx*.07, 0, 1);
     p.ty = .4 + .12*clamp(fy + p.o[1].dx*.07, 0, 1);
-    // mode jari harus stabil beberapa frame supaya tidak berkedip
-    if(h.jari === p.gc) p.gn++; else { p.gc = h.jari; p.gn = 1; }
-    const mBaru = p.gn >= 2 ? (h.jari >= 1 && h.jari <= 3 ? h.jari : 0) : p.mode;
-    if(mBaru !== p.mode){ p.mode = mBaru; if(mBaru) say(['', '☝️ 1 jari: ujung jari = tangan KIRI wayang', '✌️ 2 jari: ujung jari = tangan KANAN wayang', '🤟 3 jari: kedua tangan bergantian'][mBaru], 1400); }
+    p.mode = 0; if(!petunjuk){ petunjuk = true; say('👍 Jempol = tangan kiri wayang · ☝️ telunjuk = tangan kanan wayang', 3500); }
     // kepalan ditahan ±0,8 detik = wayang berbalik arah (sekali; buka tangan lagi untuk mengulang)
     if(h.jari === 0 && h.buka < 1.45){
-      if(!p.fistT) p.fistT = now;
-      else if(!p.fistDone && now - p.fistT > 800){ p.fistDone = true; p.inv = !p.inv; say('✊ Kepalan ditahan: wayang berbalik arah', 1400); }
+      if(!p.fistT){ p.fistT = now; setTimeout(() => { if(p.fistT && !p.fistDone) say('✊ Tahan terus… 2 detik untuk membalik wayang', 1400); }, 600); }
+      else if(!p.fistDone && now - p.fistT > 2000){ p.fistDone = true; p.inv = !p.inv; say('✊ Kepalan ditahan: wayang berbalik arah', 1400); }
     } else { p.fistT = 0; p.fistDone = false; }
-    p.tr = p.o[2].f(p.mode ? h.rot*.3 : h.rot, ts);
+    p.tr = p.o[2].f(h.rot*.3, ts);
     p.ts = clamp(p.o[3].f(h.size/.16, ts), .75, 1.15);
     const u = clamp(p.o[4].f(clamp((h.buka - 1.2)/.7, 0, 1), ts), 0, 1);
-    if(p.mode === 3 && p.arms.length === 2){
-      // 3 jari: kedua lengan melambai bergantian
-      p.arms.forEach((a, j) => { a.cam = clamp(.42 + .5*Math.sin(ts*6.2 + j*Math.PI), -.45, .95); a.camT = now; });
-    } else if(p.mode && p.arms.length === 2 && p.G){
-      // lengan kiri/kanan menurut posisi di layar; hanya lengan terpilih yang mengikuti kemiringan jari
-      const xs = p.arms.map(a => keLayar(p, p.G, a.S[0], a.S[1])[0]), kiri = xs[0] <= xs[1] ? 0 : 1;
-      const pilih = p.mode === 1 ? kiri : 1 - kiri;
-      // arah & jauhnya ujung jari dari pergelangan = letak ujung tangan wayang terhadap bahunya (IK)
-      const sgn = Math.sign(p.G.sc) || 1, fvx = p.o[6].f(h.fvx, ts), fvy = p.o[7].f(h.fvy, ts), r = Math.hypot(fvx, fvy) || 1, kk = clamp(r/2, .3, 1);
-      p.arms.forEach((a, j) => {
-        if(j === pilih){
-          const R = a.l1 + a.l2;
-          a.ik = ikSolve(a, a.S[0] + R*kk*fvx*sgn/r, a.S[1] + R*kk*fvy/r); a.ikT = now;
-        } else { a.cam = .04; a.camT = now; a.ikT = -1e9; }
-      });
+    const K = p.cal;
+    if(!K.ok){                                               // kalibrasi: lengan tetap di posisi awal selagi tangan dibiarkan santai
+      if(now - K.t0 < 1200){ K.n++; K.js += Math.sin(h.jem.a); K.jc += Math.cos(h.jem.a); K.ts += Math.sin(h.tel.a); K.tc += Math.cos(h.tel.a); K.je += h.jem.c; K.te += h.tel.c; }
+      else if(K.n > 3){ K.ok = true; K.t1 = now; K.ja = Math.atan2(K.js, K.jc); K.ta = Math.atan2(K.ts, K.tc); K.je /= K.n; K.te /= K.n; say('✅ Siap! Miringkan & tekuk jempol / telunjuk', 1800); }
+      else p.cal = {t0:now, n:0, js:0, jc:0, ts:0, tc:0, je:0, te:0, ok:false};
+    } else if(p.arms.length === 2 && p.G){
+      // gerak RELATIF terhadap posisi santai: miring ke luar = lengan naik, ditekuk = lengan turun, jempol dilebarkan = naik
+      const xs = p.arms.map(a => keLayar(p, p.G, a.S[0], a.S[1])[0]), kiri = xs[0] <= xs[1] ? 0 : 1, tk = $('tukar').checked, w = clamp((now - K.t1)/700, 0, 1);
+      const dz = (v, z) => Math.abs(v) < z ? 0 : v - Math.sign(v)*z;
+      for(const [j, f, ba, be, oi] of [[tk ? 1 - kiri : kiri, h.jem, K.ja, K.je, 8], [tk ? kiri : 1 - kiri, h.tel, K.ta, K.te, 10]]){
+        const a = p.arms[j], lado = j === kiri ? -1 : 1;
+        const tilt = dz(p.o[oi].f(wrap(f.a - ba), ts), .06), cv = clamp(p.o[oi + 1].f((f.c - be)/(be*.45), ts), -1, 1);
+        const tg = clamp(.06 + w*(1.8*lado*tilt + (cv > 0 ? .7 : .8)*cv), -a.lim[0], a.lim[1]);
+        a.ik = {a:tg, e:-.55*tg}; a.ikT = now;
+      }
     } else p.arms.forEach((a, j) => { a.cam = (-.3 + 1.2*u)*(j ? .88 : 1); a.camT = now; });
   }
 }
@@ -689,7 +690,9 @@ $('sdel').onclick = () => {
 };
 tampilCerita(); simpanDB();
 // ---- suara narator: pria, dalam; utamakan suara Jawa bila ada di perangkat ----
-const NAMA_PRIA = /andika|ardi|male|pria|laki|bapak|rizki|jawa|java/i;
+const NAMA_PRIA = /andika|ardi|male|pria|laki|bapak|rizki|jawa|java|jvd|idc|idd/i;
+// profil suara tiap tokoh: [pitch, kecepatan]. Semua pria & dalam, dibedakan lewat berat dan tempo
+const SUARA = {gatotkaca:[.55,.92], semar:[.38,.78], rahwana:[.28,.82], werkudara:[.42,.88], arjuna:[.62,.92], hanoman:[.68,1], gunungan:[.4,.8]};
 const semuaSuara = () => { try{ return speechSynthesis.getVoices(); }catch(_){ return []; } };
 function isiSuara(){
   const all = semuaSuara(), sel = $('vnar'), lokal = v => /^(jv|id|in|ms)[-_]/i.test(v.lang);
@@ -698,6 +701,7 @@ function isiSuara(){
   sel.value = vnarNama;
   if(sel.value !== vnarNama) sel.value = '';
 }
+$('tesv').onclick = () => { try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance('Sugeng ndalu, kulo Semar. Mugi-mugi wayang punika dados tetuladan.'), v = pilihSuara(0), [pt, rt] = SUARA[CUR[0]] || [.5, .9]; if(v){ u.voice = v; u.lang = v.lang; } else u.lang = 'id-ID'; u.pitch = pt; u.rate = rt; speechSynthesis.speak(u); }catch(_){ say('Suara tidak didukung browser ini.'); } };
 $('vnar').onchange = () => { vnarNama = $('vnar').value; try{ localStorage.setItem(KUNCI_VNAR, vnarNama); }catch(_){} };
 try{ speechSynthesis.addEventListener('voiceschanged', isiSuara); }catch(_){}
 isiSuara();
@@ -724,13 +728,10 @@ function mulaiCerita(){
   mulaiBaris();
 }
 function pilihSuara(who){
-  const all = semuaSuara(), idv = all.filter(v => /^(id|in|ms)[-_]/i.test(v.lang));
-  if(who < 0){
-    const pilihan = vnarNama && all.find(v => v.name === vnarNama); if(pilihan) return pilihan;
-    const jv = all.find(v => /^jv/i.test(v.lang)); if(jv) return jv;
-    return idv.find(v => NAMA_PRIA.test(v.name)) || idv[0] || null;
-  }
-  return idv.length ? idv[who % idv.length] : null;
+  const all = semuaSuara(), idv = all.filter(v => /^(id|in|ms)[-_]/i.test(v.lang)), jv = all.filter(v => /^jv/i.test(v.lang)), nG = v => !/google/i.test(v.name);
+  const pilihan = vnarNama && all.find(v => v.name === vnarNama); if(pilihan) return pilihan;
+  // utamakan bukan Google: Jawa > pria Indonesia > Indonesia apa pun; Google hanya cadangan
+  return jv.find(nG) || idv.find(v => NAMA_PRIA.test(v.name) && nG(v)) || idv.find(nG) || jv[0] || idv.find(v => NAMA_PRIA.test(v.name)) || idv[0] || null;
 }
 function mulaiBaris(){
   const L = cerita.baris[cerita.i];
@@ -742,7 +743,7 @@ function mulaiBaris(){
     try{
       const id = cerita.id, u = new SpeechSynthesisUtterance(L.teks), v = pilihSuara(L.who);
       if(v){ u.voice = v; u.lang = v.lang; } else u.lang = 'id-ID';
-      u.pitch = L.who === 0 ? 1.3 : L.who === 1 ? .65 : .35; u.rate = L.who < 0 ? .8 : 1;      // narator: dalam & pelan ala dalang
+      const [pt, rt] = L.who < 0 ? [.35, .78] : (SUARA[CUR[L.who]] || [.5, .9]); u.pitch = pt; u.rate = rt;   // dalam & pelan ala dalang
       u.onstart = () => { if(cerita && cerita.id === id){ cerita.ttsMulai = true; cerita.tm = performance.now(); ducked = true; terapVol(); } };
       const akhir = () => { if(cerita && cerita.id === id && !cerita.ttsSelesai){ cerita.ttsSelesai = true; cerita.tEnd = performance.now(); ducked = false; terapVol(); } };
       u.onend = akhir; u.onerror = akhir; cerita.tts = true; speechSynthesis.speak(u);
@@ -922,7 +923,7 @@ function loop(t){
     P.forEach((p, i) => gambar(p, Gs[i], t));
     g.restore();
     if(ORN.naturalWidth){ const s = Math.max(W/1308, H/736), ox = (W - 1308*s)/2, oy = (H - 736*s)/2; g.drawImage(ORN, ox + 340*s, oy + 500*s, 630*s, 140*s); }
-    lukisCerita(now); lukisGunung(now);
+    lukisCerita(now); lukisGunung(now); lukisPercik(now);
   }
   if(rec) komposit();
   requestAnimationFrame(loop);
@@ -977,17 +978,37 @@ function lukisGunung(now){
   g.drawImage(c, -w/2, -h, w, h); g.restore();
 }
 // ---- efek gamelan yang bereaksi ----
-let tabrak = false, tabrakT = 0;
+let tabrak = false, tabrakT = 0, percik = null, petunjuk = false; const klas = [];
+function beradu(x, y, kuat){
+  if($('gmlOn').checked){ tak(kuat ? .26 : .18); bonang(kuat ? 1175 : 1568, kuat ? .1 : .075); setTimeout(() => bonang(kuat ? 1760 : 2349, .05), 60); if(kuat){ kendang(); gong(.14); } }
+  percik = {x, y, t:performance.now(), kuat};
+}
+function lukisPercik(now){
+  if(!percik) return; const t = now - percik.t; if(t > 320){ percik = null; return; }
+  const r = (percik.kuat ? 46 : 30)*(.4 + t/320);
+  g.save(); g.translate(percik.x, percik.y); g.globalAlpha = 1 - t/320; g.strokeStyle = '#ffe9a8'; g.lineWidth = 3; g.lineCap = 'round';
+  for(let i = 0; i < 8; i++){ const an = i*Math.PI/4 + .2; g.beginPath(); g.moveTo(Math.cos(an)*r*.45, Math.sin(an)*r*.45); g.lineTo(Math.cos(an)*r, Math.sin(an)*r); g.stroke(); }
+  g.restore();
+}
 function efekAksi(now){
-  if(!$('gmlOn').checked || !P.every(p => p.G)) return;
+  if(!P.every(p => p.G)) return;
   const [a, b] = P, dekat = Math.abs(a.x - b.x)*W < (a.G.w + b.G.w)*.34;
-  if(dekat && !tabrak && now - tabrakT > 700){ tabrakT = now; kendang(); if(Math.abs(a.vxs - b.vxs) > .6) gong(.14); }   // wayang bertabrakan
+  if(dekat && !tabrak && now - tabrakT > 700){ tabrakT = now; beradu((a.x + b.x)/2*W, (a.y + b.y)/2*H, true); }   // badan beradu
   tabrak = dekat;
+  // lengan bawah / ujung tangan kedua wayang saling bersentuh
+  const tt = p => p.arms.map(m => [.5, 1].map(f => { const [x, y] = titikLengan(m, m.E[0] + (m.tip[0] - m.E[0])*f, m.E[1] + (m.tip[1] - m.E[1])*f, true); return keLayar(p, p.G, x, y); }));
+  const A = tt(a), B = tt(b), R = Math.min(W, H)*.055; let n = 0;
+  A.forEach(pa => B.forEach(pb => {
+    const hit = pa.some(u => pb.some(v => Math.hypot(u[0] - v[0], u[1] - v[1]) < R));
+    if(hit && !klas[n] && now - tabrakT > 250){ tabrakT = now; beradu((pa[1][0] + pb[1][0])/2, (pa[1][1] + pb[1][1])/2, false); }
+    klas[n++] = hit;
+  }));
+  if(!$('gmlOn').checked) return;
   P.forEach((p, i) => p.arms.forEach((m, j) => {
     const tinggi = Math.abs(m.a) > 1.05;                                   // tangan diangkat tinggi
     if(tinggi && !m.hi && now - (m.sn || 0) > 350){ m.sn = now; tak(.14); bonang((i ? 262 : 392)*2*SLENDRO[(j*2 + i)%5], .07); }
     m.hi = tinggi;
-    if(Math.abs(m.va) > 7 && now - (m.sn2 || 0) > 200){ m.sn2 = now; bonang((i ? 262 : 392)*SLENDRO[Math.abs(Math.round(m.a*3))%5], .04); }   // tangan diayun cepat
+    if(Math.abs(m.va) > 7 && now - (m.sn2 || 0) > 200){ m.sn2 = now; bonang((i ? 262 : 392)*SLENDRO[Math.abs(Math.round(m.a*3))%5], .04); }
   }));
 }
 // ---- foto, rekam & bagikan ----
@@ -1048,6 +1069,7 @@ $('tkR').onchange = () => setTokoh(1, $('tkR').value);
 $('latar').onchange = () => setLatar($('latar').value);
 $('pgb').onclick = () => { $('story').hidden = true; $('pg').hidden = !$('pg').hidden; };
 $('cerita').addEventListener('click', () => { $('pg').hidden = true; });
+$('kalib').onclick = () => { P.forEach(p => { p.seen = -1e9; }); $('pg').hidden = true; say('🎯 Tunjukkan tangan, tahan santai ±1 detik', 2500); };
 $('pclose').onclick = () => { $('pg').hidden = true; };
 $('pmain').onclick = async () => {
   const k = $('lakon').value, l = LAKON[k]; if(cerita) selesaiCerita();

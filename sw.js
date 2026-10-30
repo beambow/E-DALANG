@@ -1,4 +1,4 @@
-const V = 'wayang-v4', INTI = ["./", "index.html", "manifest.webmanifest", "ikon-192.png", "ikon-512.png", "aset/kelir.jpg", "aset/orn.webp", "aset/gunungan.webp", "aset/kertas.jpg", "aset/hutan.jpg", "suara/gamelan.mp3", "tokoh/arjuna.json", "tokoh/hanoman.json", "tokoh/rahwana.json", "tokoh/werkudara.json", "tokoh/gatotkaca.json", "tokoh/semar.json"];
+const V = 'wayang-v5', INTI = ["./", "index.html", "manifest.webmanifest", "ikon-192.png", "ikon-512.png", "aset/kelir.jpg", "aset/orn.webp", "aset/gunungan.webp", "aset/kertas.jpg", "aset/hutan.jpg", "suara/gamelan.mp3", "tokoh/arjuna.json", "tokoh/hanoman.json", "tokoh/rahwana.json", "tokoh/werkudara.json", "tokoh/gatotkaca.json", "tokoh/semar.json"];
 self.addEventListener('install', e => e.waitUntil(caches.open(V).then(c => Promise.allSettled(INTI.map(u => c.add(u)))).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== V).map(k => caches.delete(k)))).then(() => self.clients.claim())));
 async function rentang(r, res){            // dukungan Range untuk audio dari cache

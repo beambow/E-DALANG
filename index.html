@@ -74,6 +74,10 @@ input[type=file]{display:none}
 #dock{width:min(96%,660px)}
 @media (max-height:420px){.b{padding:7px 10px;min-height:36px;font-size:12px}.ic{width:40px;height:40px}}
 #pg select{flex:1}.ic.rec{background:#b3261e;animation:kelip 1s infinite alternate}
+#tur{position:fixed;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;background:rgba(15,8,3,.84);backdrop-filter:blur(4px)}#tur[hidden]{display:none}
+#tur .kt{width:min(88vw,420px);background:#2b1a0d;border:1.5px solid #e1af5f;border-radius:16px;padding:18px;color:#f3e4c4;font:15px/1.55 system-ui,sans-serif}
+#tur h3{margin:6px 0 8px;color:#ffd36a;font-size:19px;text-align:center}#tur .bt{display:flex;gap:8px;margin-top:14px}#tur .bt button{flex:1}
+#pg input[type=range]{flex:1}#pg details{color:#f3e4c4;font-size:13px}#pg summary{padding:6px 0;cursor:pointer}
 </style>
 </head>
 <body>
@@ -109,6 +113,15 @@ input[type=file]{display:none}
     <label class="ck">Tokoh kanan <select id="tkR"></select></label>
     <label class="ck">Latar kelir <select id="latar"></select></label>
     <label class="ck"><input type="checkbox" id="tukar"> Tukar jempol ↔ telunjuk</label>
+    <label class="ck"><input type="checkbox" id="dua"> 👥 Mode dua pemain (kamera dibagi kiri / kanan)</label>
+    <details><summary>⚙️ Penyetelan tangan</summary>
+      <label class="ck">Kepekaan lengan <input type="range" id="sGain" min="60" max="220"></label>
+      <label class="ck">Respons (lambat ↔ cepat) <input type="range" id="sResp" min="50" max="300"></label>
+      <label class="ck">Zona mati jari <input type="range" id="sDz" min="0" max="15"></label>
+      <label class="ck">Prediksi gerak <input type="range" id="sPred" min="0" max="130"></label>
+      <label class="ck"><input type="checkbox" id="cbAuto"> Kompensasi jeda otomatis</label>
+      <div class="sn" id="diag">Nyalakan kamera untuk melihat fps &amp; jeda.</div>
+    </details>
     <label class="ck"><input type="checkbox" id="aduOn"> ⚔️ Mode adu (tenaga &amp; pemenang)</label>
     <button class="b" id="mdl">🤖 Model tangan</button>
     <button class="b" id="kalib">🎯 Kalibrasi ulang tangan</button>
@@ -116,6 +129,8 @@ input[type=file]{display:none}
     <div class="sb"><button class="b" id="pmain">▶ Mainkan lakon</button><button class="b" id="pclose">Tutup</button></div>
     <div class="sn">Lakon otomatis memasang tokoh, latar, dan gunungan pembuka/penutup. Lengan yang bisa digerakkan baru ada pada Arjuna &amp; Hanoman; tokoh lain bergoyang mengikuti geseran.</div>
   </div>
+  <div id="tur" hidden><div class="kt"><div id="turE" style="font-size:44px;text-align:center"></div><h3 id="turJ"></h3><div id="turT"></div><div id="turD" style="text-align:center;margin-top:10px;color:#e1af5f;letter-spacing:4px"></div>
+    <div class="bt"><button class="b" id="turP">‹ Kembali</button><button class="b" id="turN">Lanjut ›</button></div><button class="b" id="turS" style="width:100%;margin-top:8px;opacity:.8">Lewati panduan</button></div></div>
   <div id="pip" class="ov"><video id="vid" playsinline muted></video><canvas id="oc"></canvas><div id="trk" title="Ketuk untuk ganti GPU/CPU"></div></div>
   <div id="dock" class="ov">
     <button class="b" id="cam">📷 Kamera</button>
@@ -123,6 +138,7 @@ input[type=file]{display:none}
     <label class="b">🎭 Kanan<input type="file" id="fr" accept="image/*"></label>
     <button class="b" id="flip">🔁 Balik arah</button>
     <button class="b" id="reset">↺ Wayang asli</button>
+    <button class="b" id="pandu">❓ Panduan</button>
     <button class="b" id="pgb">🎪 Panggung</button>
     <button class="b" id="cerita">💬 Cerita</button>
   </div>
@@ -158,7 +174,7 @@ class OE{
     if(this.t === null){ this.t = t; this.x = x; this.dx = 0; return x; }
     const dt = Math.max(.001, t - this.t); this.t = t;
     this.dx += this.a(this.dc, dt)*((x - this.x)/dt - this.dx);
-    this.x += this.a(this.mc + this.b*Math.abs(this.dx), dt)*(x - this.x);
+    this.x += this.a((this.mc + this.b*Math.abs(this.dx))*(this.s || 1), dt)*(x - this.x);
     return this.x;
   }
   reset(){ this.t = null; }
@@ -362,7 +378,8 @@ $('menu').onclick = () => { $('dock').hidden = !$('dock').hidden; };
 
 /* ---------- Musik latar (sound_wayang.mp3) + efek kendang ---------- */
 let audioEl = null, musicOn = false, musicAsked = false, ac = null, mst = null, vol = .75, volTimer = 0, bisu = false, ducked = false;
-const terapVol = () => { if(audioEl) audioEl.volume = vol*(ducked ? .3 : 1); };
+let musikV = 1;
+const terapVol = () => { if(audioEl) audioEl.volume = Math.min(1, vol*(ducked ? .3 : 1)*musikV); };
 try{ const v = localStorage.getItem('wayang-vol'); if(v !== null) vol = clamp(+v/100, 0, 1); }catch(_){}
 $('vol').value = Math.round(vol*100);
 function ikonSuara(){
@@ -574,7 +591,9 @@ $('cam').onclick = async e => {
 const oc = $('oc'), og = oc.getContext('2d'); oc.width = 160; oc.height = 120;
 const RANTAI = [[0,1,2,3,4],[0,5,6,7,8],[9,10,11,12],[13,14,15,16],[0,17,18,19,20],[5,9,13,17]];
 function lukis(ls){
-  og.clearRect(0,0,160,120); og.strokeStyle = '#fff'; og.lineWidth = 2; og.fillStyle = '#ffb43a';
+  og.clearRect(0,0,160,120);
+  if(SET.dua){ og.strokeStyle = 'rgba(255,211,106,.85)'; og.lineWidth = 1.5; og.setLineDash([4,3]); og.beginPath(); og.moveTo(80,0); og.lineTo(80,120); og.stroke(); og.setLineDash([]); }
+  og.strokeStyle = '#fff'; og.lineWidth = 2; og.fillStyle = '#ffb43a';
   for(const l of ls){
     for(const ch of RANTAI){ og.beginPath(); ch.forEach((k,j) => { const x = l[k].x*160, y = l[k].y*120; j ? og.lineTo(x,y) : og.moveTo(x,y); }); og.stroke(); }
     for(const q of l){ og.beginPath(); og.arc(q.x*160, q.y*120, 2.5, 0, 7); og.fill(); }
@@ -583,6 +602,7 @@ function lukis(ls){
 const dist = (a,b) => Math.hypot(a.x-b.x, a.y-b.y);
 // Tiap wayang "mengunci" tangan terdekat dari posisi terakhirnya, jadi tidak tertukar saat tangan bersilang
 function bagi(hs){
+  if(SET.dua){ const r = [[], []]; hs.forEach(h => r[h.x < .5 ? 0 : 1].push(h)); return r.map((l, i) => l.length ? [i, l.sort((a, b) => Math.abs(a.x - .5) - Math.abs(b.x - .5))[0]] : null).filter(Boolean); }
   const now = performance.now(), hidup = i => now - P[i].seen < 800, d = (h,i) => dist(h, {x:P[i].hx, y:P[i].hy});
   if(hs.length >= 2){
     const [a,b] = hs.slice(0,2).sort((p,q) => p.x-q.x);
@@ -623,9 +643,10 @@ function proses(landmarks, tcap){
     const p = P[i];
     if(now - p.seen > 800){ p.o.forEach(f => f.reset()); p.cal = {t0:now, n:0, js:0, jc:0, ts:0, tc:0, je:0, te:0, ok:false}; say('🎯 Tahan tangan santai ±1 detik, posisi awal lengan dikunci', 1300); }      // tangan baru muncul: jangan tarik dari posisi lama
     p.seen = now; p.hx = h.x; p.hy = h.y;
-    const fx = p.o[0].f((h.x-.1)/.8, ts), fy = p.o[1].f((h.y-.15)/.7, ts);       // + prediksi 50 ms ke depan menutup jeda deteksi
-    p.tx = .18 + .64*clamp(fx + p.o[0].dx*.07, 0, 1);
-    p.ty = .4 + .12*clamp(fy + p.o[1].dx*.07, 0, 1);
+    const hx = SET.dua ? (h.x - i*.5)*2 : h.x, pr = SET.auto ? clamp(((trk.ms || 30) + 500/Math.max(trk.fps || 20, 10))/1000, .05, .13) : SET.pred; p.o[0].s = p.o[1].s = SET.resp;
+    const fx = p.o[0].f((hx-.1)/.8, ts), fy = p.o[1].f((h.y-.15)/.7, ts);       // + prediksi 50 ms ke depan menutup jeda deteksi
+    p.tx = .18 + .64*clamp(fx + p.o[0].dx*pr, 0, 1);
+    p.ty = .4 + .12*clamp(fy + p.o[1].dx*pr, 0, 1);
     p.mode = 0; if(!petunjuk){ petunjuk = true; say('👍 Jempol = tangan kiri wayang · ☝️ telunjuk = tangan kanan wayang', 3500); }
     // kepalan ditahan ±0,8 detik = wayang berbalik arah (sekali; buka tangan lagi untuk mengulang)
     if(h.jari === 0 && h.buka < 1.45){
@@ -646,8 +667,8 @@ function proses(landmarks, tcap){
       const dz = (v, z) => Math.abs(v) < z ? 0 : v - Math.sign(v)*z;
       for(const [j, f, ba, be, oi] of [[tk ? 1 - kiri : kiri, h.jem, K.ja, K.je, 8], [tk ? kiri : 1 - kiri, h.tel, K.ta, K.te, 10]]){
         const a = p.arms[j], lado = j === kiri ? -1 : 1;
-        const tilt = dz(p.o[oi].f(wrap(f.a - ba), ts), .06), cv = clamp(p.o[oi + 1].f((f.c - be)/(be*.45), ts), -1, 1);
-        const tg = clamp(.06 + w*(1.8*lado*tilt + (cv > 0 ? .7 : .8)*cv), -a.lim[0], a.lim[1]);
+        p.o[oi].s = p.o[oi + 1].s = SET.resp; const tilt = dz(p.o[oi].f(wrap(f.a - ba), ts), SET.dz), cv = clamp(p.o[oi + 1].f((f.c - be)/(be*.45), ts), -1, 1);
+        const tg = clamp(.06 + w*(1.8*SET.gain*lado*tilt + (cv > 0 ? .7 : .8)*cv), -a.lim[0], a.lim[1]);
         a.ik = {a:tg, e:-.55*tg}; a.ikT = now;
       }
     } else p.arms.forEach((a, j) => { a.cam = (-.3 + 1.2*u)*(j ? .88 : 1); a.camT = now; });
@@ -876,7 +897,7 @@ function gambar(p, G, t){
   g.save(); g.translate(G.px, G.py + G.pv); g.rotate(G.rot); g.translate(0, -G.pv);
   batang(G.w*.05, G.h*.1, G.w*.12, H*1.3, 4, 9, 'rgba(34,18,8,.92)');
   g.scale(G.sc, 1);
-  const SI = siluet ? siapSiluet(p) : null;
+  const SI = siluet ? siapSiluet(p) : null; if(SI) g.globalAlpha = .93 + .05*Math.sin(t/170 + p.x*5);   // nyala blencong bergoyang
   g.drawImage(SI ? SI.body : p.body, -G.w/2, -G.h/2, G.w, G.h);
   const k = G.k, iw = p.iw, ih = p.ih;
   p.arms.forEach((a, j) => {
@@ -978,11 +999,14 @@ function mkLatar(k){
 const BG0 = getComputedStyle($('kelir')).backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
 const bgIm = new Image(); bgIm.src = BG0;
 let siluet = false;
-function hitam(img){      // siluet hitam penuh; bagian putih (lubang tatahan) dibuat tembus cahaya
-  const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const x = c.getContext('2d'); x.drawImage(img, 0, 0);
-  const d = x.getImageData(0, 0, c.width, c.height), a = d.data;
-  for(let i = 0; i < a.length; i += 4){ if(a[i + 3] && Math.min(a[i], a[i + 1], a[i + 2]) > 226) a[i + 3] = 0; a[i] = 10; a[i + 1] = 6; a[i + 2] = 3; }
-  x.putImageData(d, 0, 0); return c;
+function hitam(img){      // siluet hitam: lubang tatahan tembus cahaya (lembut) + tepi bayangan melebar
+  const w = img.width, h = img.height, c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); x.drawImage(img, 0, 0);
+  const d = x.getImageData(0, 0, w, h), a = d.data;
+  for(let i = 0; i < a.length; i += 4){ const m = Math.min(a[i], a[i + 1], a[i + 2]); a[i + 3] *= m > 236 ? 0 : m < 212 ? 1 : (236 - m)/24; a[i] = 8; a[i + 1] = 5; a[i + 2] = 3; }
+  x.putImageData(d, 0, 0);
+  const o = document.createElement('canvas'); o.width = w; o.height = h; const y = o.getContext('2d');
+  y.filter = 'blur(' + Math.max(2, w/90) + 'px)'; y.globalAlpha = .4; y.drawImage(c, 0, 0);
+  y.filter = 'blur(0.7px)'; y.globalAlpha = 1; y.drawImage(c, 0, 0); return o;
 }
 function siapSiluet(p){ if(!p.si || p.si.src !== p.body) p.si = {src:p.body, body:hitam(p.body), arms:p.arms.map(a => ({U:hitam(a.U.im), L:hitam(a.L.im)}))}; return p.si; }
 function setLatar(k){
@@ -1039,6 +1063,9 @@ $('aduOn').onchange = () => { adu.on = $('aduOn').checked; adu.hp = [100, 100]; 
 function efekAksi(now){
   if(!P.every(p => p.G)) return;
   const dtS = Math.max(.001, (now - (efekAksi.t || now))/1000); efekAksi.t = now;
+  const mn = Math.min(adu.hp[0], adu.hp[1])/100, gml = $('gmlOn').checked;                  // musik mengikuti suasana
+  if(audioEl && musicOn){ const tr = adu.on ? (adu.over ? .85 : 1.1 + .12*(1 - mn)) : (cerita ? .94 : 1); audioEl.playbackRate += (tr - audioEl.playbackRate)*.03; musikV = adu.over ? .6 : cerita ? .85 : 1; terapVol(); }
+  if(adu.on && !adu.over && gml && now - (efekAksi.r || 0) > 560 - 240*(1 - mn)){ efekAksi.r = now; efekAksi.n = (efekAksi.n || 0) + 1; if(efekAksi.n % 4) tak(.08); else dung(.2); }   // denyut kendang makin cepat saat tenaga menipis
   P.forEach(p => { p.jt = (p.jt || 0) + ((p.jtT || 0) - (p.jt || 0))*.1; p.kb = (p.kb || 0)*.88; });
   if(adu.over){ const k = P[1 - adu.over.win]; k.jtT = (k.x < .5 ? -1 : 1)*1.35; if(now - adu.over.t > 4500){ adu.hp = [100, 100]; adu.over = null; P.forEach(p => p.jtT = 0); say('⚔️ Ronde baru!', 1500); } }
   const [a, b] = P, dekat = Math.abs(a.x - b.x)*W < (a.G.w + b.G.w)*.34;
@@ -1164,6 +1191,34 @@ $('mdl').onclick = async () => {
     say('Model ' + modelPilih + ' aktif', 2000);
   }catch(er){ say('Gagal: ' + er.message, 0); }
 };
+
+// ---- penyetelan tangan, mode dua pemain, panduan ----
+const SET = {gain:1.2, resp:1.3, dz:.05, pred:.07, auto:true, dua:false};
+try{ Object.assign(SET, JSON.parse(localStorage.getItem('wayang-set') || '{}')); SET.dua = false; }catch(_){}
+const simpanSET = () => { try{ localStorage.setItem('wayang-set', JSON.stringify(SET)); }catch(_){} };
+const sinkSET = () => { $('sGain').value = SET.gain*100; $('sResp').value = SET.resp*100; $('sDz').value = SET.dz*100; $('sPred').value = SET.pred*1000; $('cbAuto').checked = SET.auto; $('dua').checked = SET.dua; };
+sinkSET();
+[['sGain', v => SET.gain = v/100], ['sResp', v => SET.resp = v/100], ['sDz', v => SET.dz = v/100], ['sPred', v => { SET.pred = v/1000; SET.auto = false; $('cbAuto').checked = false; }]].forEach(([id, f]) => { $(id).oninput = () => { f(+$(id).value); simpanSET(); }; });
+$('cbAuto').onchange = () => { SET.auto = $('cbAuto').checked; simpanSET(); };
+$('dua').onchange = () => { SET.dua = $('dua').checked; P.forEach(p => { p.seen = -1e9; }); $('pg').hidden = true; say(SET.dua ? '👥 Dua pemain: tangan di sisi kiri kamera = wayang kiri, sisi kanan = wayang kanan' : 'Mode dua pemain dimatikan', 4000); };
+setInterval(() => { if($('pg').hidden || !vid.srcObject) return; const pr = SET.auto ? clamp(((trk.ms || 30) + 500/Math.max(trk.fps || 20, 10))/1000, .05, .13) : SET.pred, lag = (trk.ms || 0) + 500/Math.max(trk.fps || 20, 10);
+  $('diag').textContent = (hl ? 'Lite' : 'Standar') + ' · ' + (trk.fps || 0) + ' fps · deteksi ' + (trk.ms || 0) + ' ms · jeda ±' + Math.round(lag) + ' ms · prediksi ' + Math.round(pr*1000) + ' ms' + (lag > 90 ? ' → jeda tinggi: coba ganti model, perbanyak cahaya, atau naikkan Respons' : ''); }, 600);
+const TUR = [
+  ['🎭', 'Selamat datang di Wayang Tangan', 'Mainkan wayang digital dengan sentuhan atau gerakan tangan di depan kamera. Geser wayang dengan jari, atau nyalakan kamera lewat tombol 📷.'],
+  ['🎯', 'Kalibrasi dulu', 'Saat kamera menyala, tahan tangan santai ±1 detik. Lengan wayang dikunci di posisi awal, lalu mulai mengikuti. Tombol Kalibrasi ulang ada di 🎪 Panggung.'],
+  ['👍☝️', 'Jempol & telunjuk', 'Jempol = tangan kiri wayang, telunjuk = tangan kanan wayang. Miringkan jari ke luar untuk mengangkat lengan, tekuk untuk menurunkan. Kepalan ditahan 2 detik membalik wayang.'],
+  ['⚔️', 'Mode adu & dua pemain', 'Centang Mode adu di 🎪 Panggung: pukul lawan dengan ayunan lengan sampai tenaganya habis. Mode dua pemain membagi kamera kiri / kanan, satu tangan untuk tiap wayang.'],
+  ['🎬', 'Cerita, rekam & bagikan', 'Pilih lakon di 🎪 Panggung lalu ▶. Tombol 📸 mengambil foto dan ⏺ merekam video. Kalau tangan terasa lag, setel di ⚙️ Penyetelan tangan atau ganti model tangan.']
+];
+let turI = 0;
+function tampilTur(){ const t = TUR[turI]; $('turE').textContent = t[0]; $('turJ').textContent = t[1]; $('turT').textContent = t[2]; $('turD').textContent = TUR.map((_, i) => i === turI ? '●' : '○').join(' '); $('turP').style.visibility = turI ? 'visible' : 'hidden'; $('turN').textContent = turI === TUR.length - 1 ? 'Mulai ▶' : 'Lanjut ›'; }
+function bukaTur(){ turI = 0; tampilTur(); $('tur').hidden = false; }
+function tutupTur(){ $('tur').hidden = true; try{ localStorage.setItem('wayang-tur', '1'); }catch(_){} }
+$('turN').onclick = () => { if(turI < TUR.length - 1){ turI++; tampilTur(); } else tutupTur(); };
+$('turP').onclick = () => { if(turI){ turI--; tampilTur(); } };
+$('turS').onclick = tutupTur; $('pandu').onclick = bukaTur;
+let sudahTur = false; try{ sudahTur = localStorage.getItem('wayang-tur') === '1'; }catch(_){}
+if(!sudahTur) setTimeout(bukaTur, 700);
 const isi = (el, o) => Object.entries(o).forEach(([v, t]) => el.add(new Option(t, v)));
 isi($('tkL'), TOKOH); isi($('tkR'), TOKOH); isi($('latar'), LATAR); Object.entries(LAKON).forEach(([k, l]) => $('lakon').add(new Option(l.nama, k)));
 function sinkPanel(){ $('tkL').value = CUR[0]; $('tkR').value = CUR[1]; }

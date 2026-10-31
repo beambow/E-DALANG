@@ -7,6 +7,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Wayang Tangan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <meta name="description" content="Main wayang digital: gerakkan Arjuna, Hanoman, Semar, Gatotkaca, Rahwana, dan Werkudara dengan sentuhan atau kamera. Rekam dan bagikan pertunjukanmu.">
 <meta property="og:title" content="Wayang Tangan">
 <meta property="og:description" content="Main wayang digital dengan jempol &amp; telunjuk. Adu, rekam, dan bagikan.">
@@ -78,11 +80,55 @@ input[type=file]{display:none}
 #tur .kt{width:min(88vw,420px);background:#2b1a0d;border:1.5px solid #e1af5f;border-radius:16px;padding:18px;color:#f3e4c4;font:15px/1.55 system-ui,sans-serif}
 #tur h3{margin:6px 0 8px;color:#ffd36a;font-size:19px;text-align:center}#tur .bt{display:flex;gap:8px;margin-top:14px}#tur .bt button{flex:1}
 #pg input[type=range]{flex:1}#pg details{color:#f3e4c4;font-size:13px}#pg summary{padding:6px 0;cursor:pointer}
+
+:root{--em:#e1af5f;--cr:#f3e4c4}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+.ic{width:44px;height:44px;padding:0;display:grid;place-items:center;position:relative;color:var(--cr);background:rgba(30,18,10,.8);border:1px solid rgba(225,175,95,.4);border-radius:13px;backdrop-filter:blur(6px)}
+.ic.sm{width:34px;height:34px;font-size:15px}.ic.on{background:linear-gradient(180deg,#8f4113,#5a2308);border-color:var(--em)}
+#snd.off svg{opacity:.55}#snd.off::after{content:"";position:absolute;left:11px;right:11px;top:50%;height:2px;background:var(--em);transform:rotate(-42deg)}
+@media(max-height:430px){.ic{width:38px;height:38px}}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 14px;color:var(--cr);background:rgba(30,18,10,.84);border:1px solid rgba(225,175,95,.38);border-radius:14px;font:500 13.5px 'Plus Jakarta Sans',system-ui,sans-serif;cursor:pointer;backdrop-filter:blur(6px)}
+#dock .b svg{width:18px;height:18px;color:var(--em)}
+#vig{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .6s;background:radial-gradient(ellipse 62% 72% at 50% 46%,rgba(255,205,110,.5),rgba(255,160,50,.14) 55%,transparent 80%);box-shadow:inset 0 0 16vmin 5vmin rgba(18,8,2,.78)}.pov #vig{opacity:1}
+#story,#pg{background:linear-gradient(180deg,#2c1c11,#1a0f08);border:1px solid rgba(225,175,95,.42);border-radius:18px;color:var(--cr);box-shadow:0 24px 60px rgba(0,0,0,.6)}
+#pg{width:min(94vw,500px);max-height:86vh;overflow:auto;padding:14px 18px 18px;font:14px 'Plus Jakarta Sans',system-ui,sans-serif;z-index:7}
+.ph{display:flex;align-items:center;gap:10px;padding-bottom:8px;border-bottom:1px solid rgba(225,175,95,.25);margin-bottom:6px;color:#ffd36a}.ph h2{flex:1;margin:0;font:400 21px Marcellus,serif;color:var(--cr)}
+.px{background:none;border:0;color:var(--cr);font-size:26px;cursor:pointer;line-height:1}
+.row{display:flex;align-items:center;gap:10px;margin:12px 0 6px}.row select{flex:1;padding:9px;border-radius:9px;border:0;background:#f1e3c3;color:#2a1a0d;font:500 14px 'Plus Jakarta Sans',system-ui}
+.chk{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:14px}.chk input{width:18px;height:18px;accent-color:#e1af5f}
+.wide{width:100%;margin-top:8px;padding:11px;border-radius:12px;border:1px solid rgba(225,175,95,.4);background:rgba(36,23,14,.9);color:var(--cr);font:600 14px 'Plus Jakarta Sans',system-ui;cursor:pointer}
+#pg details{margin:8px 0;padding:2px 10px;border:1px solid rgba(225,175,95,.28);border-radius:10px}
+.lbl{font:500 11px 'Plus Jakarta Sans';letter-spacing:.2em;color:#a8916a;margin:12px 0 6px;text-transform:uppercase}
+.tg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.tk{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:72px;padding:6px 4px 5px;border-radius:12px;border:1px solid rgba(225,175,95,.22);background:rgba(55,38,25,.85);color:var(--cr);font:500 11px 'Plus Jakarta Sans';cursor:pointer}
+.tk img{height:48px;max-width:90%;object-fit:contain}.tk.on{border-color:var(--em);background:rgba(98,70,38,.92)}#pg .tk{height:88px}#pg .tk img{height:60px}
+#depan{position:fixed;inset:0;z-index:20;overflow:auto;color:var(--cr);font-family:'Plus Jakarta Sans',system-ui,sans-serif}#depan[hidden]{display:none}
+#depan.land{background:radial-gradient(ellipse 70% 50% at 50% 8%,rgba(125,85,25,.45),transparent 60%),radial-gradient(circle at 85% 82%,rgba(90,55,15,.35),transparent 45%),#140b05}
+#depan.bl{background:rgba(34,23,15,.62);backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
+.scr{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 14px;position:relative}.scr[hidden]{display:none}
+.wm{position:fixed;left:50%;top:50%;height:92vh;transform:translate(-50%,-50%);opacity:.15;pointer-events:none}
+.ring{position:fixed;border:1px solid rgba(225,175,95,.22);border-radius:50%;pointer-events:none}
+.eb{font:500 11px/1 'Plus Jakarta Sans';letter-spacing:.42em;color:#d9a44a;text-transform:uppercase;text-align:center}
+.et{font:400 clamp(56px,10vw,104px)/1.05 Marcellus,serif;color:#ffd36a;letter-spacing:.04em;text-shadow:0 2px 20px rgba(255,170,40,.3);margin:14px 0 4px;text-align:center}
+.dv{display:flex;align-items:center;gap:12px;color:#e1af5f;margin:8px 0 16px}.dv i{width:62px;height:1px;background:rgba(225,175,95,.5)}
+.sub{max-width:440px;text-align:center;color:#d8c6a2;font-size:14.5px;line-height:1.55;margin:0 0 18px}
+.mb{width:min(92vw,458px);display:flex;align-items:center;gap:14px;text-align:left;padding:14px 16px;margin-bottom:10px;border-radius:14px;border:1px solid rgba(225,175,95,.28);background:rgba(36,23,14,.86);color:var(--cr);cursor:pointer}
+.mb.p{background:linear-gradient(180deg,#8f4113,#5a2308);border-color:var(--em)}.mb svg{width:22px;height:22px;color:#ffd36a;flex:none}
+.mb b{display:block;font:400 20px Marcellus,serif}.mb small{display:block;font:400 12.5px 'Plus Jakarta Sans';color:#cdb68e;margin-top:2px}
+.tgw{width:min(94vw,524px)}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;width:min(94vw,524px)}
+.two button{padding:13px;border-radius:12px;border:1px solid rgba(225,175,95,.3);background:rgba(36,23,14,.86);color:var(--cr);font:500 14px 'Plus Jakarta Sans';cursor:pointer}.two .p{background:linear-gradient(180deg,#8f4113,#5a2308);border-color:var(--em)}
+.lc{width:min(100%,620px);padding:46px 48px;border:1px solid rgba(225,175,95,.42);border-radius:26px;background:linear-gradient(180deg,rgba(34,21,11,.9),rgba(20,11,5,.92));box-shadow:0 30px 80px rgba(0,0,0,.55);position:relative}
+.lt{font:400 clamp(42px,7vw,62px)/1.1 Marcellus,serif;margin:12px 0 14px;color:#fff3d6}.lt b{font-weight:400;color:#ffd36a}.lp{color:#e2d2b0;font-size:16px;line-height:1.6;margin:0 0 22px}
+.gold{display:inline-flex;align-items:center;gap:10px;padding:14px 28px;border:0;border-radius:999px;background:#e1b062;color:#2b1707;font:600 16px 'Plus Jakarta Sans';cursor:pointer;box-shadow:0 8px 28px rgba(225,176,98,.35)}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px;margin:30px 0 22px}.fi{display:flex;gap:12px}.fc{flex:none;width:38px;height:38px;border:1px solid rgba(225,175,95,.45);border-radius:11px;display:grid;place-items:center;color:var(--em)}
+.fi b{display:block;font-size:14.5px;color:#fff;margin-bottom:4px}.fi p{margin:0;font-size:12.5px;line-height:1.7;color:#bfa886}.fn{font-size:12px;color:#8f7a5a}
+@media(max-width:640px){.lc{padding:26px 24px}.fg{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <div id="kelir">
   <div id="glow"></div>
+  <div id="vig"></div>
   <canvas id="cv"></canvas>
   <div id="st" class="ov"></div>
   <div id="tools" class="ov">
@@ -91,6 +137,7 @@ input[type=file]{display:none}
     <button class="ic" id="fs" title="Layar penuh" aria-label="Layar penuh">⛶</button>
     <button class="ic" id="shot" title="Foto" aria-label="Ambil foto">📸</button>
     <button class="ic" id="recb" title="Rekam" aria-label="Rekam video">⏺</button>
+    <button class="ic" id="pov" title="Sudut penonton (bayangan)" aria-label="Sudut penonton">◐</button>
     <button class="ic" id="nextb" title="Kalimat berikutnya" aria-label="Kalimat berikutnya" hidden>⏭</button>
   </div>
   <div id="volp" class="ov" hidden><button class="ic sm" id="mute" aria-label="Bisukan musik">🔊</button><input type="range" id="vol" min="0" max="100" value="75" aria-label="Volume musik"><span id="volv">75%</span></div>
@@ -108,26 +155,23 @@ input[type=file]{display:none}
     <div class="sn">Satu kalimat per baris: <b>Nama: kalimat</b>. "Narator:" = teks narasi. Arjuna / Kiri = wayang kiri, Hanoman / Kanan = wayang kanan; nama baru dibagi bergantian.</div>
   </div>
   <div id="pg" class="ov" hidden>
-    <div class="sh">🎪 Panggung</div>
-    <label class="ck">Tokoh kiri <select id="tkL"></select></label>
-    <label class="ck">Tokoh kanan <select id="tkR"></select></label>
-    <label class="ck">Latar kelir <select id="latar"></select></label>
-    <label class="ck"><input type="checkbox" id="tukar"> Tukar jempol ↔ telunjuk</label>
-    <label class="ck"><input type="checkbox" id="dua"> 👥 Mode dua pemain (kamera dibagi kiri / kanan)</label>
-    <details><summary>⚙️ Penyetelan tangan</summary>
-      <label class="ck">Kepekaan lengan <input type="range" id="sGain" min="60" max="220"></label>
-      <label class="ck">Respons (lambat ↔ cepat) <input type="range" id="sResp" min="50" max="300"></label>
-      <label class="ck">Zona mati jari <input type="range" id="sDz" min="0" max="15"></label>
-      <label class="ck">Prediksi gerak <input type="range" id="sPred" min="0" max="130"></label>
-      <label class="ck"><input type="checkbox" id="cbAuto"> Kompensasi jeda otomatis</label>
+    <div class="ph"><span id="plogo"></span><h2>Panggung</h2><button class="px" id="pclose" aria-label="Tutup">×</button></div>
+    <div class="lbl">Tokoh kiri</div><div class="tg" id="pgL"></div>
+    <div class="lbl">Tokoh kanan</div><div class="tg" id="pgR"></div>
+    <label class="row">Latar kelir <select id="latar"></select></label>
+    <label class="chk"><input type="checkbox" id="tukar"> Tukar jempol ↔ telunjuk</label>
+    <label class="chk"><input type="checkbox" id="dua"> Mode dua pemain (kamera dibagi kiri / kanan)</label>
+    <details><summary>Penyetelan tangan</summary>
+      <label class="chk">Kepekaan lengan <input type="range" id="sGain" min="60" max="220" style="flex:1"></label>
+      <label class="chk">Respons <input type="range" id="sResp" min="50" max="300" style="flex:1"></label>
+      <label class="chk">Zona mati jari <input type="range" id="sDz" min="0" max="15" style="flex:1"></label>
+      <label class="chk">Prediksi gerak <input type="range" id="sPred" min="0" max="130" style="flex:1"></label>
+      <label class="chk"><input type="checkbox" id="cbAuto"> Kompensasi jeda otomatis</label>
       <div class="sn" id="diag">Nyalakan kamera untuk melihat fps &amp; jeda.</div>
     </details>
-    <label class="ck"><input type="checkbox" id="aduOn"> ⚔️ Mode adu (tenaga &amp; pemenang)</label>
-    <button class="b" id="mdl">🤖 Model tangan</button>
-    <button class="b" id="kalib">🎯 Kalibrasi ulang tangan</button>
-    <label class="ck">Lakon <select id="lakon"></select></label>
-    <div class="sb"><button class="b" id="pmain">▶ Mainkan lakon</button><button class="b" id="pclose">Tutup</button></div>
-    <div class="sn">Lakon otomatis memasang tokoh, latar, dan gunungan pembuka/penutup. Lengan yang bisa digerakkan baru ada pada Arjuna &amp; Hanoman; tokoh lain bergoyang mengikuti geseran.</div>
+    <label class="chk"><input type="checkbox" id="aduOn"> Mode adu (tenaga &amp; pemenang)</label>
+    <button class="wide" id="mdl">Model tangan</button>
+    <button class="wide" id="kalib">Kalibrasi ulang tangan</button>
   </div>
   <div id="tur" hidden><div class="kt"><div id="turE" style="font-size:44px;text-align:center"></div><h3 id="turJ"></h3><div id="turT"></div><div id="turD" style="text-align:center;margin-top:10px;color:#e1af5f;letter-spacing:4px"></div>
     <div class="bt"><button class="b" id="turP">‹ Kembali</button><button class="b" id="turN">Lanjut ›</button></div><button class="b" id="turS" style="width:100%;margin-top:8px;opacity:.8">Lewati panduan</button></div></div>
@@ -144,6 +188,23 @@ input[type=file]{display:none}
   </div>
 </div>
 
+<div id="depan" class="land">
+  <section class="scr" id="s-land"><div class="ring" style="width:520px;height:520px;right:-120px;top:-300px"></div><div class="ring" style="width:380px;height:380px;left:-190px;bottom:-190px"></div>
+    <div class="lc"><div class="eb" style="text-align:left;color:#b99a62">Panggung kulit digital</div><h1 class="lt">Wayang <b>Tangan</b></h1>
+      <p class="lp">Gerakkan Arjuna, Hanoman, Gatotkaca, dan sahabatnya dengan sentuhan jari — atau gerakan tanganmu di depan kamera. Lengan bersendi, badan menari, gamelan menyertai.</p>
+      <button class="gold" id="masuk">Masuki Panggung <span id="arr"></span></button>
+      <div class="fg" id="fg"></div><div class="fn">Bisa dimainkan dengan sentuhan saja · Untuk mode kamera, izinkan akses kamera di browser</div></div></section>
+  <section class="scr" id="s-menu" hidden><img class="wm" alt=""><div class="kp"></div>
+    <p class="sub">Gerakkan wayang dengan tanganmu, biarkan sang dalang membawakan lakonnya.</p>
+    <button class="mb p" id="m-mulai"><span class="mi"></span><div><b>Mulai Pentas</b><small>Main wayang bebas dengan tangan atau sentuhan</small></div></button>
+    <button class="mb" id="m-lakon"><span class="mi"></span><div><b>Pilih Lakon</b><small>Cerita bawaan yang dibacakan suara dalang</small></div></button>
+    <button class="mb" id="m-tokoh"><span class="mi"></span><div><b>Pilih Tokoh</b><small>Tentukan wayang kiri dan kanan</small></div></button></section>
+  <section class="scr" id="s-tokoh" hidden><img class="wm" alt=""><div class="kp"></div><div class="tgw"><div class="et" style="font-size:24px;margin:0 0 6px;color:#ffd36a">Pilih Tokoh</div>
+    <div class="lbl">Wayang kiri</div><div class="tg" id="tgL"></div><div class="lbl">Wayang kanan</div><div class="tg" id="tgR"></div></div>
+    <div class="two"><button id="tk-back">‹ Kembali</button><button class="p" id="tk-go">Mulai Pentas ›</button></div></section>
+  <section class="scr" id="s-lakon" hidden><img class="wm" alt=""><div class="kp"></div><div class="et" style="font-size:24px;margin:0 0 12px">Pilih Lakon</div><div id="lk-list"></div>
+    <button class="mb" id="lk-back" style="justify-content:center;width:min(92vw,458px)">‹ Kembali</button></section>
+</div>
 
 <script type="module">
 const $ = id => document.getElementById(id);
@@ -384,7 +445,7 @@ try{ const v = localStorage.getItem('wayang-vol'); if(v !== null) vol = clamp(+v
 $('vol').value = Math.round(vol*100);
 function ikonSuara(){
   const ik = (!musicOn || vol === 0) ? '🔇' : vol < .4 ? '🔉' : '🔊';
-  $('snd').textContent = ik; $('mute').textContent = ik; $('volv').textContent = Math.round(vol*100) + '%';
+  $('snd').classList.toggle('off', ik === '🔇'); $('mute').textContent = ik; $('volv').textContent = Math.round(vol*100) + '%';
 }
 const tutupVol = () => { $('volp').hidden = true; };
 const jagaVol = () => { clearTimeout(volTimer); volTimer = setTimeout(tutupVol, 4500); };
@@ -755,7 +816,7 @@ function mulaiCerita(){
   if(!baris.length){ say('Tulis dulu ceritanya.'); return; }
   initSfx();
   tandaiSuara(baris); cerita = {baris, i:0, t0:performance.now(), id:0};
-  $('story').hidden = true; $('nextb').hidden = false; $('cerita').textContent = '⏹ Henti';
+  $('story').hidden = true; $('nextb').hidden = false; $('ctl').textContent = 'Henti';
   mulaiBaris();
 }
 function pilihSuara(who){
@@ -790,7 +851,7 @@ function hurufTampil(now){
   return Math.floor(el*30);
 }
 function selesaiCerita(pesan){
-  cerita = null; $('nextb').hidden = true; $('cerita').textContent = '💬 Cerita'; P.forEach(p => { p.sp = false; });
+  cerita = null; $('nextb').hidden = true; $('ctl').textContent = 'Cerita'; P.forEach(p => { p.sp = false; });
   try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(_){} try{ if(cerita && cerita.audio) cerita.audio.pause(); }catch(_){}
   ducked = false; terapVol();
   if(pesan){ say(pesan, 2200); if($('gmlOn').checked) gong(.2); if(pesan === 'Cerita selesai.') gunungan('tutup'); }
@@ -1002,7 +1063,7 @@ let siluet = false;
 function hitam(img){      // siluet hitam: lubang tatahan tembus cahaya (lembut) + tepi bayangan melebar
   const w = img.width, h = img.height, c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'); x.drawImage(img, 0, 0);
   const d = x.getImageData(0, 0, w, h), a = d.data;
-  for(let i = 0; i < a.length; i += 4){ const m = Math.min(a[i], a[i + 1], a[i + 2]); a[i + 3] *= m > 236 ? 0 : m < 212 ? 1 : (236 - m)/24; a[i] = 8; a[i + 1] = 5; a[i + 2] = 3; }
+  for(let i = 0; i < a.length; i += 4){ const m = Math.min(a[i], a[i + 1], a[i + 2]); a[i + 3] *= m > 236 ? 0 : m < 212 ? 1 : (236 - m)/24; a[i] = 26; a[i + 1] = 14; a[i + 2] = 7; }
   x.putImageData(d, 0, 0);
   const o = document.createElement('canvas'); o.width = w; o.height = h; const y = o.getContext('2d');
   y.filter = 'blur(' + Math.max(2, w/90) + 'px)'; y.globalAlpha = .4; y.drawImage(c, 0, 0);
@@ -1121,6 +1182,7 @@ function komposit(){
   rg.save(); rg.globalAlpha = +getComputedStyle($('glow')).opacity || .85; rg.translate(w*.5, h*.1); rg.scale(1, (h*.65)/(w*.55));
   const gr = rg.createRadialGradient(0, 0, 0, 0, 0, w*.55); gr.addColorStop(0, 'rgba(255,214,120,.42)'); gr.addColorStop(.55, 'rgba(255,176,70,.12)'); gr.addColorStop(.8, 'rgba(255,176,70,0)');
   rg.fillStyle = gr; rg.fillRect(-w, -h*3, w*2, h*6); rg.restore();
+  if(pov){ const v = rg.createRadialGradient(w/2, h*.45, Math.min(w, h)*.2, w/2, h*.5, Math.max(w, h)*.75); v.addColorStop(0, 'rgba(255,205,110,.45)'); v.addColorStop(.6, 'rgba(255,160,50,.1)'); v.addColorStop(1, 'rgba(18,8,2,.78)'); rg.fillStyle = v; rg.fillRect(0, 0, w, h); }
   rg.drawImage(cv, 0, 0, w, h);
   rg.font = Math.round(h*.024) + 'px system-ui,sans-serif'; rg.textAlign = 'right'; rg.fillStyle = 'rgba(255,236,190,.8)'; rg.fillText('Wayang Tangan · ' + (location.host || 'wayang'), w - 14, h*.975);
 }
@@ -1139,8 +1201,8 @@ $('recb').onclick = () => {
   const mime = ['video/mp4;codecs=avc1.42E01E', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(m => MediaRecorder.isTypeSupported(m)) || '', ch = [];
   const mr = new MediaRecorder(new MediaStream(tracks), mime ? {mimeType:mime, videoBitsPerSecond:3e6} : {});
   mr.ondataavailable = e => { if(e.data.size) ch.push(e.data); };
-  mr.onstop = () => { rec = null; clearInterval(recTick); $('recb').textContent = '⏺'; $('recb').classList.remove('rec'); say('Video siap…', 2500); kirim(new Blob(ch, {type:mr.mimeType || 'video/webm'}), (mr.mimeType || '').includes('mp4') ? 'mp4' : 'webm'); };
-  rec = mr; recT = performance.now(); mr.start(1000); $('recb').textContent = '⏹'; $('recb').classList.add('rec');
+  mr.onstop = () => { rec = null; clearInterval(recTick); $('recb').classList.remove('rec'); say('Video siap…', 2500); kirim(new Blob(ch, {type:mr.mimeType || 'video/webm'}), (mr.mimeType || '').includes('mp4') ? 'mp4' : 'webm'); };
+  rec = mr; recT = performance.now(); mr.start(1000); $('recb').classList.add('rec');
   recTick = setInterval(() => { const s = Math.round((performance.now() - recT)/1000); say('● Merekam ' + s + ' dtk · musik & gamelan ikut, suara narator tidak', 0); if(s >= 90) mr.stop(); }, 500);
 };
 // ---- panel Panggung & lakon bawaan ----
@@ -1164,7 +1226,7 @@ LAKON.ah = {nama:'Arjuna & Hanoman', kiri:'arjuna', kanan:'hanoman', latar:'mala
 const HANDS_CDN = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240';
 let modelPilih = 'lite', hl = null, hlBusy = false, hlT0 = 0, hlTs = 0;
 try{ modelPilih = localStorage.getItem('wayang-model') === 'standar' ? 'standar' : 'lite'; }catch(_){}
-const labelMdl = () => { $('mdl').textContent = '🤖 Model tangan: ' + (modelPilih === 'lite' ? 'Lite (cepat)' : 'Standar'); };
+const labelMdl = () => { $('mdl').textContent = 'Model tangan · ' + (modelPilih === 'lite' ? 'Lite (cepat)' : 'Standar'); };
 labelMdl();
 async function siapkanLite(){
   if(!window.Hands) await new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = HANDS_CDN + '/hands.js'; sc.crossOrigin = 'anonymous'; sc.onload = ok; sc.onerror = () => no(new Error('hands.js tidak termuat')); document.head.appendChild(sc); });
@@ -1218,24 +1280,64 @@ $('turN').onclick = () => { if(turI < TUR.length - 1){ turI++; tampilTur(); } el
 $('turP').onclick = () => { if(turI){ turI--; tampilTur(); } };
 $('turS').onclick = tutupTur; $('pandu').onclick = bukaTur;
 let sudahTur = false; try{ sudahTur = localStorage.getItem('wayang-tur') === '1'; }catch(_){}
-if(!sudahTur) setTimeout(bukaTur, 700);
+
+
+// ================= UI baru: halaman depan, menu E-DALANG, galeri tokoh & lakon, ikon, sudut penonton =================
+const THUMB = {"arjuna": "aset/th_arjuna.webp", "hanoman": "aset/th_hanoman.webp", "rahwana": "aset/th_rahwana.webp", "werkudara": "aset/th_werkudara.webp", "gatotkaca": "aset/th_gatotkaca.webp", "semar": "aset/th_semar.webp", "gunungan": "aset/th_gunungan.webp"};
+const SV = (p, n = 22) => '<svg viewBox="0 0 24 24" width="' + n + '" height="' + n + '" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + p + '</svg>';
+const IKON = {menu:'<path d="M4 7h16M4 12h16M4 17h16"/>', musik:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>', penuh:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
+  kamera:'<path d="M3 8a2 2 0 012-2h2l1.5-2h7L17 6h2a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><circle cx="12" cy="13" r="3.5"/>', rekam:'<circle cx="12" cy="12" r="5.5" fill="currentColor"/>',
+  pov:'<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 000 17z" fill="currentColor"/>', next:'<path d="M6 5l8 7-8 7zM18 5v14"/>', orang:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1-6 15-6 16 0"/>',
+  balik:'<path d="M17 2l4 4-4 4M3 11V9a3 3 0 013-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 01-3 3H3"/>', ulang:'<path d="M3 12a9 9 0 109-9 9 9 0 00-6.4 2.6L3 8M3 3v5h5"/>',
+  tanya:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.6-1.5 1.1-1.5 2.3M12 17h.01"/>', logo:'<path d="M12 3l9 17H3z"/><path d="M8.5 20L12 12l3.5 8"/>',
+  cerita:'<path d="M4 5h16v11H9l-5 4z"/>', rumah:'<path d="M3 11l9-8 9 8M5 10v10h14V10"/>', main:'<path d="M7 4l13 8-13 8z" fill="currentColor"/>', buku:'<path d="M3 5h7a2 2 0 012 2v13a2 2 0 00-2-2H3zM21 5h-7a2 2 0 00-2 2v13a2 2 0 012-2h7z"/>',
+  tokoh:'<path d="M12 3l9 17H3z"/><path d="M12 9v5M12 17h.01"/>', tangan:'<path d="M8 13V5.5a1.5 1.5 0 013 0V12M11 11V4a1.5 1.5 0 013 0v8M14 11.5V6a1.5 1.5 0 013 0v7M17 11a1.5 1.5 0 013 0v4a7 7 0 01-7 7h-1a7 7 0 01-5.6-2.8L4 14.5a1.6 1.6 0 012.5-2L8 14"/>',
+  mahkota:'<path d="M3 18h18M4 18L3 7l5 4 4-6 4 6 5-4-1 11"/>', panah:'<path d="M5 12h14M13 6l6 6-6 6"/>'};
+function ikon(el, p, label){ [...el.childNodes].forEach(n => n.nodeType === 3 && n.remove()); el.insertAdjacentHTML('afterbegin', SV(p) + (label ? '<span' + (el.id === 'cerita' ? ' id="ctl"' : '') + '>' + label + '</span>' : '')); }
+[['menu','menu'], ['snd','musik'], ['fs','penuh'], ['shot','kamera'], ['recb','rekam'], ['pov','pov'], ['nextb','next']].forEach(([id, k]) => ikon($(id), IKON[k]));
+[['cam','kamera','Kamera'], ['fl','orang','Kiri'], ['fr','orang','Kanan'], ['flip','balik','Balik arah'], ['reset','ulang','Wayang asli'], ['pandu','tanya','Panduan'], ['pgb','logo','Panggung'], ['cerita','cerita','Cerita']].forEach(([id, k, t]) => ikon($(id).closest('label') || $(id), IKON[k], t));
+{ const hb = document.createElement('button'); hb.className = 'b'; hb.id = 'home'; $('pgb').before(hb); ikon(hb, IKON.rumah, 'Menu'); }
+$('plogo').innerHTML = SV(IKON.logo); $('arr').innerHTML = SV(IKON.panah, 20);
+[['m-mulai','main'], ['m-lakon','buku'], ['m-tokoh','tokoh']].forEach(([id, k]) => { $(id).querySelector('.mi').innerHTML = SV(IKON[k]); });
+document.querySelectorAll('.kp').forEach(e => { e.innerHTML = '<div class="eb">Panggung wayang kulit digital</div><div class="et">E-DALANG</div><div class="dv"><i></i>✦<i></i></div>'; });
+document.querySelectorAll('.wm').forEach(e => { e.src = GUNIM.src; });
+$('fg').innerHTML = [['tangan','Kamera & gestur','Jempol & telunjuk menggerakkan lengan wayang — kepalan ditahan 2 detik membalik arah.'], ['mahkota','Enam tokoh wayang','Arjuna, Hanoman, Semar, Gatotkaca, Werkudara, Rahwana — pilih lewat galeri tokoh.'], ['musik','Gamelan menyertai','Musik latar plus bunyi bonang, kendang, dan gong yang bereaksi pada tiap gerakan.'], ['kamera','Rekam & bagikan','Ambil foto atau rekam video pertunjukanmu lengkap dengan musiknya.']]
+  .map(([k, j, t]) => '<div class="fi"><span class="fc">' + SV(IKON[k], 20) + '</span><div><b>' + j + '</b><p>' + t + '</p></div></div>').join('');
+function tampilScr(k){ document.querySelectorAll('#depan .scr').forEach(e => { e.hidden = e.id !== 's-' + k; }); $('depan').hidden = false; $('depan').className = k === 'land' ? 'land' : 'bl'; $('depan').scrollTop = 0; if(k === 'tokoh') segarKartu(); }
+function tutupDepan(){ $('depan').hidden = true; initSfx(); if(!sudahTur){ sudahTur = true; setTimeout(bukaTur, 500); } }
+$('masuk').onclick = () => tampilScr('menu'); $('m-mulai').onclick = tutupDepan; $('m-lakon').onclick = () => tampilScr('lakon'); $('m-tokoh').onclick = () => tampilScr('tokoh');
+$('tk-back').onclick = $('lk-back').onclick = () => tampilScr('menu'); $('tk-go').onclick = tutupDepan; $('home').onclick = () => tampilScr('menu');
+const nm = k => (TOKOH[k] || '').split(' (')[0];
+$('lk-list').innerHTML = '';
+Object.entries(LAKON).forEach(([k, l]) => { const b = document.createElement('button'); b.className = 'mb'; b.innerHTML = '<div><b>' + l.nama + '</b><small>' + nm(l.kiri) + ' · ' + nm(l.kanan) + ' — ' + l.teks.split('\n').filter(x => x.trim()).length + ' adegan dibacakan dalang</small></div>'; b.onclick = () => { tutupDepan(); mainLakon(k); }; $('lk-list').appendChild(b); });
+function bangunKartu(host, i){ host.innerHTML = ''; Object.keys(TOKOH).forEach(k => { const b = document.createElement('button'); b.className = 'tk'; b.dataset.i = i; b.dataset.k = k; b.innerHTML = '<img alt="" src="' + (THUMB[k] || '') + '"><span>' + nm(k) + '</span>'; b.onclick = () => setTokoh(i, k); host.appendChild(b); }); }
+[['tgL', 0], ['tgR', 1], ['pgL', 0], ['pgR', 1]].forEach(([id, i]) => bangunKartu($(id), i));
+function segarKartu(){ document.querySelectorAll('.tk').forEach(b => b.classList.toggle('on', CUR[+b.dataset.i] === b.dataset.k)); }
+segarKartu();
+// ---- sudut penonton: wayang jadi bayangan di kelir kertas ----
+let pov = false, latarSblm = 'asli';
+function setPov(on, tanpaLatar){
+  if(on === pov) return; pov = on; $('pov').classList.toggle('on', on); $('kelir').classList.toggle('pov', on);
+  if(on){ latarSblm = $('latar').value === 'kertas' ? 'asli' : $('latar').value; setLatar('kertas'); $('latar').value = 'kertas'; }
+  else if(!tanpaLatar){ setLatar(latarSblm); $('latar').value = latarSblm; }
+  say(on ? 'Sudut penonton: wayang jadi bayangan di kelir kertas' : 'Kembali ke sudut dalang', 2500);
+}
+$('pov').onclick = () => setPov(!pov);
 const isi = (el, o) => Object.entries(o).forEach(([v, t]) => el.add(new Option(t, v)));
-isi($('tkL'), TOKOH); isi($('tkR'), TOKOH); isi($('latar'), LATAR); Object.entries(LAKON).forEach(([k, l]) => $('lakon').add(new Option(l.nama, k)));
-function sinkPanel(){ $('tkL').value = CUR[0]; $('tkR').value = CUR[1]; }
+isi($('latar'), LATAR);
+function sinkPanel(){ segarKartu(); }
 sinkPanel();
-$('tkL').onchange = () => setTokoh(0, $('tkL').value);
-$('tkR').onchange = () => setTokoh(1, $('tkR').value);
-$('latar').onchange = () => setLatar($('latar').value);
+$('latar').onchange = () => { if(pov && $('latar').value !== 'kertas') setPov(false, true); setLatar($('latar').value); };
 $('pgb').onclick = () => { $('story').hidden = true; $('pg').hidden = !$('pg').hidden; };
 $('cerita').addEventListener('click', () => { $('pg').hidden = true; });
 $('kalib').onclick = () => { P.forEach(p => { p.seen = -1e9; }); $('pg').hidden = true; say('🎯 Tunjukkan tangan, tahan santai ±1 detik', 2500); };
 $('pclose').onclick = () => { $('pg').hidden = true; };
-$('pmain').onclick = async () => {
-  const k = $('lakon').value, l = LAKON[k]; if(cerita) selesaiCerita();
+async function mainLakon(k){
+  const l = LAKON[k]; if(cerita) selesaiCerita(); if(pov) setPov(false, true);
   await setTokoh(0, l.kiri); await setTokoh(1, l.kanan); setLatar(l.latar); $('latar').value = l.latar;
   const id = 'p_' + k; if(!db.daftar.some(c => c.id === id)) db.daftar.push({id, nama:l.nama, teks:l.teks});
   db.aktif = id; tampilCerita(); simpanDB(); $('pg').hidden = true; initSfx(); gunungan('buka', mulaiCerita);
-};
+}
 
 say(W/H < 1.3 ? 'Seret badan untuk menggeser, seret tangan wayang untuk menggerakkan. Putar HP ke lanskap agar lebih lebar.' : 'Seret badan wayang untuk menggeser · seret tangannya untuk menggerakkan', 9000);
 </script>

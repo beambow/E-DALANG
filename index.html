@@ -123,6 +123,21 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:20px 24px;margin:30px 0 22px}.fi{display:flex;gap:12px}.fc{flex:none;width:38px;height:38px;border:1px solid rgba(225,175,95,.45);border-radius:11px;display:grid;place-items:center;color:var(--em)}
 .fi b{display:block;font-size:14.5px;color:#fff;margin-bottom:4px}.fi p{margin:0;font-size:12.5px;line-height:1.7;color:#bfa886}.fn{font-size:12px;color:#8f7a5a}
 @media(max-width:640px){.lc{padding:26px 24px}.fg{grid-template-columns:1fr}}
+
+#depan.land,#depan.bl{background:radial-gradient(ellipse 78% 64% at 50% 42%,rgba(255,198,112,.6),rgba(214,128,48,.28) 46%,rgba(40,20,8,0) 80%),linear-gradient(180deg,#1b0e06 0%,#3a2009 58%,#120a04 100%);backdrop-filter:none}
+#depan .scr{z-index:2}.wm{opacity:.1;z-index:0}
+.kw,.tp,.pj,.db{position:fixed;left:0;right:0;pointer-events:none;z-index:0}
+.kw{inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' fill='none' stroke='%23e1af5f' stroke-opacity='.17' stroke-width='1.2'%3E%3Cellipse cx='32' cy='15' rx='7' ry='14'/%3E%3Cellipse cx='32' cy='49' rx='7' ry='14'/%3E%3Cellipse cx='15' cy='32' rx='14' ry='7'/%3E%3Cellipse cx='49' cy='32' rx='14' ry='7'/%3E%3Ccircle cx='32' cy='32' r='2.5'/%3E%3C/svg%3E");-webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 45%,transparent 10%,#000 95%);mask-image:radial-gradient(ellipse 70% 60% at 50% 45%,transparent 10%,#000 95%)}
+.tp{top:0;height:34px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='22'%3E%3Cpath d='M0 22L20 2l20 20z' fill='%23e1af5f' fill-opacity='.55'/%3E%3Cpath d='M10 22l10-12 10 12z' fill='%23140b05'/%3E%3C/svg%3E") repeat-x bottom/40px 22px,linear-gradient(180deg,#0e0703,#241207);border-bottom:2px solid #e1af5f}
+.db{bottom:0;height:11vh;background:repeating-linear-gradient(90deg,rgba(70,50,20,0) 0 5px,rgba(70,50,20,.22) 5px 6px,rgba(0,0,0,0) 6px 11px),linear-gradient(180deg,#d1ba82,#a68d55 40%,#5b4725);box-shadow:inset 0 8px 10px rgba(20,10,3,.6);border-top:2px solid rgba(225,175,95,.8)}
+.pj{bottom:11vh;height:56vh;overflow:hidden}
+#trk2{display:flex;align-items:flex-end;gap:7vw;width:max-content;height:100%;padding-left:6vw;animation:kirab 95s linear infinite}
+.pw{position:relative;height:100%;display:flex;align-items:flex-end;transform-origin:50% 100%;animation:goyang 4.6s ease-in-out infinite alternate;animation-delay:calc(var(--d)*-1)}
+.pw img{height:94%;width:auto;filter:drop-shadow(0 0 16px rgba(255,170,60,.28))}.pw.g img{height:100%}
+.pw i{position:absolute;left:50%;bottom:-2vh;width:3px;height:34%;background:#0d0603;transform:translateX(-50%);z-index:-1}
+@keyframes kirab{to{transform:translateX(-50%)}}@keyframes goyang{from{transform:rotate(-2deg)}to{transform:rotate(2deg)}}
+@media(prefers-reduced-motion:reduce){#trk2,.pw{animation:none}}
+.kb{height:140px;display:flex;justify-content:center;align-items:flex-end;gap:6px;margin:0 auto 8px;padding:10px 10px 0;border-radius:14px;border:1px solid rgba(225,175,95,.5);background:radial-gradient(ellipse at 50% 35%,#ffe2a0,#e0a050 55%,#7a4a1c);overflow:hidden}.kb img{height:124px;width:auto}
 </style>
 </head>
 <body>
@@ -173,15 +188,12 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
     <button class="wide" id="mdl">Model tangan</button>
     <button class="wide" id="kalib">Kalibrasi ulang tangan</button>
   </div>
-  <div id="tur" hidden><div class="kt"><div id="turE" style="font-size:44px;text-align:center"></div><h3 id="turJ"></h3><div id="turT"></div><div id="turD" style="text-align:center;margin-top:10px;color:#e1af5f;letter-spacing:4px"></div>
+  <div id="tur" hidden><div class="kt"><div id="turE" class="kb"></div><h3 id="turJ"></h3><div id="turT"></div><div id="turD" style="text-align:center;margin-top:10px;color:#e1af5f;letter-spacing:4px"></div>
     <div class="bt"><button class="b" id="turP">‹ Kembali</button><button class="b" id="turN">Lanjut ›</button></div><button class="b" id="turS" style="width:100%;margin-top:8px;opacity:.8">Lewati panduan</button></div></div>
   <div id="pip" class="ov"><video id="vid" playsinline muted></video><canvas id="oc"></canvas><div id="trk" title="Ketuk untuk ganti GPU/CPU"></div></div>
   <div id="dock" class="ov">
     <button class="b" id="cam">📷 Kamera</button>
-    <label class="b">🎭 Kiri<input type="file" id="fl" accept="image/*"></label>
-    <label class="b">🎭 Kanan<input type="file" id="fr" accept="image/*"></label>
     <button class="b" id="flip">🔁 Balik arah</button>
-    <button class="b" id="reset">↺ Wayang asli</button>
     <button class="b" id="pandu">❓ Panduan</button>
     <button class="b" id="pgb">🎪 Panggung</button>
     <button class="b" id="cerita">💬 Cerita</button>
@@ -189,6 +201,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
 </div>
 
 <div id="depan" class="land">
+  <div class="kw"></div><div class="tp"></div><div class="pj"><div id="trk2"></div></div><div class="db"></div>
   <section class="scr" id="s-land"><div class="ring" style="width:520px;height:520px;right:-120px;top:-300px"></div><div class="ring" style="width:380px;height:380px;left:-190px;bottom:-190px"></div>
     <div class="lc"><div class="eb" style="text-align:left;color:#b99a62">Panggung kulit digital</div><h1 class="lt">Wayang <b>Tangan</b></h1>
       <p class="lp">Gerakkan Arjuna, Hanoman, Gatotkaca, dan sahabatnya dengan sentuhan jari — atau gerakan tanganmu di depan kamera. Lengan bersendi, badan menari, gamelan menyertai.</p>
@@ -289,24 +302,8 @@ async function pasangAsli(i){
 const pasangSemua = () => Promise.all([pasangAsli(0), pasangAsli(1)]);
 pasangSemua();
 
-// Wayang buatan sendiri (dari galeri): satu gambar utuh tanpa lengan bergerak
-function muat(file, i){
-  if(!file) return; const u = URL.createObjectURL(file), im = new Image();
-  im.onload = () => {
-    const k = Math.min(1, 640/Math.max(im.width, im.height)), c = document.createElement('canvas');
-    c.width = Math.round(im.width*k); c.height = Math.round(im.height*k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
-    URL.revokeObjectURL(u);
-    const p = P[i]; p.id = 'kustom'; p.iw = c.width; p.ih = c.height; p.body = c; p.arms = []; p.nat = -1; bakarBayang(p);
-    say('Wayang diganti. (Gambar sendiri tidak punya lengan yang bisa digerakkan.)');
-  };
-  im.onerror = () => { URL.revokeObjectURL(u); say('Gambar tidak bisa dibuka.'); };
-  im.src = u;
-}
-$('fl').onchange = e => { muat(e.target.files[0], 0); e.target.value = ''; };
-$('fr').onchange = e => { muat(e.target.files[0], 1); e.target.value = ''; };
 $('pip').onclick = () => $('pip').classList.toggle('min');
 $('flip').onclick = () => P.forEach(p => p.inv = !p.inv);
-$('reset').onclick = async () => { CUR[0] = ASLI[0] = 'arjuna'; CUR[1] = ASLI[1] = 'hanoman'; SISI.clear(); SISI.set('arjuna', 0); SISI.set('hanoman', 1); sinkPanel(); await pasangSemua(); P.forEach(p => p.inv = false); say('Kembali ke Arjuna & Hanoman.'); };
 
 /* ---------- Geometri: gambar <-> layar ---------- */
 function geo(p, t, i){
@@ -469,7 +466,7 @@ function setMusik(on){
   if(on){
     initSfx();
     const pr = a.play();
-    if(pr && pr.catch) pr.catch(() => { musicOn = false; ikonSuara(); say('Ketuk tombol 🔇 untuk memutar musik.'); });
+    if(pr && pr.catch) pr.catch(() => { musicOn = false; ikonSuara(); say('Ketuk tombol musik untuk memutar gamelan.'); });
   } else a.pause();
 }
 function mulaiMusikSekali(){ if(!musicAsked) setMusik(true); }        // sentuhan pertama di panggung menyalakan musik
@@ -646,7 +643,7 @@ $('cam').onclick = async e => {
       const tick = () => { try{ if(hl) kirimLite(); else if(wReady) kirimFrame(); else baca(); }catch(err){ say('Error pelacakan: ' + err.message, 0); lm = null; } vid.requestVideoFrameCallback(tick); };
       vid.requestVideoFrameCallback(tick);
     }
-    say('Siap! Tahan tangan santai ±1 detik (kalibrasi), lalu 👍 jempol = tangan kiri wayang, ☝️ telunjuk = tangan kanan wayang.', 11000);
+    say('Siap! Tahan tangan santai ±1 detik (kalibrasi), lalu jempol = tangan kiri wayang, telunjuk = tangan kanan wayang.', 11000);
   }catch(err){ say('Gagal: ' + err.message + (err.name === 'NotAllowedError' ? ' — izinkan kamera di pengaturan situs lalu coba lagi.' : ''), 0); e.target.disabled = false; }
 };
 const oc = $('oc'), og = oc.getContext('2d'); oc.width = 160; oc.height = 120;
@@ -702,17 +699,17 @@ function proses(landmarks, tcap){
   const ts = tcap/1000;
   for(const [i,h] of bagi(hs)){
     const p = P[i];
-    if(now - p.seen > 800){ p.o.forEach(f => f.reset()); p.cal = {t0:now, n:0, js:0, jc:0, ts:0, tc:0, je:0, te:0, ok:false}; say('🎯 Tahan tangan santai ±1 detik, posisi awal lengan dikunci', 1300); }      // tangan baru muncul: jangan tarik dari posisi lama
+    if(now - p.seen > 800){ p.o.forEach(f => f.reset()); p.cal = {t0:now, n:0, js:0, jc:0, ts:0, tc:0, je:0, te:0, ok:false}; say('Tahan tangan santai ±1 detik, posisi awal lengan dikunci', 1300); }      // tangan baru muncul: jangan tarik dari posisi lama
     p.seen = now; p.hx = h.x; p.hy = h.y;
     const hx = SET.dua ? (h.x - i*.5)*2 : h.x, pr = SET.auto ? clamp(((trk.ms || 30) + 500/Math.max(trk.fps || 20, 10))/1000, .05, .13) : SET.pred; p.o[0].s = p.o[1].s = SET.resp;
     const fx = p.o[0].f((hx-.1)/.8, ts), fy = p.o[1].f((h.y-.15)/.7, ts);       // + prediksi 50 ms ke depan menutup jeda deteksi
     p.tx = .18 + .64*clamp(fx + p.o[0].dx*pr, 0, 1);
     p.ty = .4 + .12*clamp(fy + p.o[1].dx*pr, 0, 1);
-    p.mode = 0; if(!petunjuk){ petunjuk = true; say('👍 Jempol = tangan kiri wayang · ☝️ telunjuk = tangan kanan wayang', 3500); }
+    p.mode = 0; if(!petunjuk){ petunjuk = true; say('Jempol = tangan kiri wayang · telunjuk = tangan kanan wayang', 3500); }
     // kepalan ditahan ±0,8 detik = wayang berbalik arah (sekali; buka tangan lagi untuk mengulang)
     if(h.jari === 0 && h.buka < 1.45){
-      if(!p.fistT){ p.fistT = now; setTimeout(() => { if(p.fistT && !p.fistDone) say('✊ Tahan terus… 2 detik untuk membalik wayang', 1400); }, 600); }
-      else if(!p.fistDone && now - p.fistT > 2000){ p.fistDone = true; p.inv = !p.inv; say('✊ Kepalan ditahan: wayang berbalik arah', 1400); }
+      if(!p.fistT){ p.fistT = now; setTimeout(() => { if(p.fistT && !p.fistDone) say('Tahan terus… 2 detik untuk membalik wayang', 1400); }, 600); }
+      else if(!p.fistDone && now - p.fistT > 2000){ p.fistDone = true; p.inv = !p.inv; say('Kepalan ditahan: wayang berbalik arah', 1400); }
     } else { p.fistT = 0; p.fistDone = false; }
     p.tr = p.o[2].f(h.rot*.3, ts);
     p.ts = clamp(p.o[3].f(h.size/.16, ts), .75, 1.15);
@@ -720,7 +717,7 @@ function proses(landmarks, tcap){
     const K = p.cal;
     if(!K.ok){                                               // kalibrasi: lengan tetap di posisi awal selagi tangan dibiarkan santai
       if(now - K.t0 < 1200){ K.n++; K.js += Math.sin(h.jem.a); K.jc += Math.cos(h.jem.a); K.ts += Math.sin(h.tel.a); K.tc += Math.cos(h.tel.a); K.je += h.jem.c; K.te += h.tel.c; }
-      else if(K.n > 3){ K.ok = true; K.t1 = now; K.ja = Math.atan2(K.js, K.jc); K.ta = Math.atan2(K.ts, K.tc); K.je /= K.n; K.te /= K.n; say('✅ Siap! Miringkan & tekuk jempol / telunjuk', 1800); }
+      else if(K.n > 3){ K.ok = true; K.t1 = now; K.ja = Math.atan2(K.js, K.jc); K.ta = Math.atan2(K.ts, K.tc); K.je /= K.n; K.te /= K.n; say('Siap! Miringkan & tekuk jempol / telunjuk', 1800); }
       else p.cal = {t0:now, n:0, js:0, jc:0, ts:0, tc:0, je:0, te:0, ok:false};
     } else if(p.arms.length === 2 && p.G){
       // gerak RELATIF terhadap posisi santai: miring ke luar = lengan naik, ditekuk = lengan turun, jempol dilebarkan = naik
@@ -919,7 +916,6 @@ function lukisCerita(now){
 }
 
 /* ---------- Gambar ---------- */
-const ORN = new Image(); ORN.src = 'aset/orn.webp';   // ornamen emas bawah, dipotong dari background, digambar DI DEPAN wayang
 function batang(x1, y1, x2, y2, w1, w2, warna){            // tongkat lancip (kecil di ujung, besar di pegangan)
   const dx = x2 - x1, dy = y2 - y1, l = Math.hypot(dx, dy) || 1, nx = -dy/l, ny = dx/l;
   g.fillStyle = warna; g.beginPath();
@@ -1017,7 +1013,6 @@ function loop(t){
     P.forEach((p, i) => bayang(p, Gs[i], t));
     P.forEach((p, i) => gambar(p, Gs[i], t));
     g.restore();
-    if(ORN.naturalWidth){ const s = Math.max(W/1308, H/736), ox = (W - 1308*s)/2, oy = (H - 736*s)/2; g.drawImage(ORN, ox + 340*s, oy + 500*s, 630*s, 140*s); }
     lukisCerita(now); lukisGunung(now); lukisPercik(now); lukisAdu(now);
   }
   if(rec) komposit();
@@ -1026,8 +1021,8 @@ function loop(t){
 requestAnimationFrame(loop);
 
 /* ================= UPGRADE: tokoh, latar, lakon, efek gamelan, rekam & bagikan ================= */
-const TOKOH = {gatotkaca:'Gatotkaca', semar:'Semar', rahwana:'Rahwana (Dasamuka)', werkudara:'Werkudara (Bima)', arjuna:'Arjuna', hanoman:'Hanoman', gunungan:'Gunungan'};
-const LATAR = {asli:'Kelir asli', malam:'Malam bertabur bintang', sogan:'Merah sogan', kertas:'Kertas kuno', hutan:'Hutan rimba'};
+const TOKOH = {gatotkaca:'Gatotkaca', semar:'Semar', rahwana:'Rahwana (Dasamuka)', werkudara:'Werkudara (Bima)', arjuna:'Arjuna', hanoman:'Hanoman'};
+const LATAR = {asli:'Kelir asli', klasik:'Pentas klasik', malam:'Pentas malam', sogan:'Pentas sogan', kertas:'Kertas kuno', hutan:'Hutan rimba'};
 const BGI = {};
 for(const k of ['kertas', 'hutan']){ const im = new Image(); im.src = 'aset/' + k + '.jpg'; BGI[k] = im; }
 const CUR = ['gatotkaca', 'semar'];
@@ -1043,18 +1038,41 @@ async function setTokoh(i, k){
   SISI.clear(); CUR.forEach((n, j) => { SISI.set(n, j); if(n === 'rahwana') SISI.set('dasamuka', j); if(n === 'werkudara') SISI.set('bima', j); }); sinkPanel();
 }
 // ---- latar kelir ----
+function sokoGuru(x, px, pw, yb){                 // tiang kayu pendapa berukir (soko guru) dengan umpak batu
+  const gr = x.createLinearGradient(px, 0, px + pw, 0); gr.addColorStop(0, '#2a1206'); gr.addColorStop(.35, '#7a3f16'); gr.addColorStop(.65, '#5a2c0e'); gr.addColorStop(1, '#220f05'); x.fillStyle = gr; x.fillRect(px, 0, pw, yb);
+  x.strokeStyle = 'rgba(225,175,95,.75)'; x.lineWidth = 3;
+  [.14, .5, .86].forEach(f => { const y = yb*f; x.beginPath(); x.moveTo(px, y); x.lineTo(px + pw, y); x.stroke(); for(let i = 0; i < 4; i++){ x.beginPath(); x.moveTo(px + pw*(.12 + .22*i), y); x.lineTo(px + pw*(.23 + .22*i), y - 16); x.lineTo(px + pw*(.34 + .22*i), y); x.stroke(); } });
+  x.fillStyle = '#3b3128'; x.beginPath(); x.moveTo(px - pw*.15, yb); x.lineTo(px + pw*1.15, yb); x.lineTo(px + pw*1.0, yb - 38); x.lineTo(px, yb - 38); x.fill();
+}
 function mkLatar(k){
-  const w = 1920, h = 1080, cn = document.createElement('canvas'); cn.width = w; cn.height = h; const x = cn.getContext('2d'); x.imageSmoothingQuality = 'high';
-  if(BGI[k]){ const im = BGI[k]; x.save(); x.translate(w/2, h/2); const rot = im.naturalHeight > im.naturalWidth;
-    if(rot){ x.rotate(Math.PI/2); const s = Math.max(h/im.naturalWidth, w/im.naturalHeight); x.drawImage(im, -im.naturalWidth*s/2, -im.naturalHeight*s/2, im.naturalWidth*s, im.naturalHeight*s); }
+  const w = 1920, h = 1080, cn = document.createElement('canvas'); cn.width = w; cn.height = h; const x = cn.getContext('2d'); x.imageSmoothingQuality = 'high'; const yb = h*LEDGE;
+  const el = (a, b, c, d) => { x.beginPath(); x.ellipse(a, b, c, d, 0, 0, 7); x.stroke(); };
+  if(BGI[k]){ const im = BGI[k]; x.save(); x.translate(w/2, h/2);
+    if(im.naturalHeight > im.naturalWidth){ x.rotate(Math.PI/2); const s = Math.max(h/im.naturalWidth, w/im.naturalHeight); x.drawImage(im, -im.naturalWidth*s/2, -im.naturalHeight*s/2, im.naturalWidth*s, im.naturalHeight*s); }
     else { const s = Math.max(w/im.naturalWidth, h/im.naturalHeight); x.drawImage(im, -im.naturalWidth*s/2, -im.naturalHeight*s/2, im.naturalWidth*s, im.naturalHeight*s); }
-    x.restore(); }
-  else {
-    const C = {malam:['#06091f','#1b2a5e'], sogan:['#3a1208','#8a3a14']}[k], gr0 = x.createLinearGradient(0, 0, 0, h*LEDGE); gr0.addColorStop(0, C[0]); gr0.addColorStop(1, C[1]); x.fillStyle = gr0; x.fillRect(0, 0, w, h);
-    if(k === 'malam'){ x.fillStyle = 'rgba(255,230,160,.55)'; for(let i = 0; i < 140; i++){ x.beginPath(); x.arc((i*637)%w, (i*311)%(h*.8), 1.2 + i%3*.8, 0, 7); x.fill(); } }
-    if(k === 'sogan'){ x.strokeStyle = 'rgba(240,190,100,.2)'; x.lineWidth = 4; for(let r = 0; r < w + 120; r += 160) for(let q = 0; q < h*.9; q += 160){ x.beginPath(); x.arc(r, q, 66, 0, 7); x.stroke(); x.beginPath(); x.arc(r + 80, q + 80, 66, 0, 7); x.stroke(); } }
+    x.restore();
+  } else {
+    const PAL = {klasik:['#fff3d2', '#ecc67f', '#7d4c1d'], malam:['#d6e0f5', '#6c88bd', '#16233f'], sogan:['#f3c98f', '#b9622b', '#3d1409']}[k];
+    const g0 = x.createRadialGradient(w/2, h*.4, 30, w/2, h*.48, w*.66); g0.addColorStop(0, PAL[0]); g0.addColorStop(.5, PAL[1]); g0.addColorStop(1, PAL[2]); x.fillStyle = g0; x.fillRect(0, 0, w, h);
+    x.globalAlpha = .06; x.strokeStyle = '#2b1808'; x.lineWidth = 1; x.beginPath(); for(let i = 0; i < w; i += 5){ x.moveTo(i, 0); x.lineTo(i, yb); } for(let j = 0; j < yb; j += 5){ x.moveTo(0, j); x.lineTo(w, j); } x.stroke(); x.globalAlpha = 1;
+    if(k === 'sogan'){ x.strokeStyle = 'rgba(70,25,8,.22)'; x.lineWidth = 3; for(let r = 0; r < w + 100; r += 120) for(let q = 0; q < yb + 100; q += 120){ el(r, q - 30, 12, 34); el(r, q + 30, 12, 34); el(r - 30, q, 34, 12); el(r + 30, q, 34, 12); } }
+    if(k === 'malam'){ x.fillStyle = 'rgba(255,252,230,.9)'; x.shadowColor = 'rgba(255,250,210,.9)'; x.shadowBlur = 40; x.beginPath(); x.arc(w*.78, h*.2, 54, 0, 7); x.fill(); x.shadowBlur = 0; x.fillStyle = 'rgba(255,240,200,.7)'; for(let i = 0; i < 60; i++){ x.beginPath(); x.arc(w*.08 + (i*137)%(w*.84), h*.08 + (i*89)%(h*.5), 1 + i%3*.6, 0, 7); x.fill(); } }
+    const sp = (k2, cx, hh, kanan) => { const im = SILI[k2]; if(!im || !im.naturalWidth) return; const ww = hh*im.naturalWidth/im.naturalHeight, natKanan = ['semar', 'hanoman'].includes(k2);   // simpingan: wayang berjajar di debog
+      x.save(); x.translate(cx, yb + 8); x.rotate(kanan ? .08 : -.08); x.globalAlpha = .62; if(natKanan !== kanan) x.scale(-1, 1); x.drawImage(im, -ww/2, -hh, ww, hh); x.restore(); };
+    sp('werkudara', w*.15, h*.5, true); sp('arjuna', w*.09, h*.58, true); sp('hanoman', w*.85, h*.5, false); sp('rahwana', w*.91, h*.58, false);
   }
-  const y = h*LEDGE, gr = x.createLinearGradient(0, y, 0, h); gr.addColorStop(0, '#7a4a1c'); gr.addColorStop(1, '#2b1507'); x.fillStyle = gr; x.fillRect(0, y, w, h - y); x.fillStyle = '#e1af5f'; x.fillRect(0, y, w, 6);
+  if(k !== 'kertas'){ const vg = x.createRadialGradient(w/2, h*.45, h*.3, w/2, h*.5, w*.75); vg.addColorStop(0, 'rgba(0,0,0,0)'); vg.addColorStop(1, 'rgba(10,4,0,.45)'); x.fillStyle = vg; x.fillRect(0, 0, w, yb); }
+  if(!BGI[k]){
+    sokoGuru(x, 0, w*.05, yb); sokoGuru(x, w*.95, w*.05, yb);
+    x.fillStyle = '#4a1608'; x.fillRect(0, 0, w, h*.075); for(let i = 0; i < 20; i++){ x.beginPath(); x.arc((i + .5)*w/20, h*.075, w/40, 0, Math.PI); x.fill(); }      // kuap atas bermotif kawung
+    x.strokeStyle = 'rgba(225,175,95,.5)'; x.lineWidth = 2; for(let r = 32; r < w; r += 64){ el(r, h*.0375 - 13, 6, 12); el(r, h*.0375 + 13, 6, 12); el(r - 13, h*.0375, 12, 6); el(r + 13, h*.0375, 12, 6); }
+    x.strokeStyle = '#e1af5f'; x.lineWidth = 4; for(let i = 0; i < 20; i++){ x.beginPath(); x.arc((i + .5)*w/20, h*.075, w/40, 0, Math.PI); x.stroke(); }
+    x.fillStyle = '#6b1d0b'; x.strokeStyle = 'rgba(225,175,95,.75)'; x.lineWidth = 2; for(let i = 0; i < w; i += 46){ x.beginPath(); x.moveTo(i, yb); x.lineTo(i + 23, yb - 26); x.lineTo(i + 46, yb); x.closePath(); x.fill(); x.stroke(); }   // tumpal
+  }
+  const gd = x.createLinearGradient(0, yb, 0, h); gd.addColorStop(0, '#cdb67d'); gd.addColorStop(.35, '#a8905a'); gd.addColorStop(1, '#5b4725'); x.fillStyle = gd; x.fillRect(0, yb, w, h - yb);   // debog (batang pisang)
+  x.strokeStyle = 'rgba(70,50,20,.25)'; for(let i = 0; i < w; i += 7){ x.lineWidth = 1 + (i*13)%3; x.beginPath(); x.moveTo(i, yb); x.lineTo(i + ((i*7)%5 - 2), h); x.stroke(); }
+  x.strokeStyle = 'rgba(60,40,15,.35)'; x.lineWidth = 3; [.4, .72].forEach(f => { x.beginPath(); x.moveTo(0, yb + (h - yb)*f); x.lineTo(w, yb + (h - yb)*f); x.stroke(); });
+  x.fillStyle = 'rgba(20,10,3,.6)'; x.fillRect(0, yb, w, 7); x.fillStyle = 'rgba(225,175,95,.8)'; x.fillRect(0, yb - 2, w, 2);
   return cn;
 }
 const BG0 = getComputedStyle($('kelir')).backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
@@ -1072,7 +1090,7 @@ function hitam(img){      // siluet hitam: lubang tatahan tembus cahaya (lembut)
 function siapSiluet(p){ if(!p.si || p.si.src !== p.body) p.si = {src:p.body, body:hitam(p.body), arms:p.arms.map(a => ({U:hitam(a.U.im), L:hitam(a.L.im)}))}; return p.si; }
 function setLatar(k){
   siluet = k === 'kertas';
-  if(BGI[k] && !BGI[k].complete){ BGI[k].onload = () => setLatar(k); return; }
+  const tunggu = [BGI[k], ...(BGI[k] ? [] : Object.values(SILI))].find(im => im && !im.complete); if(tunggu){ tunggu.addEventListener('load', () => setLatar(k), {once:true}); return; }
   const u = k === 'asli' ? BG0 : mkLatar(k).toDataURL('image/jpeg', .88);
   $('kelir').style.backgroundImage = k === 'asli' ? '' : 'url(' + u + ')'; bgIm.src = u;
 }
@@ -1118,9 +1136,9 @@ function lukisAdu(now){
     g.fillStyle = '#ffe9a8'; g.font = '600 12px system-ui,sans-serif'; g.textAlign = i ? 'right' : 'left'; g.fillText(namaT(i), i ? x + w : x, y + 8); g.restore();
   });
   if(adu.over){ const t = Math.min(1, (now - adu.over.t)/500); g.save(); g.globalAlpha = t; g.textAlign = 'center'; g.font = '700 ' + Math.round(Math.min(W, H)*.07) + 'px serif'; g.lineWidth = 6; g.strokeStyle = '#2b1507'; g.fillStyle = '#ffd36a';
-    const tx = '🏆 ' + namaT(adu.over.win) + ' menang!'; g.strokeText(tx, W/2, H*.3); g.fillText(tx, W/2, H*.3); g.restore(); }
+    const tx = '' + namaT(adu.over.win) + ' menang!'; g.strokeText(tx, W/2, H*.3); g.fillText(tx, W/2, H*.3); g.restore(); }
 }
-$('aduOn').onchange = () => { adu.on = $('aduOn').checked; adu.hp = [100, 100]; adu.over = null; P.forEach(p => { p.jtT = 0; p.kb = 0; }); $('pg').hidden = true; say(adu.on ? '⚔️ Mode adu! Pukul badan lawan atau adu lengan, tenaga habis = kalah' : 'Mode adu dimatikan', 3500); };
+$('aduOn').onchange = () => { adu.on = $('aduOn').checked; adu.hp = [100, 100]; adu.over = null; P.forEach(p => { p.jtT = 0; p.kb = 0; }); $('pg').hidden = true; say(adu.on ? 'Mode adu! Pukul badan lawan atau adu lengan, tenaga habis = kalah' : 'Mode adu dimatikan', 3500); };
 function efekAksi(now){
   if(!P.every(p => p.G)) return;
   const dtS = Math.max(.001, (now - (efekAksi.t || now))/1000); efekAksi.t = now;
@@ -1128,7 +1146,7 @@ function efekAksi(now){
   if(audioEl && musicOn){ const tr = adu.on ? (adu.over ? .85 : 1.1 + .12*(1 - mn)) : (cerita ? .94 : 1); audioEl.playbackRate += (tr - audioEl.playbackRate)*.03; musikV = adu.over ? .6 : cerita ? .85 : 1; terapVol(); }
   if(adu.on && !adu.over && gml && now - (efekAksi.r || 0) > 560 - 240*(1 - mn)){ efekAksi.r = now; efekAksi.n = (efekAksi.n || 0) + 1; if(efekAksi.n % 4) tak(.08); else dung(.2); }   // denyut kendang makin cepat saat tenaga menipis
   P.forEach(p => { p.jt = (p.jt || 0) + ((p.jtT || 0) - (p.jt || 0))*.1; p.kb = (p.kb || 0)*.88; });
-  if(adu.over){ const k = P[1 - adu.over.win]; k.jtT = (k.x < .5 ? -1 : 1)*1.35; if(now - adu.over.t > 4500){ adu.hp = [100, 100]; adu.over = null; P.forEach(p => p.jtT = 0); say('⚔️ Ronde baru!', 1500); } }
+  if(adu.over){ const k = P[1 - adu.over.win]; k.jtT = (k.x < .5 ? -1 : 1)*1.35; if(now - adu.over.t > 4500){ adu.hp = [100, 100]; adu.over = null; P.forEach(p => p.jtT = 0); say('Ronde baru!', 1500); } }
   const [a, b] = P, dekat = Math.abs(a.x - b.x)*W < (a.G.w + b.G.w)*.34;
   if(dekat && !tabrak && now - tabrakT > 700){ tabrakT = now; beradu((a.x + b.x)/2*W, (a.y + b.y)/2*H, true); }   // badan beradu
   tabrak = dekat;
@@ -1195,7 +1213,7 @@ async function kirim(blob, ext){
 $('shot').onclick = () => { komposit(); rc.toBlob(b => b ? kirim(b, 'png') : say('Gagal mengambil foto.'), 'image/png'); };
 $('recb').onclick = () => {
   if(rec){ rec.stop(); return; }
-  if(!window.MediaRecorder){ say('Perekaman tidak didukung browser ini. Pakai tombol 📸.'); return; }
+  if(!window.MediaRecorder){ say('Perekaman tidak didukung browser ini. Pakai tombol .'); return; }
   initSfx(); komposit(); const tracks = [...rc.captureStream(30).getVideoTracks()];
   try{ if(ac){ if(!rdest){ rdest = ac.createMediaStreamDestination(); mst.connect(rdest); const s = ac.createMediaElementSource(siapAudio()); s.connect(ac.destination); s.connect(rdest); } tracks.push(...rdest.stream.getAudioTracks()); } }catch(_){}
   const mime = ['video/mp4;codecs=avc1.42E01E', 'video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm'].find(m => MediaRecorder.isTypeSupported(m)) || '', ch = [];
@@ -1262,18 +1280,19 @@ const sinkSET = () => { $('sGain').value = SET.gain*100; $('sResp').value = SET.
 sinkSET();
 [['sGain', v => SET.gain = v/100], ['sResp', v => SET.resp = v/100], ['sDz', v => SET.dz = v/100], ['sPred', v => { SET.pred = v/1000; SET.auto = false; $('cbAuto').checked = false; }]].forEach(([id, f]) => { $(id).oninput = () => { f(+$(id).value); simpanSET(); }; });
 $('cbAuto').onchange = () => { SET.auto = $('cbAuto').checked; simpanSET(); };
-$('dua').onchange = () => { SET.dua = $('dua').checked; P.forEach(p => { p.seen = -1e9; }); $('pg').hidden = true; say(SET.dua ? '👥 Dua pemain: tangan di sisi kiri kamera = wayang kiri, sisi kanan = wayang kanan' : 'Mode dua pemain dimatikan', 4000); };
+$('dua').onchange = () => { SET.dua = $('dua').checked; P.forEach(p => { p.seen = -1e9; }); $('pg').hidden = true; say(SET.dua ? 'Dua pemain: tangan di sisi kiri kamera = wayang kiri, sisi kanan = wayang kanan' : 'Mode dua pemain dimatikan', 4000); };
 setInterval(() => { if($('pg').hidden || !vid.srcObject) return; const pr = SET.auto ? clamp(((trk.ms || 30) + 500/Math.max(trk.fps || 20, 10))/1000, .05, .13) : SET.pred, lag = (trk.ms || 0) + 500/Math.max(trk.fps || 20, 10);
   $('diag').textContent = (hl ? 'Lite' : 'Standar') + ' · ' + (trk.fps || 0) + ' fps · deteksi ' + (trk.ms || 0) + ' ms · jeda ±' + Math.round(lag) + ' ms · prediksi ' + Math.round(pr*1000) + ' ms' + (lag > 90 ? ' → jeda tinggi: coba ganti model, perbanyak cahaya, atau naikkan Respons' : ''); }, 600);
+const NATKIRI = ['gatotkaca', 'rahwana', 'werkudara', 'arjuna'];
 const TUR = [
-  ['🎭', 'Selamat datang di Wayang Tangan', 'Mainkan wayang digital dengan sentuhan atau gerakan tangan di depan kamera. Geser wayang dengan jari, atau nyalakan kamera lewat tombol 📷.'],
-  ['🎯', 'Kalibrasi dulu', 'Saat kamera menyala, tahan tangan santai ±1 detik. Lengan wayang dikunci di posisi awal, lalu mulai mengikuti. Tombol Kalibrasi ulang ada di 🎪 Panggung.'],
-  ['👍☝️', 'Jempol & telunjuk', 'Jempol = tangan kiri wayang, telunjuk = tangan kanan wayang. Miringkan jari ke luar untuk mengangkat lengan, tekuk untuk menurunkan. Kepalan ditahan 2 detik membalik wayang.'],
-  ['⚔️', 'Mode adu & dua pemain', 'Centang Mode adu di 🎪 Panggung: pukul lawan dengan ayunan lengan sampai tenaganya habis. Mode dua pemain membagi kamera kiri / kanan, satu tangan untuk tiap wayang.'],
-  ['🎬', 'Cerita, rekam & bagikan', 'Pilih lakon di 🎪 Panggung lalu ▶. Tombol 📸 mengambil foto dan ⏺ merekam video. Kalau tangan terasa lag, setel di ⚙️ Penyetelan tangan atau ganti model tangan.']
+  [[['gunungan']], 'Selamat datang di Wayang Tangan', 'Mainkan wayang digital dengan sentuhan atau gerakan tangan di depan kamera. Geser wayang dengan jari, atau nyalakan kamera lewat tombol Kamera di bawah.'],
+  [[['semar', 'kanan']], 'Kalibrasi dulu', 'Saat kamera menyala, tahan tangan santai sekitar 1 detik. Lengan wayang dikunci di posisi awal, lalu mulai mengikuti. Tombol Kalibrasi ulang ada di menu Panggung.'],
+  [[['gatotkaca', 'kanan']], 'Jempol & telunjuk', 'Jempol = tangan kiri wayang, telunjuk = tangan kanan wayang. Miringkan jari ke luar untuk mengangkat lengan, tekuk untuk menurunkan. Kepalan ditahan 2 detik membalik wayang.'],
+  [[['rahwana', 'kanan'], ['werkudara', 'kiri']], 'Mode adu & dua pemain', 'Centang Mode adu di menu Panggung: pukul lawan dengan ayunan lengan sampai tenaganya habis. Mode dua pemain membagi kamera kiri dan kanan, satu tangan untuk tiap wayang.'],
+  [[['arjuna', 'kanan'], ['hanoman', 'kiri']], 'Cerita, rekam & bagikan', 'Pilih lakon lewat menu E-DALANG atau tombol Cerita. Tombol Foto mengambil gambar dan tombol Rekam membuat video. Kalau tangan terasa lag, setel di Penyetelan tangan atau ganti model tangan.']
 ];
 let turI = 0;
-function tampilTur(){ const t = TUR[turI]; $('turE').textContent = t[0]; $('turJ').textContent = t[1]; $('turT').textContent = t[2]; $('turD').textContent = TUR.map((_, i) => i === turI ? '●' : '○').join(' '); $('turP').style.visibility = turI ? 'visible' : 'hidden'; $('turN').textContent = turI === TUR.length - 1 ? 'Mulai ▶' : 'Lanjut ›'; }
+function tampilTur(){ const t = TUR[turI]; $('turE').innerHTML = t[0].map(([k, ke]) => '<img alt="" src="' + SIL[k] + '"' + (ke && (ke === 'kanan') === NATKIRI.includes(k) ? ' style="transform:scaleX(-1)"' : '') + '>').join(''); $('turJ').textContent = t[1]; $('turT').textContent = t[2]; $('turD').textContent = TUR.map((_, i) => i === turI ? '●' : '○').join(' '); $('turP').style.visibility = turI ? 'visible' : 'hidden'; $('turN').textContent = turI === TUR.length - 1 ? 'Mulai ▶' : 'Lanjut ›'; }
 function bukaTur(){ turI = 0; tampilTur(); $('tur').hidden = false; }
 function tutupTur(){ $('tur').hidden = true; try{ localStorage.setItem('wayang-tur', '1'); }catch(_){} }
 $('turN').onclick = () => { if(turI < TUR.length - 1){ turI++; tampilTur(); } else tutupTur(); };
@@ -1295,11 +1314,11 @@ const IKON = {menu:'<path d="M4 7h16M4 12h16M4 17h16"/>', musik:'<path d="M9 18V
   mahkota:'<path d="M3 18h18M4 18L3 7l5 4 4-6 4 6 5-4-1 11"/>', panah:'<path d="M5 12h14M13 6l6 6-6 6"/>'};
 function ikon(el, p, label){ [...el.childNodes].forEach(n => n.nodeType === 3 && n.remove()); el.insertAdjacentHTML('afterbegin', SV(p) + (label ? '<span' + (el.id === 'cerita' ? ' id="ctl"' : '') + '>' + label + '</span>' : '')); }
 [['menu','menu'], ['snd','musik'], ['fs','penuh'], ['shot','kamera'], ['recb','rekam'], ['pov','pov'], ['nextb','next']].forEach(([id, k]) => ikon($(id), IKON[k]));
-[['cam','kamera','Kamera'], ['fl','orang','Kiri'], ['fr','orang','Kanan'], ['flip','balik','Balik arah'], ['reset','ulang','Wayang asli'], ['pandu','tanya','Panduan'], ['pgb','logo','Panggung'], ['cerita','cerita','Cerita']].forEach(([id, k, t]) => ikon($(id).closest('label') || $(id), IKON[k], t));
+[['cam','kamera','Kamera'], ['flip','balik','Balik arah'], ['pandu','tanya','Panduan'], ['pgb','logo','Panggung'], ['cerita','cerita','Cerita']].forEach(([id, k, t]) => ikon($(id).closest('label') || $(id), IKON[k], t));
 { const hb = document.createElement('button'); hb.className = 'b'; hb.id = 'home'; $('pgb').before(hb); ikon(hb, IKON.rumah, 'Menu'); }
 $('plogo').innerHTML = SV(IKON.logo); $('arr').innerHTML = SV(IKON.panah, 20);
 [['m-mulai','main'], ['m-lakon','buku'], ['m-tokoh','tokoh']].forEach(([id, k]) => { $(id).querySelector('.mi').innerHTML = SV(IKON[k]); });
-document.querySelectorAll('.kp').forEach(e => { e.innerHTML = '<div class="eb">Panggung wayang kulit digital</div><div class="et">E-DALANG</div><div class="dv"><i></i>✦<i></i></div>'; });
+document.querySelectorAll('.kp').forEach(e => { e.innerHTML = '<div class="eb">Panggung wayang kulit digital</div><div class="et">E-DALANG</div><div class="dv"><i></i><i></i></div>'; });
 document.querySelectorAll('.wm').forEach(e => { e.src = GUNIM.src; });
 $('fg').innerHTML = [['tangan','Kamera & gestur','Jempol & telunjuk menggerakkan lengan wayang — kepalan ditahan 2 detik membalik arah.'], ['mahkota','Enam tokoh wayang','Arjuna, Hanoman, Semar, Gatotkaca, Werkudara, Rahwana — pilih lewat galeri tokoh.'], ['musik','Gamelan menyertai','Musik latar plus bunyi bonang, kendang, dan gong yang bereaksi pada tiap gerakan.'], ['kamera','Rekam & bagikan','Ambil foto atau rekam video pertunjukanmu lengkap dengan musiknya.']]
   .map(([k, j, t]) => '<div class="fi"><span class="fc">' + SV(IKON[k], 20) + '</span><div><b>' + j + '</b><p>' + t + '</p></div></div>').join('');
@@ -1323,6 +1342,14 @@ function setPov(on, tanpaLatar){
   say(on ? 'Sudut penonton: wayang jadi bayangan di kelir kertas' : 'Kembali ke sudut dalang', 2500);
 }
 $('pov').onclick = () => setPov(!pov);
+setLatar('klasik'); $('latar').value = 'klasik';
+
+// ---- kirab bayangan wayang di latar menu ----
+const SIL = {"arjuna": "aset/sil_arjuna.webp", "hanoman": "aset/sil_hanoman.webp", "rahwana": "aset/sil_rahwana.webp", "werkudara": "aset/sil_werkudara.webp", "gatotkaca": "aset/sil_gatotkaca.webp", "semar": "aset/sil_semar.webp", "gunungan": "aset/sil_gunungan.webp"}, SILI = {};
+Object.keys(SIL).forEach(k => { const im = new Image(); im.src = SIL[k]; SILI[k] = im; });
+(function(){ const URUT = ['gatotkaca', 'semar', 'rahwana', 'werkudara', 'arjuna', 'hanoman', 'gunungan'], KANAN = ['semar', 'hanoman'];   // yang menghadap kanan dibalik: semua berarak ke kiri
+  let h = ''; for(let r = 0; r < 2; r++) URUT.forEach((k, i) => { if(SIL[k]) h += '<div class="pw' + (k === 'gunungan' ? ' g' : '') + '" style="--d:' + ((i*1.3 + r*.7) % 4.6).toFixed(1) + 's"><img alt="" src="' + SIL[k] + '"' + (KANAN.includes(k) ? ' style="transform:scaleX(-1)"' : '') + '><i></i></div>'; });
+  $('trk2').innerHTML = h; })();
 const isi = (el, o) => Object.entries(o).forEach(([v, t]) => el.add(new Option(t, v)));
 isi($('latar'), LATAR);
 function sinkPanel(){ segarKartu(); }
@@ -1330,7 +1357,7 @@ sinkPanel();
 $('latar').onchange = () => { if(pov && $('latar').value !== 'kertas') setPov(false, true); setLatar($('latar').value); };
 $('pgb').onclick = () => { $('story').hidden = true; $('pg').hidden = !$('pg').hidden; };
 $('cerita').addEventListener('click', () => { $('pg').hidden = true; });
-$('kalib').onclick = () => { P.forEach(p => { p.seen = -1e9; }); $('pg').hidden = true; say('🎯 Tunjukkan tangan, tahan santai ±1 detik', 2500); };
+$('kalib').onclick = () => { P.forEach(p => { p.seen = -1e9; }); $('pg').hidden = true; say('Tunjukkan tangan, tahan santai ±1 detik', 2500); };
 $('pclose').onclick = () => { $('pg').hidden = true; };
 async function mainLakon(k){
   const l = LAKON[k]; if(cerita) selesaiCerita(); if(pov) setPov(false, true);

@@ -1342,7 +1342,6 @@ function setPov(on, tanpaLatar){
   say(on ? 'Sudut penonton: wayang jadi bayangan di kelir kertas' : 'Kembali ke sudut dalang', 2500);
 }
 $('pov').onclick = () => setPov(!pov);
-setLatar('klasik'); $('latar').value = 'klasik';
 
 // ---- kirab bayangan wayang di latar menu ----
 const SIL = {"arjuna": "aset/sil_arjuna.webp", "hanoman": "aset/sil_hanoman.webp", "rahwana": "aset/sil_rahwana.webp", "werkudara": "aset/sil_werkudara.webp", "gatotkaca": "aset/sil_gatotkaca.webp", "semar": "aset/sil_semar.webp", "gunungan": "aset/sil_gunungan.webp"}, SILI = {};
@@ -1366,6 +1365,7 @@ async function mainLakon(k){
   db.aktif = id; tampilCerita(); simpanDB(); $('pg').hidden = true; initSfx(); gunungan('buka', mulaiCerita);
 }
 
+setLatar('klasik'); $('latar').value = 'klasik';   // latar awal, dipasang setelah semua bagian siap
 say(W/H < 1.3 ? 'Seret badan untuk menggeser, seret tangan wayang untuk menggerakkan. Putar HP ke lanskap agar lebih lebar.' : 'Seret badan wayang untuk menggeser · seret tangannya untuk menggerakkan', 9000);
 </script>
 </body>

@@ -138,6 +138,16 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
 @keyframes kirab{to{transform:translateX(-50%)}}@keyframes goyang{from{transform:rotate(-2deg)}to{transform:rotate(2deg)}}
 @media(prefers-reduced-motion:reduce){#trk2,.pw{animation:none}}
 .kb{height:140px;display:flex;justify-content:center;align-items:flex-end;gap:6px;margin:0 auto 8px;padding:10px 10px 0;border-radius:14px;border:1px solid rgba(225,175,95,.5);background:radial-gradient(ellipse at 50% 35%,#ffe2a0,#e0a050 55%,#7a4a1c);overflow:hidden}.kb img{height:124px;width:auto}
+#lang{position:fixed;right:14px;top:44px;z-index:3;padding:7px 12px;font-size:12.5px}
+.kd{margin-top:10px;padding:14px 16px;border-radius:14px;border:1px solid rgba(225,175,95,.3);background:rgba(36,23,14,.9);font-size:13.5px;line-height:1.6}
+.kd h3{margin:0 0 2px;font:400 22px Marcellus,serif;color:#ffd36a}.kd i{display:block;color:#d9a44a;font-style:normal;font-size:12.5px;margin-bottom:8px}.kd b{color:#e1af5f;font-weight:600}.kd p{margin:5px 0}
+#kg .tk.on{border-color:var(--em)}
+.qq{font:400 19px/1.35 Marcellus,serif;margin:8px 2px 12px;text-align:center}.qh{display:flex;justify-content:space-between;font-size:12.5px;color:#cdb68e;margin-bottom:8px}
+.qo{justify-content:center;text-align:center;width:100%;margin-bottom:8px;padding:12px 14px;font:500 15px 'Plus Jakarta Sans'}.qo.ok{background:#2f6b2a;border-color:#7bd36a}.qo.no{background:#7a2318;border-color:#e0493a}
+.qf{min-height:44px;font-size:13px;line-height:1.5;color:#e9d8b4;margin:2px 0 10px;text-align:center}.qs{font:400 56px/1 Marcellus,serif;color:#ffd36a;text-align:center;margin:8px 0}
+#lat{position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:8;width:min(92vw,460px);padding:12px 14px;border-radius:14px;border:1px solid rgba(225,175,95,.5);background:rgba(28,17,10,.92);color:var(--cr);font:13.5px/1.45 'Plus Jakarta Sans',system-ui}#lat[hidden]{display:none}
+#lat .lh{display:flex;flex-direction:column;gap:3px}#lat b{font:400 16px Marcellus,serif;color:#ffd36a}.lb{height:5px;border-radius:3px;background:rgba(255,255,255,.12);margin:8px 0}.lb i{display:block;height:100%;width:0;border-radius:3px;background:var(--em);transition:width .4s}
+#lat .lr{display:flex;gap:8px}#lat .lr .b{flex:1;padding:7px}
 </style>
 </head>
 <body>
@@ -174,6 +184,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
     <div class="lbl">Tokoh kiri</div><div class="tg" id="pgL"></div>
     <div class="lbl">Tokoh kanan</div><div class="tg" id="pgR"></div>
     <label class="row">Latar kelir <select id="latar"></select></label>
+    <label class="row">Bahasa <select id="sBhs"><option value="id">Indonesia</option><option value="jv">Basa Jawa</option></select></label>
     <label class="chk"><input type="checkbox" id="tukar"> Tukar jempol ↔ telunjuk</label>
     <label class="chk"><input type="checkbox" id="dua"> Mode dua pemain (kamera dibagi kiri / kanan)</label>
     <details><summary>Penyetelan tangan</summary>
@@ -188,6 +199,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
     <button class="wide" id="mdl">Model tangan</button>
     <button class="wide" id="kalib">Kalibrasi ulang tangan</button>
   </div>
+  <div id="lat" hidden><div class="lh"><b id="latT"></b><span id="latS"></span></div><div class="lb"><i id="latB"></i></div><div class="lr"><button class="b" id="latSkip"></button><button class="b" id="latX"></button></div></div>
   <div id="tur" hidden><div class="kt"><div id="turE" class="kb"></div><h3 id="turJ"></h3><div id="turT"></div><div id="turD" style="text-align:center;margin-top:10px;color:#e1af5f;letter-spacing:4px"></div>
     <div class="bt"><button class="b" id="turP">‹ Kembali</button><button class="b" id="turN">Lanjut ›</button></div><button class="b" id="turS" style="width:100%;margin-top:8px;opacity:.8">Lewati panduan</button></div></div>
   <div id="pip" class="ov"><video id="vid" playsinline muted></video><canvas id="oc"></canvas><div id="trk" title="Ketuk untuk ganti GPU/CPU"></div></div>
@@ -201,6 +213,7 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
 </div>
 
 <div id="depan" class="land">
+  <button class="b" id="lang"></button>
   <div class="kw"></div><div class="tp"></div><div class="pj"><div id="trk2"></div></div><div class="db"></div>
   <section class="scr" id="s-land"><div class="ring" style="width:520px;height:520px;right:-120px;top:-300px"></div><div class="ring" style="width:380px;height:380px;left:-190px;bottom:-190px"></div>
     <div class="lc"><div class="eb" style="text-align:left;color:#b99a62">Panggung kulit digital</div><h1 class="lt">Wayang <b>Tangan</b></h1>
@@ -211,15 +224,59 @@ body{font-family:'Plus Jakarta Sans',system-ui,sans-serif}
     <p class="sub">Gerakkan wayang dengan tanganmu, biarkan sang dalang membawakan lakonnya.</p>
     <button class="mb p" id="m-mulai"><span class="mi"></span><div><b>Mulai Pentas</b><small>Main wayang bebas dengan tangan atau sentuhan</small></div></button>
     <button class="mb" id="m-lakon"><span class="mi"></span><div><b>Pilih Lakon</b><small>Cerita bawaan yang dibacakan suara dalang</small></div></button>
-    <button class="mb" id="m-tokoh"><span class="mi"></span><div><b>Pilih Tokoh</b><small>Tentukan wayang kiri dan kanan</small></div></button></section>
+    <button class="mb" id="m-tokoh"><span class="mi"></span><div><b>Pilih Tokoh</b><small>Tentukan wayang kiri dan kanan</small></div></button>
+    <button class="mb" id="m-kenal"><span class="mi"></span><div><b></b><small></small></div></button>
+    <button class="mb" id="m-kuis"><span class="mi"></span><div><b></b><small></small></div></button>
+    <button class="mb" id="m-latih"><span class="mi"></span><div><b></b><small></small></div></button></section>
   <section class="scr" id="s-tokoh" hidden><img class="wm" alt=""><div class="kp"></div><div class="tgw"><div class="et" style="font-size:24px;margin:0 0 6px;color:#ffd36a">Pilih Tokoh</div>
     <div class="lbl">Wayang kiri</div><div class="tg" id="tgL"></div><div class="lbl">Wayang kanan</div><div class="tg" id="tgR"></div></div>
     <div class="two"><button id="tk-back">‹ Kembali</button><button class="p" id="tk-go">Mulai Pentas ›</button></div></section>
+  <section class="scr" id="s-kenal" hidden><img class="wm" alt=""><div class="kp"></div><div class="tgw"><div class="et" style="font-size:24px;margin:0 0 8px;color:#ffd36a"></div><div class="tg" id="kg"></div><div class="kd" id="kd"></div></div>
+    <div class="two"><button id="kn-back"></button><button class="p" id="kn-uji"></button></div></section>
+  <section class="scr" id="s-kuis" hidden><img class="wm" alt=""><div class="kp"></div><div class="tgw" id="kq"></div></section>
   <section class="scr" id="s-lakon" hidden><img class="wm" alt=""><div class="kp"></div><div class="et" style="font-size:24px;margin:0 0 12px">Pilih Lakon</div><div id="lk-list"></div>
     <button class="mb" id="lk-back" style="justify-content:center;width:min(92vw,458px)">‹ Kembali</button></section>
 </div>
 
 <script type="module">
+// ---- teks dwibahasa (dimuat paling awal agar bisa dipakai di mana saja) ----
+let BHS = 'id'; try{ BHS = localStorage.getItem('wayang-bhs') === 'jv' ? 'jv' : 'id'; }catch(_){}
+const TXT = {
+id:{lp:'Gerakkan Arjuna, Hanoman, Gatotkaca, dan sahabatnya dengan sentuhan jari — atau gerakan tanganmu di depan kamera. Lengan bersendi, badan menari, gamelan menyertai.',masuk:'Masuki Panggung ',eb:'Panggung kulit digital',eb2:'Panggung wayang kulit digital',
+f1j:'Kamera & gestur',f1t:'Jempol & telunjuk menggerakkan lengan wayang — kepalan ditahan 2 detik membalik arah.',f2j:'Enam tokoh wayang',f2t:'Arjuna, Hanoman, Semar, Gatotkaca, Werkudara, Rahwana — pilih lewat galeri tokoh.',f3j:'Gamelan menyertai',f3t:'Musik latar plus bunyi bonang, kendang, dan gong yang bereaksi pada tiap gerakan.',f4j:'Rekam & bagikan',f4t:'Ambil foto atau rekam video pertunjukanmu lengkap dengan musiknya.',fn:'Bisa dimainkan dengan sentuhan saja · Untuk mode kamera, izinkan akses kamera di browser',
+sub:'Gerakkan wayang dengan tanganmu, biarkan sang dalang membawakan lakonnya.',m1b:'Mulai Pentas',m1s:'Main wayang bebas dengan tangan atau sentuhan',m2b:'Pilih Lakon',m2s:'Cerita bawaan yang dibacakan suara dalang',m3b:'Pilih Tokoh',m3s:'Tentukan wayang kiri dan kanan',m4b:'Kenali Tokoh',m4s:'Baca watak dan kisah tiap wayang',m5b:'Kuis Wayang',m5s:'Uji pengetahuanmu tentang wayang dan budaya Jawa',m6b:'Latihan Gerak',m6s:'Belajar menggerakkan wayang langkah demi langkah',
+pt:'Pilih Tokoh',wk:'Wayang kiri',wn:'Wayang kanan',kembali:'‹ Kembali',mulai2:'Mulai Pentas ›',pl:'Pilih Lakon',kt:'Kenali Tokoh',kjl:'Julukan',kwt:'Watak',klk:'Asal kisah',kck:'Ciri khas',kfk:'Tahukah kamu?',kuji:'Uji Pengetahuan ›',
+qt:'Kuis Wayang',qs:'Soal',qn:'Lanjut ›',qend:'Lihat hasil ›',qb:'Benar!',qsal:'Kurang tepat.',qskor:'Skor',qul:'Main lagi',g3:'Dalang Agung',g2:'Dalang Muda',g1:'Niyaga',g0:'Penonton Setia',
+lt:'Latihan',lskip:'Lewati',lx:'Keluar',lsel:'Latihan selesai',lcam:'Nyalakan kamera lewat tombol Kamera, atau lewati langkah ini.',
+l0:'Tahan tangan santai di depan kamera (kalibrasi)',l1:'Angkat lengan kiri wayang tinggi-tinggi (jempol dimiringkan ke luar)',l2:'Angkat lengan kanan wayang (telunjuk dimiringkan ke luar)',l3:'Turunkan kedua lengan (tekuk jari)',l4:'Geser wayang ke tengah layar',l5:'Geser wayang kembali ke kiri',l6:'Balik arah wayang (kepalan 2 detik atau tombol Balik arah)',
+dKamera:'Kamera',dBalik:'Balik arah',dPandu:'Panduan',dMenu:'Menu',dPgg:'Panggung',dCerita:'Cerita',dHenti:'Henti',
+pPgg:'Panggung',pTk:'Tokoh kiri',pTn:'Tokoh kanan',pLatar:'Latar kelir',pBhs:'Bahasa',pTukar:'Tukar jempol ↔ telunjuk',pDua:'Mode dua pemain (kamera dibagi kiri / kanan)',pSet:'Penyetelan tangan',pAdu:'Mode adu (tenaga & pemenang)',pMdl:'Model tangan',pKal:'Kalibrasi ulang tangan',
+bj:'Jejer',bp:'Perang',bt:'Penutup',babak:'Babak',
+sKal:'Tahan tangan santai ±1 detik, posisi awal lengan dikunci',sSiap:'Siap! Miringkan & tekuk jempol / telunjuk',sPet:'Jempol = tangan kiri wayang · telunjuk = tangan kanan wayang',sFist:'Tahan terus… 2 detik untuk membalik wayang',sFlip:'Kepalan ditahan: wayang berbalik arah',sPovOn:'Sudut penonton: wayang jadi bayangan di kelir kertas',sPovOff:'Kembali ke sudut dalang',sAdu:'Mode adu! Pukul badan lawan atau adu lengan, tenaga habis = kalah',sAduOff:'Mode adu dimatikan',
+tP:'‹ Kembali',tN:'Lanjut ›',tN2:'Mulai ›',tS:'Lewati panduan',
+tj0:'Selamat datang di Wayang Tangan',tt0:'Mainkan wayang digital dengan sentuhan atau gerakan tangan di depan kamera. Geser wayang dengan jari, atau nyalakan kamera lewat tombol Kamera di bawah.',
+tj1:'Kalibrasi dulu',tt1:'Saat kamera menyala, tahan tangan santai sekitar 1 detik. Lengan wayang dikunci di posisi awal, lalu mulai mengikuti. Tombol Kalibrasi ulang ada di menu Panggung.',
+tj2:'Jempol & telunjuk',tt2:'Jempol = tangan kiri wayang, telunjuk = tangan kanan wayang. Miringkan jari ke luar untuk mengangkat lengan, tekuk untuk menurunkan. Kepalan ditahan 2 detik membalik wayang.',
+tj3:'Mode adu & dua pemain',tt3:'Centang Mode adu di menu Panggung: pukul lawan dengan ayunan lengan sampai tenaganya habis. Mode dua pemain membagi kamera kiri dan kanan, satu tangan untuk tiap wayang.',
+tj4:'Cerita, rekam & bagikan',tt4:'Pilih lakon lewat menu E-DALANG atau tombol Cerita. Tombol Foto mengambil gambar dan tombol Rekam membuat video. Kalau tangan terasa lag, setel di Penyetelan tangan atau ganti model tangan.'},
+jv:{lp:'Obahna Arjuna, Hanoman, Gatotkaca, lan kanca-kancane nganggo ndemek layar — utawa obahna tanganmu ing ngarep kamera. Lengene bisa ketekuk, awake njoged, gamelan nyengkuyung.',masuk:'Mlebu Pentas ',eb:'Pentas kulit digital',eb2:'Pentas wayang kulit digital',
+f1j:'Kamera & obahan',f1t:'Jempol lan driji panuduh nggerakake lengen wayang — genggaman ditahan 2 detik kanggo walik arah.',f2j:'Enem tokoh wayang',f2t:'Arjuna, Hanoman, Semar, Gatotkaca, Werkudara, Rahwana — pilih saka dhaptar tokoh.',f3j:'Gamelan nyengkuyung',f3t:'Musik latar, bonang, kendhang, lan gong kang nanggapi saben obahan.',f4j:'Rekam & bagekake',f4t:'Jupuk foto utawa rekam video pagelaranmu lengkap karo musike.',fn:'Bisa dimainake mung nganggo ndemek layar · Kanggo mode kamera, idinana akses kamera ing browser',
+sub:'Obahna wayang nganggo tanganmu, lan ki dalang bakal nggawa lakone.',m1b:'Miwiti Pentas',m1s:'Dolanan wayang bebas nganggo tangan utawa ndemek layar',m2b:'Pilih Lakon',m2s:'Crita pilihan kang diwaca swarane dalang',m3b:'Pilih Tokoh',m3s:'Tetepake wayang kiwa lan tengen',m4b:'Kenal Tokoh',m4s:'Waca watak lan kisahe saben wayang',m5b:'Kuis Wayang',m5s:'Ujia kawruhmu bab wayang lan budaya Jawa',m6b:'Latihan Obahan',m6s:'Sinau nggerakake wayang sithik mbaka sithik',
+pt:'Pilih Tokoh',wk:'Wayang kiwa',wn:'Wayang tengen',kembali:'‹ Bali',mulai2:'Miwiti Pentas ›',pl:'Pilih Lakon',kt:'Kenal Tokoh',kjl:'Sesebutan',kwt:'Watak',klk:'Asale crita',kck:'Ciri khas',kfk:'Apa kowe ngerti?',kuji:'Uji Kawruh ›',
+qt:'Kuis Wayang',qs:'Pitakon',qn:'Terusake ›',qend:'Deleng asil ›',qb:'Bener!',qsal:'Durung pas.',qskor:'Skor',qul:'Dolanan maneh',g3:'Dalang Agung',g2:'Dalang Enom',g1:'Niyaga',g0:'Penonton Setya',
+lt:'Latihan',lskip:'Liwati',lx:'Metu',lsel:'Latihan rampung',lcam:'Nyalakna kamera liwat tombol Kamera, utawa liwati langkah iki.',
+l0:'Tahan tangan santai ing ngarep kamera (kalibrasi)',l1:'Angkat lengen kiwa wayang dhuwur (jempol dimiringake metu)',l2:'Angkat lengen tengen wayang (driji panuduh dimiringake metu)',l3:'Mudhunake lengen loro (tekuk drijine)',l4:'Geser wayang menyang tengah layar',l5:'Geser wayang bali menyang kiwa',l6:'Walik arah wayang (genggaman 2 detik utawa tombol Walik arah)',
+dKamera:'Kamera',dBalik:'Walik arah',dPandu:'Pituduh',dMenu:'Menu',dPgg:'Panggung',dCerita:'Crita',dHenti:'Mandheg',
+pPgg:'Panggung',pTk:'Tokoh kiwa',pTn:'Tokoh tengen',pLatar:'Latar kelir',pBhs:'Basa',pTukar:'Tukar jempol ↔ driji panuduh',pDua:'Mode pemain loro (kamera dibagi kiwa / tengen)',pSet:'Setelan tangan',pAdu:'Mode adu (tenaga & pemenang)',pMdl:'Model tangan',pKal:'Kalibrasi ulang tangan',
+bj:'Jejer',bp:'Perang',bt:'Penutup',babak:'Babak',
+sKal:'Tahan tangan santai ±1 detik, posisi wiwitan lengen dikunci',sSiap:'Siap! Miringake & tekuk jempol / driji panuduh',sPet:'Jempol = tangan kiwa wayang · driji panuduh = tangan tengen wayang',sFist:'Tahan terus… 2 detik kanggo walik arah',sFlip:'Genggaman ditahan: wayang walik arah',sPovOn:'Sudut penonton: wayang dadi bayangan ing kelir kertas',sPovOff:'Bali menyang sudut dalang',sAdu:'Mode adu! Pukulen awak lawan utawa adu lengen, tenaga entek = kalah',sAduOff:'Mode adu dipateni',
+tP:'‹ Bali',tN:'Terusake ›',tN2:'Miwiti ›',tS:'Liwati pituduh',
+tj0:'Sugeng rawuh ing Wayang Tangan',tt0:'Dolanan wayang digital nganggo ndemek layar utawa obahan tangan ing ngarep kamera. Geser wayang nganggo driji, utawa nyalakna kamera liwat tombol Kamera ing ngisor.',
+tj1:'Kalibrasi dhisik',tt1:'Nalika kamera urip, tahan tangan santai watara 1 detik. Lengen wayang dikunci ing posisi wiwitan, banjur wiwit ngetutake. Tombol Kalibrasi ulang ana ing menu Panggung.',
+tj2:'Jempol & driji panuduh',tt2:'Jempol = tangan kiwa wayang, driji panuduh = tangan tengen wayang. Miringake driji metu kanggo ngangkat lengen, tekuk kanggo mudhunake. Genggaman ditahan 2 detik kanggo walik arah.',
+tj3:'Mode adu & pemain loro',tt3:'Centhang Mode adu ing menu Panggung: pukulen lawan nganggo ayunan lengen nganti tenagane entek. Mode pemain loro mbagi kamera dadi kiwa lan tengen, siji tangan kanggo saben wayang.',
+tj4:'Crita, rekam & bagekake',tt4:'Pilih lakon liwat menu E-DALANG utawa tombol Crita. Tombol Foto njupuk gambar lan tombol Rekam gawe video. Yen tangan krasa kendho, setel ing Setelan tangan utawa ganti model tangan.'}};
+const tx = k => (TXT[BHS] && TXT[BHS][k]) || TXT.id[k] || k;
 const $ = id => document.getElementById(id);
 const cv = $('cv'), g = cv.getContext('2d'), vid = $('vid'), st = $('st');
 const LEDGE = .856;                 // garis atas bingkai kayu di bagian bawah background (pecahan tinggi)
@@ -699,17 +756,17 @@ function proses(landmarks, tcap){
   const ts = tcap/1000;
   for(const [i,h] of bagi(hs)){
     const p = P[i];
-    if(now - p.seen > 800){ p.o.forEach(f => f.reset()); p.cal = {t0:now, n:0, js:0, jc:0, ts:0, tc:0, je:0, te:0, ok:false}; say('Tahan tangan santai ±1 detik, posisi awal lengan dikunci', 1300); }      // tangan baru muncul: jangan tarik dari posisi lama
+    if(now - p.seen > 800){ p.o.forEach(f => f.reset()); p.cal = {t0:now, n:0, js:0, jc:0, ts:0, tc:0, je:0, te:0, ok:false}; say(tx('sKal'), 1300); }      // tangan baru muncul: jangan tarik dari posisi lama
     p.seen = now; p.hx = h.x; p.hy = h.y;
     const hx = SET.dua ? (h.x - i*.5)*2 : h.x, pr = SET.auto ? clamp(((trk.ms || 30) + 500/Math.max(trk.fps || 20, 10))/1000, .05, .13) : SET.pred; p.o[0].s = p.o[1].s = SET.resp;
     const fx = p.o[0].f((hx-.1)/.8, ts), fy = p.o[1].f((h.y-.15)/.7, ts);       // + prediksi 50 ms ke depan menutup jeda deteksi
     p.tx = .18 + .64*clamp(fx + p.o[0].dx*pr, 0, 1);
     p.ty = .4 + .12*clamp(fy + p.o[1].dx*pr, 0, 1);
-    p.mode = 0; if(!petunjuk){ petunjuk = true; say('Jempol = tangan kiri wayang · telunjuk = tangan kanan wayang', 3500); }
+    p.mode = 0; if(!petunjuk){ petunjuk = true; say(tx('sPet'), 3500); }
     // kepalan ditahan ±0,8 detik = wayang berbalik arah (sekali; buka tangan lagi untuk mengulang)
     if(h.jari === 0 && h.buka < 1.45){
-      if(!p.fistT){ p.fistT = now; setTimeout(() => { if(p.fistT && !p.fistDone) say('Tahan terus… 2 detik untuk membalik wayang', 1400); }, 600); }
-      else if(!p.fistDone && now - p.fistT > 2000){ p.fistDone = true; p.inv = !p.inv; say('Kepalan ditahan: wayang berbalik arah', 1400); }
+      if(!p.fistT){ p.fistT = now; setTimeout(() => { if(p.fistT && !p.fistDone) say(tx('sFist'), 1400); }, 600); }
+      else if(!p.fistDone && now - p.fistT > 2000){ p.fistDone = true; p.inv = !p.inv; say(tx('sFlip'), 1400); }
     } else { p.fistT = 0; p.fistDone = false; }
     p.tr = p.o[2].f(h.rot*.3, ts);
     p.ts = clamp(p.o[3].f(h.size/.16, ts), .75, 1.15);
@@ -717,7 +774,7 @@ function proses(landmarks, tcap){
     const K = p.cal;
     if(!K.ok){                                               // kalibrasi: lengan tetap di posisi awal selagi tangan dibiarkan santai
       if(now - K.t0 < 1200){ K.n++; K.js += Math.sin(h.jem.a); K.jc += Math.cos(h.jem.a); K.ts += Math.sin(h.tel.a); K.tc += Math.cos(h.tel.a); K.je += h.jem.c; K.te += h.tel.c; }
-      else if(K.n > 3){ K.ok = true; K.t1 = now; K.ja = Math.atan2(K.js, K.jc); K.ta = Math.atan2(K.ts, K.tc); K.je /= K.n; K.te /= K.n; say('Siap! Miringkan & tekuk jempol / telunjuk', 1800); }
+      else if(K.n > 3){ K.ok = true; K.t1 = now; K.ja = Math.atan2(K.js, K.jc); K.ta = Math.atan2(K.ts, K.tc); K.je /= K.n; K.te /= K.n; say(tx('sSiap'), 1800); }
       else p.cal = {t0:now, n:0, js:0, jc:0, ts:0, tc:0, je:0, te:0, ok:false};
     } else if(p.arms.length === 2 && p.G){
       // gerak RELATIF terhadap posisi santai: miring ke luar = lengan naik, ditekuk = lengan turun, jempol dilebarkan = naik
@@ -802,7 +859,7 @@ function urai(txt){
     const m = /^([^:：]{1,24})[:：]\s*(.+)$/.exec(s);
     if(!m){ out.push({who:-1, nama:'', teks:s}); continue; }
     const nama = m[1].trim(), kunci = nama.toLowerCase();
-    if(kunci === 'narator' || kunci === 'narasi'){ out.push({who:-1, nama:'', teks:m[2].trim()}); continue; }
+    if(kunci === 'narator' || kunci === 'narasi' || kunci === 'dalang'){ out.push({who:-1, nama:'', teks:m[2].trim()}); continue; }
     if(!peta.has(kunci)) peta.set(kunci, baru++ % 2);
     out.push({who:peta.get(kunci), nama, teks:m[2].trim()});
   }
@@ -813,7 +870,7 @@ function mulaiCerita(){
   if(!baris.length){ say('Tulis dulu ceritanya.'); return; }
   initSfx();
   tandaiSuara(baris); cerita = {baris, i:0, t0:performance.now(), id:0};
-  $('story').hidden = true; $('nextb').hidden = false; $('ctl').textContent = 'Henti';
+  $('story').hidden = true; $('nextb').hidden = false; $('ctl').textContent = tx('dHenti');
   mulaiBaris();
 }
 function pilihSuara(who){
@@ -823,7 +880,7 @@ function pilihSuara(who){
   return jv.find(nG) || idv.find(v => NAMA_PRIA.test(v.name) && nG(v)) || idv.find(nG) || jv[0] || idv.find(v => NAMA_PRIA.test(v.name)) || idv[0] || null;
 }
 function mulaiBaris(){
-  const L = cerita.baris[cerita.i];
+  const L = cerita.baris[cerita.i]; aksiBabak(L, cerita.i, cerita.baris);
   Object.assign(cerita, {t0:performance.now(), id:cerita.id + 1, tts:false, ttsMulai:false, ttsSelesai:false, tm:0, tEnd:0, lastK:0, deg:Math.floor(Math.random()*5)});
   if($('gmlOn').checked){ if(L.who < 0) gong(.2); else kendang(); }
   try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(_){} try{ if(cerita && cerita.audio) cerita.audio.pause(); }catch(_){}
@@ -848,7 +905,7 @@ function hurufTampil(now){
   return Math.floor(el*30);
 }
 function selesaiCerita(pesan){
-  cerita = null; $('nextb').hidden = true; $('ctl').textContent = 'Cerita'; P.forEach(p => { p.sp = false; });
+  cerita = null; $('nextb').hidden = true; $('ctl').textContent = tx('dCerita'); P.forEach(p => { p.sp = false; });
   try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(_){} try{ if(cerita && cerita.audio) cerita.audio.pause(); }catch(_){}
   ducked = false; terapVol();
   if(pesan){ say(pesan, 2200); if($('gmlOn').checked) gong(.2); if(pesan === 'Cerita selesai.') gunungan('tutup'); }
@@ -1008,12 +1065,12 @@ function loop(t){
   efekAksi(now);
   g.clearRect(0, 0, W, H);
   if(P.every(p => p.body && p.sh)){
-    g.save(); g.beginPath(); g.rect(0, 0, W, H*LEDGE); g.clip();          // wayang "di balik" bingkai kayu bawah
+    g.save(); g.beginPath(); g.rect(0, 0, W, H*LEDGE + H*.035); g.clip();          // wayang "di balik" bingkai kayu bawah
     const Gs = P.map((p, i) => (p.G = geo(p, t, i)));
     P.forEach((p, i) => bayang(p, Gs[i], t));
     P.forEach((p, i) => gambar(p, Gs[i], t));
     g.restore();
-    lukisCerita(now); lukisGunung(now); lukisPercik(now); lukisAdu(now);
+    lukisCerita(now); lukisGunung(now); lukisPercik(now); lukisAdu(now); lukisBabak(now);
   }
   if(rec) komposit();
   requestAnimationFrame(loop);
@@ -1069,10 +1126,13 @@ function mkLatar(k){
     x.strokeStyle = '#e1af5f'; x.lineWidth = 4; for(let i = 0; i < 20; i++){ x.beginPath(); x.arc((i + .5)*w/20, h*.075, w/40, 0, Math.PI); x.stroke(); }
     x.fillStyle = '#6b1d0b'; x.strokeStyle = 'rgba(225,175,95,.75)'; x.lineWidth = 2; for(let i = 0; i < w; i += 46){ x.beginPath(); x.moveTo(i, yb); x.lineTo(i + 23, yb - 26); x.lineTo(i + 46, yb); x.closePath(); x.fill(); x.stroke(); }   // tumpal
   }
-  const gd = x.createLinearGradient(0, yb, 0, h); gd.addColorStop(0, '#cdb67d'); gd.addColorStop(.35, '#a8905a'); gd.addColorStop(1, '#5b4725'); x.fillStyle = gd; x.fillRect(0, yb, w, h - yb);   // debog (batang pisang)
-  x.strokeStyle = 'rgba(70,50,20,.25)'; for(let i = 0; i < w; i += 7){ x.lineWidth = 1 + (i*13)%3; x.beginPath(); x.moveTo(i, yb); x.lineTo(i + ((i*7)%5 - 2), h); x.stroke(); }
-  x.strokeStyle = 'rgba(60,40,15,.35)'; x.lineWidth = 3; [.4, .72].forEach(f => { x.beginPath(); x.moveTo(0, yb + (h - yb)*f); x.lineTo(w, yb + (h - yb)*f); x.stroke(); });
-  x.fillStyle = 'rgba(20,10,3,.6)'; x.fillRect(0, yb, w, 7); x.fillStyle = 'rgba(225,175,95,.8)'; x.fillRect(0, yb - 2, w, 2);
+  const bd = (y0, y1) => {                                   // debog: dua batang pisang berbaring, tempat gapit wayang ditancapkan
+    const g1 = x.createLinearGradient(0, y0, 0, y1); g1.addColorStop(0, '#5e4a28'); g1.addColorStop(.12, '#e2cf98'); g1.addColorStop(.45, '#c4ac70'); g1.addColorStop(.85, '#8a7243'); g1.addColorStop(1, '#4a3a1d'); x.fillStyle = g1; x.fillRect(0, y0, w, y1 - y0);
+    x.strokeStyle = 'rgba(80,58,24,.28)'; for(let j = y0 + 8; j < y1 - 4; j += 6){ x.lineWidth = 1 + (j*7)%2; x.beginPath(); x.moveTo(0, j); for(let i = 0; i <= w; i += 160) x.lineTo(i, j + Math.sin(i*.02 + j)*1.6); x.stroke(); }
+    x.strokeStyle = 'rgba(60,42,16,.45)'; x.lineWidth = 3; for(let i = 90; i < w; i += 230 + (i*13)%90){ x.beginPath(); x.moveTo(i, y0 + 3); x.quadraticCurveTo(i + 14, (y0 + y1)/2, i, y1 - 3); x.stroke(); }
+    x.fillStyle = 'rgba(40,26,8,.55)'; x.fillRect(0, y1 - 5, w, 5);
+  };
+  const y1 = yb + (h - yb)*.54; bd(yb, y1); bd(y1, h); x.fillStyle = 'rgba(20,10,3,.65)'; x.fillRect(0, yb, w, 6);
   return cn;
 }
 const BG0 = getComputedStyle($('kelir')).backgroundImage.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
@@ -1138,12 +1198,12 @@ function lukisAdu(now){
   if(adu.over){ const t = Math.min(1, (now - adu.over.t)/500); g.save(); g.globalAlpha = t; g.textAlign = 'center'; g.font = '700 ' + Math.round(Math.min(W, H)*.07) + 'px serif'; g.lineWidth = 6; g.strokeStyle = '#2b1507'; g.fillStyle = '#ffd36a';
     const tx = '' + namaT(adu.over.win) + ' menang!'; g.strokeText(tx, W/2, H*.3); g.fillText(tx, W/2, H*.3); g.restore(); }
 }
-$('aduOn').onchange = () => { adu.on = $('aduOn').checked; adu.hp = [100, 100]; adu.over = null; P.forEach(p => { p.jtT = 0; p.kb = 0; }); $('pg').hidden = true; say(adu.on ? 'Mode adu! Pukul badan lawan atau adu lengan, tenaga habis = kalah' : 'Mode adu dimatikan', 3500); };
+$('aduOn').onchange = () => { adu.on = $('aduOn').checked; adu.hp = [100, 100]; adu.over = null; P.forEach(p => { p.jtT = 0; p.kb = 0; }); $('pg').hidden = true; say(adu.on ? tx('sAdu') : tx('sAduOff'), 3500); };
 function efekAksi(now){
   if(!P.every(p => p.G)) return;
-  const dtS = Math.max(.001, (now - (efekAksi.t || now))/1000); efekAksi.t = now;
+  const dtS = Math.max(.001, (now - (efekAksi.t || now))/1000); efekAksi.t = now; if(lat.on) cekLatih(now, dtS);
   const mn = Math.min(adu.hp[0], adu.hp[1])/100, gml = $('gmlOn').checked;                  // musik mengikuti suasana
-  if(audioEl && musicOn){ const tr = adu.on ? (adu.over ? .85 : 1.1 + .12*(1 - mn)) : (cerita ? .94 : 1); audioEl.playbackRate += (tr - audioEl.playbackRate)*.03; musikV = adu.over ? .6 : cerita ? .85 : 1; terapVol(); }
+  if(audioEl && musicOn){ const tr = adu.on ? (adu.over ? .85 : 1.1 + .12*(1 - mn)) : (cerita ? (babakAktif === 'perang' ? 1.1 : .94) : 1); audioEl.playbackRate += (tr - audioEl.playbackRate)*.03; musikV = adu.over ? .6 : cerita ? .85 : 1; terapVol(); }
   if(adu.on && !adu.over && gml && now - (efekAksi.r || 0) > 560 - 240*(1 - mn)){ efekAksi.r = now; efekAksi.n = (efekAksi.n || 0) + 1; if(efekAksi.n % 4) tak(.08); else dung(.2); }   // denyut kendang makin cepat saat tenaga menipis
   P.forEach(p => { p.jt = (p.jt || 0) + ((p.jtT || 0) - (p.jt || 0))*.1; p.kb = (p.kb || 0)*.88; });
   if(adu.over){ const k = P[1 - adu.over.win]; k.jtT = (k.x < .5 ? -1 : 1)*1.35; if(now - adu.over.t > 4500){ adu.hp = [100, 100]; adu.over = null; P.forEach(p => p.jtT = 0); say('Ronde baru!', 1500); } }
@@ -1177,8 +1237,8 @@ function efekAksi(now){
 }
 // ---- suara MP3 (mas Jawa neural) per baris lakon bawaan; bila file tidak ada otomatis pakai suara perangkat ----
 function tandaiSuara(baris){
-  const a = db.daftar.find(c => c.id === db.aktif), k = a && /^p_/.test(a.id) ? a.id.slice(2) : '';
-  if(k && LAKON[k] && LAKON[k].teks === $('stxt').value) baris.forEach((b, i) => { b.src = 'suara/' + k + '/' + (i + 1) + '.mp3'; });
+  const a = db.daftar.find(c => c.id === db.aktif), m = a && /^p_(\w+?)(_jv)?$/.exec(a.id), k = m ? m[1] : '', jv = !!(m && m[2]), l = k && LAKON[k];
+  if(l && (jv ? l.jv : l.teks) === $('stxt').value) baris.forEach((b, i) => { b.src = 'suara/' + (jv ? 'jv/' : '') + k + '/' + (i + 1) + '.mp3'; b.babak = l.babak && l.babak[i]; });
 }
 function mainkanSuara(L, id){
   const a = new Audio(L.src); let mulai = false; a.preload = 'auto';
@@ -1244,7 +1304,7 @@ LAKON.ah = {nama:'Arjuna & Hanoman', kiri:'arjuna', kanan:'hanoman', latar:'mala
 const HANDS_CDN = 'https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240';
 let modelPilih = 'lite', hl = null, hlBusy = false, hlT0 = 0, hlTs = 0;
 try{ modelPilih = localStorage.getItem('wayang-model') === 'standar' ? 'standar' : 'lite'; }catch(_){}
-const labelMdl = () => { $('mdl').textContent = 'Model tangan · ' + (modelPilih === 'lite' ? 'Lite (cepat)' : 'Standar'); };
+const labelMdl = () => { $('mdl').textContent = tx('pMdl') + ' · ' + (modelPilih === 'lite' ? 'Lite (cepat)' : 'Standar'); };
 labelMdl();
 async function siapkanLite(){
   if(!window.Hands) await new Promise((ok, no) => { const sc = document.createElement('script'); sc.src = HANDS_CDN + '/hands.js'; sc.crossOrigin = 'anonymous'; sc.onload = ok; sc.onerror = () => no(new Error('hands.js tidak termuat')); document.head.appendChild(sc); });
@@ -1292,7 +1352,7 @@ const TUR = [
   [[['arjuna', 'kanan'], ['hanoman', 'kiri']], 'Cerita, rekam & bagikan', 'Pilih lakon lewat menu E-DALANG atau tombol Cerita. Tombol Foto mengambil gambar dan tombol Rekam membuat video. Kalau tangan terasa lag, setel di Penyetelan tangan atau ganti model tangan.']
 ];
 let turI = 0;
-function tampilTur(){ const t = TUR[turI]; $('turE').innerHTML = t[0].map(([k, ke]) => '<img alt="" src="' + SIL[k] + '"' + (ke && (ke === 'kanan') === NATKIRI.includes(k) ? ' style="transform:scaleX(-1)"' : '') + '>').join(''); $('turJ').textContent = t[1]; $('turT').textContent = t[2]; $('turD').textContent = TUR.map((_, i) => i === turI ? '●' : '○').join(' '); $('turP').style.visibility = turI ? 'visible' : 'hidden'; $('turN').textContent = turI === TUR.length - 1 ? 'Mulai ▶' : 'Lanjut ›'; }
+function tampilTur(){ const it = TUR[turI]; $('turE').innerHTML = it[0].map(([k, ke]) => '<img alt="" src="' + SIL[k] + '"' + (ke && (ke === 'kanan') === NATKIRI.includes(k) ? ' style="transform:scaleX(-1)"' : '') + '>').join(''); $('turJ').textContent = tx('tj' + turI); $('turT').textContent = tx('tt' + turI); $('turD').textContent = TUR.map((_, i) => i === turI ? '●' : '○').join(' '); $('turP').style.visibility = turI ? 'visible' : 'hidden'; $('turP').textContent = tx('tP'); $('turS').textContent = tx('tS'); $('turN').textContent = turI === TUR.length - 1 ? tx('tN2') : tx('tN'); }
 function bukaTur(){ turI = 0; tampilTur(); $('tur').hidden = false; }
 function tutupTur(){ $('tur').hidden = true; try{ localStorage.setItem('wayang-tur', '1'); }catch(_){} }
 $('turN').onclick = () => { if(turI < TUR.length - 1){ turI++; tampilTur(); } else tutupTur(); };
@@ -1320,15 +1380,11 @@ $('plogo').innerHTML = SV(IKON.logo); $('arr').innerHTML = SV(IKON.panah, 20);
 [['m-mulai','main'], ['m-lakon','buku'], ['m-tokoh','tokoh']].forEach(([id, k]) => { $(id).querySelector('.mi').innerHTML = SV(IKON[k]); });
 document.querySelectorAll('.kp').forEach(e => { e.innerHTML = '<div class="eb">Panggung wayang kulit digital</div><div class="et">E-DALANG</div><div class="dv"><i></i><i></i></div>'; });
 document.querySelectorAll('.wm').forEach(e => { e.src = GUNIM.src; });
-$('fg').innerHTML = [['tangan','Kamera & gestur','Jempol & telunjuk menggerakkan lengan wayang — kepalan ditahan 2 detik membalik arah.'], ['mahkota','Enam tokoh wayang','Arjuna, Hanoman, Semar, Gatotkaca, Werkudara, Rahwana — pilih lewat galeri tokoh.'], ['musik','Gamelan menyertai','Musik latar plus bunyi bonang, kendang, dan gong yang bereaksi pada tiap gerakan.'], ['kamera','Rekam & bagikan','Ambil foto atau rekam video pertunjukanmu lengkap dengan musiknya.']]
-  .map(([k, j, t]) => '<div class="fi"><span class="fc">' + SV(IKON[k], 20) + '</span><div><b>' + j + '</b><p>' + t + '</p></div></div>').join('');
 function tampilScr(k){ document.querySelectorAll('#depan .scr').forEach(e => { e.hidden = e.id !== 's-' + k; }); $('depan').hidden = false; $('depan').className = k === 'land' ? 'land' : 'bl'; $('depan').scrollTop = 0; if(k === 'tokoh') segarKartu(); }
 function tutupDepan(){ $('depan').hidden = true; initSfx(); if(!sudahTur){ sudahTur = true; setTimeout(bukaTur, 500); } }
 $('masuk').onclick = () => tampilScr('menu'); $('m-mulai').onclick = tutupDepan; $('m-lakon').onclick = () => tampilScr('lakon'); $('m-tokoh').onclick = () => tampilScr('tokoh');
 $('tk-back').onclick = $('lk-back').onclick = () => tampilScr('menu'); $('tk-go').onclick = tutupDepan; $('home').onclick = () => tampilScr('menu');
 const nm = k => (TOKOH[k] || '').split(' (')[0];
-$('lk-list').innerHTML = '';
-Object.entries(LAKON).forEach(([k, l]) => { const b = document.createElement('button'); b.className = 'mb'; b.innerHTML = '<div><b>' + l.nama + '</b><small>' + nm(l.kiri) + ' · ' + nm(l.kanan) + ' — ' + l.teks.split('\n').filter(x => x.trim()).length + ' adegan dibacakan dalang</small></div>'; b.onclick = () => { tutupDepan(); mainLakon(k); }; $('lk-list').appendChild(b); });
 function bangunKartu(host, i){ host.innerHTML = ''; Object.keys(TOKOH).forEach(k => { const b = document.createElement('button'); b.className = 'tk'; b.dataset.i = i; b.dataset.k = k; b.innerHTML = '<img alt="" src="' + (THUMB[k] || '') + '"><span>' + nm(k) + '</span>'; b.onclick = () => setTokoh(i, k); host.appendChild(b); }); }
 [['tgL', 0], ['tgR', 1], ['pgL', 0], ['pgR', 1]].forEach(([id, i]) => bangunKartu($(id), i));
 function segarKartu(){ document.querySelectorAll('.tk').forEach(b => b.classList.toggle('on', CUR[+b.dataset.i] === b.dataset.k)); }
@@ -1339,7 +1395,7 @@ function setPov(on, tanpaLatar){
   if(on === pov) return; pov = on; $('pov').classList.toggle('on', on); $('kelir').classList.toggle('pov', on);
   if(on){ latarSblm = $('latar').value === 'kertas' ? 'asli' : $('latar').value; setLatar('kertas'); $('latar').value = 'kertas'; }
   else if(!tanpaLatar){ setLatar(latarSblm); $('latar').value = latarSblm; }
-  say(on ? 'Sudut penonton: wayang jadi bayangan di kelir kertas' : 'Kembali ke sudut dalang', 2500);
+  say(on ? tx('sPovOn') : tx('sPovOff'), 2500);
 }
 $('pov').onclick = () => setPov(!pov);
 
@@ -1349,6 +1405,111 @@ Object.keys(SIL).forEach(k => { const im = new Image(); im.src = SIL[k]; SILI[k]
 (function(){ const URUT = ['gatotkaca', 'semar', 'rahwana', 'werkudara', 'arjuna', 'hanoman', 'gunungan'], KANAN = ['semar', 'hanoman'];   // yang menghadap kanan dibalik: semua berarak ke kiri
   let h = ''; for(let r = 0; r < 2; r++) URUT.forEach((k, i) => { if(SIL[k]) h += '<div class="pw' + (k === 'gunungan' ? ' g' : '') + '" style="--d:' + ((i*1.3 + r*.7) % 4.6).toFixed(1) + 's"><img alt="" src="' + SIL[k] + '"' + (KANAN.includes(k) ? ' style="transform:scaleX(-1)"' : '') + '><i></i></div>'; });
   $('trk2').innerHTML = h; })();
+
+// ================= dwibahasa, profil tokoh, kuis, latihan gerak, suara dalang =================
+const LK2 = {"sg": {"nama_jv": "Wejangan Semar kanggo Gatotkaca", "babak": ["jejer", "jejer", "jejer", "jejer", "jejer", "penutup"], "jv": "Dalang: Ing pendapa Pringgodani, Gatotkaca katon gelisah mikirake perang gedhe kang arep teka.\nGatotkaca: Kakang Semar, kekuwatanku ora ana kang nandhingi, nanging yagene atiku isih rumangsa ora tenang?\nSemar: Ngger, kekuwatan tanpa kawicaksanan iku kaya prahara tanpa arah.\nGatotkaca: Banjur apa kang kudu daklakoni, Kakang?\nSemar: Lindungana wong kang ringkih, andhap asor, lan kowe bakal mabur ngungkuli mega.\nDalang: Gatotkaca ngapurancang ngajeni, banjur mabur ing awang-awang kairing gamelan.", "babakid": ["jejer", "jejer", "jejer", "jejer", "jejer", "penutup"]}, "rw": {"nama_jv": "Rahwana lan Werkudara", "babak": ["jejer", "jejer", "jejer", "perang", "perang", "penutup"], "jv": "Dalang: Ing gapura Ngalengka, Rahwana jejeg gumunggung nantang sapa wae kang wani liwat.\nRahwana: Sapa wani nyoba-nyoba ngidak lemah Ngalengka? Aku Dasamuka, ratu sapuluh penjuru!\nWerkudara: Aku Bima, putrane Pandhu. Aku ora tau tunduk marang ratu kang lali diri.\nRahwana: Gumedhe! Adhepana kekuwatanku!\nWerkudara: Kuku Pancanaka iki wis siyap mangsuli, majua!\nDalang: Gamelan gumuruh, rong kekuwatan gedhe padha adu nganti bumi gonjang-ganjing.", "babakid": ["jejer", "jejer", "jejer", "perang", "perang", "penutup"]}, "ah": {"nama_jv": "Arjuna lan Hanoman", "babak": ["jejer", "jejer", "jejer", "jejer", "jejer", "penutup"], "jv": "Dalang: Kocap kacarita, ing pinggiring wana Dandaka, ana kalih satriya pinunjul kapanggih ing sangisoring rembulan.\nArjuna: He Hanoman, kethek putih kang gagah, menyang ngendi lakumu?\nHanoman: Kawula nggoleki dalan bali menyang Ayodya, dhuh Raden Arjuna.\nArjuna: Ayo, tak tuduhake dalan kang aman.\nHanoman: Matur nuwun, Raden. Muga pangestuning para dewa nunggil karo kita.\nDalang: Mangkana lampahipun kekalih, kairing gamelan ingkang ngalun lirih.", "babakid": ["jejer", "jejer", "jejer", "jejer", "jejer", "penutup"]}};
+Object.keys(LK2).forEach(k => { const v = LK2[k]; Object.assign(LAKON[k], {jv:v.jv, nama_jv:v.nama_jv, babak:v.babakid}); });
+const PROF = {id:{
+gatotkaca:{jl:'Otot Kawat Balung Wesi',wt:'Gagah, setia, berbakti pada orang tua dan negara',lk:'Mahabharata — putra Werkudara dan Dewi Arimbi',ck:'Bisa terbang, bermahkota Basunanda, berbaju Antakusuma',fk:'Gugur di Bharatayudha oleh senjata Konta milik Karna dan dikenang sebagai pahlawan Pandawa.'},
+semar:{jl:'Ki Lurah Badranaya',wt:'Bijaksana, sabar, rendah hati, humoris',lk:'Punakawan asli ciptaan budaya Jawa, pamong para Pandawa',ck:'Tubuh bulat, berkuncung, wajah tersenyum sekaligus seperti menangis',fk:'Di balik rupa rakyat jelata, ia adalah dewa Batara Ismaya yang turun mengasuh manusia.'},
+rahwana:{jl:'Dasamuka',wt:'Sakti, angkuh, penuh ambisi',lk:'Ramayana — raja negeri Alengka',ck:'Wajah merah, hidung panjang, taring tajam, mahkota tinggi',fk:'Menculik Dewi Sinta dan akhirnya dikalahkan Rama yang dibantu Hanoman.'},
+werkudara:{jl:'Bima / Bratasena',wt:'Jujur, tegas, teguh; berbicara ngoko kepada siapa pun',lk:'Mahabharata — Pandawa kedua, putra Pandu',ck:'Kuku Pancanaka, gada Rujakpolo, tubuh tinggi besar',fk:'Berguru pada Dewa Ruci dan menemukan makna sejati hidup di dasar samudra.'},
+arjuna:{jl:'Janaka / Permadi',wt:'Halus budi, tampan, cakap memanah',lk:'Mahabharata — Pandawa ketiga',ck:'Panah Pasopati, tubuh ramping, bermahkota',fk:'Murid terbaik Resi Drona; wejangan Kresna kepadanya menjadi Bhagawadgita.'},
+hanoman:{jl:'Anoman / Maruti',wt:'Setia, gesit, berani',lk:'Ramayana — panglima kera putih pasukan Rama',ck:'Berbulu putih, dapat membesar dan mengecil',fk:'Membakar Alengka dalam lakon Hanoman Obong.'}},
+jv:{
+gatotkaca:{jl:'Otot Kawat Balung Wesi',wt:'Gagah, setya, bekti marang wong tuwa lan negara',lk:'Mahabharata — putrane Werkudara lan Dewi Arimbi',ck:'Bisa mabur, makutha Basunanda, kutang Antakusuma',fk:'Gugur ing Bharatayudha dening gegaman Konta duweke Karna, lan dikenang minangka pahlawan Pandhawa.'},
+semar:{jl:'Ki Lurah Badranaya',wt:'Wicaksana, sabar, andhap asor, lucu',lk:'Punakawan asli kreasi budaya Jawa, pamonge para Pandhawa',ck:'Awak bunder, jambul kuncung, praupan mesem nanging kaya nangis',fk:'Sanajan ujude wong cilik, satemene dheweke Batara Ismaya kang tumurun ngemong manungsa.'},
+rahwana:{jl:'Dasamuka',wt:'Sekti, gumunggung, ambisius',lk:'Ramayana — ratu ing Ngalengka',ck:'Praupan abang, irung dawa, siung landhep, makutha dhuwur',fk:'Nyulik Dewi Sinta lan pungkasane kalah dening Rama kang dibiyantu Hanoman.'},
+werkudara:{jl:'Bima / Bratasena',wt:'Jujur, tegas, mantep; ngomong ngoko marang sapa wae',lk:'Mahabharata — Pandhawa nomer loro, putrane Pandhu',ck:'Kuku Pancanaka, gada Rujakpolo, awak dhuwur gedhe',fk:'Berguru marang Dewa Ruci lan nemokake kasunyatan urip ing dhasaring samodra.'},
+arjuna:{jl:'Janaka / Permadi',wt:'Alus budi, bagus, pinter manah',lk:'Mahabharata — Pandhawa nomer telu',ck:'Panah Pasopati, awak langsing, makutha',fk:'Murid pinunjul Resi Drona; wejangan Kresna marang dheweke dadi Bhagawadgita.'},
+hanoman:{jl:'Anoman / Maruti',wt:'Setya, trengginas, wani',lk:'Ramayana — panglima kethek putih pasukane Rama',ck:'Wulune putih, bisa gedhe lan cilik',fk:'Ngobong Ngalengka ing lakon Hanoman Obong.'}}};
+const QZ = [
+{t:'semar',q:['Siapa punakawan tertua yang menjadi pamong para Pandawa?','Sapa punakawan paling sepuh kang dadi pamonge para Pandhawa?'],o:['Semar','Petruk','Gareng','Bagong'],e:['Semar adalah punakawan tertua dan asli ciptaan budaya Jawa.','Semar iku punakawan paling sepuh lan asli kreasi budaya Jawa.']},
+{t:'werkudara',q:['Kuku sakti milik Werkudara bernama...','Kuku sekti duweke Werkudara jenenge...'],o:['Pancanaka','Pasopati','Konta','Cakra'],e:['Kuku Pancanaka adalah senjata andalan Werkudara.','Kuku Pancanaka iku gegaman andalane Werkudara.']},
+{t:'rahwana',q:['Raja Alengka berwajah sepuluh dalam Ramayana adalah...','Ratu Ngalengka kang praupane sapuluh ing Ramayana yaiku...'],o:['Rahwana','Kumbakarna','Duryodana','Sugriwa'],e:['Rahwana atau Dasamuka adalah raja Alengka.','Rahwana utawa Dasamuka iku ratu ing Ngalengka.']},
+{t:'gatotkaca',q:['Julukan Gatotkaca adalah...','Sesebutane Gatotkaca yaiku...'],o:['Otot kawat balung wesi','Si kancil cerdik','Raja sepuluh wajah','Pemanah ulung'],o2:['Otot kawat balung wesi','Kancil pinter','Ratu sapuluh praupan','Pamanah pinunjul'],e:['Otot sekuat kawat dan tulang sekeras besi.','Otot kaya kawat lan balung kaya wesi.']},
+{t:'semar',q:['Siapa yang menggerakkan wayang kulit dalam pertunjukan?','Sapa kang nggerakake wayang kulit ing pagelaran?'],o:['Dalang','Sinden','Niyaga','Penabuh gong'],e:['Dalang menggerakkan wayang, mengisi suara, dan memimpin pertunjukan.','Dalang nggerakake wayang, ngisi swara, lan mimpin pagelaran.']},
+{q:['Batang pisang tempat menancapkan wayang disebut...','Batang gedhang kanggo nancepake wayang diarani...'],o:['Debog','Kelir','Blencong','Kotak'],e:['Wayang ditancapkan pada debog agar berdiri tegak.','Wayang ditancepake ing debog supaya jejeg.']},
+{q:['Kain putih tempat bayangan wayang jatuh disebut...','Kain putih panggonane bayangan wayang diarani...'],o:['Kelir','Debog','Kendang','Cempala'],e:['Penonton melihat bayangan wayang di atas kelir.','Penonton ndeleng bayangan wayang ing ndhuwur kelir.']},
+{q:['Lampu minyak sumber cahaya pertunjukan disebut...','Lampu lenga sumbering cahya pagelaran diarani...'],o:['Blencong','Kelir','Cempala','Keprak'],e:['Blencong menyinari kelir sehingga wayang membentuk bayangan.','Blencong madhangi kelir saengga wayang dadi bayangan.']},
+{t:'arjuna',q:['Panah sakti Arjuna bernama...','Panah sekti duweke Arjuna jenenge...'],o:['Pasopati','Pancanaka','Cakra','Trisula'],e:['Pasopati adalah panah sakti milik Arjuna.','Pasopati iku panah sekti duweke Arjuna.']},
+{t:'hanoman',q:['Panglima kera putih dalam Ramayana adalah...','Panglima kethek putih ing Ramayana yaiku...'],o:['Hanoman','Sugriwa','Anggada','Subali'],e:['Hanoman adalah kera putih yang setia membantu Rama.','Hanoman iku kethek putih kang setya mbiyantu Rama.']},
+{q:['UNESCO menetapkan wayang sebagai warisan budaya dunia pada tahun...','UNESCO netepake wayang minangka warisan budaya donya ing taun...'],o:['2003','1999','2010','2015'],e:['UNESCO mengakui wayang pada 7 November 2003 sebagai Karya Agung Warisan Budaya Lisan dan Takbenda Kemanusiaan.','UNESCO ngakoni wayang tanggal 7 November 2003 minangka Karya Agung Warisan Budaya Lisan lan Takbenda Kamanungsan.']},
+{q:['Pemukul kayu dalang untuk memberi isyarat disebut...','Pamukul kayu dalang kanggo menehi isyarat diarani...'],o:['Cempala','Kendang','Bonang','Gong'],e:['Cempala dipukulkan pada kotak wayang untuk memberi aba-aba kepada penabuh gamelan.','Cempala dipukulake ing kothak wayang kanggo menehi aba-aba marang penabuh gamelan.']}];
+const bi = () => BHS === 'jv' ? 1 : 0;
+function setTx(el, v){ if(!el) return; const n = [...el.childNodes].find(c => c.nodeType === 3 && c.textContent.trim()); if(n) n.textContent = (el.matches && el.matches('.chk') ? ' ' : '') + v + (el.matches && el.matches('.row') ? ' ' : ''); else el.textContent = v; }
+function applyLang(){
+  document.documentElement.lang = BHS === 'jv' ? 'jv' : 'id';
+  const Q1 = (sel, k) => document.querySelectorAll(sel).forEach(e => setTx(e, tx(k)));
+  [['#s-land .lp','lp'],['#s-land .eb','eb'],['#masuk','masuk'],['#s-land .fn','fn'],['.kp .eb','eb2'],['#s-menu .sub','sub'],['#m-mulai b','m1b'],['#m-mulai small','m1s'],['#m-lakon b','m2b'],['#m-lakon small','m2s'],['#m-tokoh b','m3b'],['#m-tokoh small','m3s'],['#m-kenal b','m4b'],['#m-kenal small','m4s'],['#m-kuis b','m5b'],['#m-kuis small','m5s'],['#m-latih b','m6b'],['#m-latih small','m6s'],
+   ['#s-tokoh .tgw .et','pt'],['#s-lakon > .et','pl'],['#s-kenal .tgw .et','kt'],['#tk-back','kembali'],['#lk-back','kembali'],['#kn-back','kembali'],['#tk-go','mulai2'],['#kn-uji','kuji'],
+   ['#cam span','dKamera'],['#flip span','dBalik'],['#pandu span','dPandu'],['#home span','dMenu'],['#pgb span','dPgg'],['#pg h2','pPgg'],['#pg summary','pSet'],['#kalib','pKal'],['#latSkip','lskip'],['#latX','lx']].forEach(([a, b]) => Q1(a, b));
+  const lb = document.querySelectorAll('#s-tokoh .lbl'); setTx(lb[0], tx('wk')); setTx(lb[1], tx('wn'));
+  const pl = document.querySelectorAll('#pg .lbl'); setTx(pl[0], tx('pTk')); setTx(pl[1], tx('pTn'));
+  const lr = document.querySelectorAll('#pg .row'); setTx(lr[0], tx('pLatar')); setTx(lr[1], tx('pBhs'));
+  setTx($('tukar').parentElement, tx('pTukar')); setTx($('dua').parentElement, tx('pDua')); setTx($('aduOn').parentElement, tx('pAdu'));
+  if(!cerita) $('ctl').textContent = tx('dCerita'); labelMdl();
+  $('lang').textContent = BHS === 'jv' ? 'Basa: Jawa' : 'Bahasa: Indonesia'; $('sBhs').value = BHS;
+  $('fg').innerHTML = [['tangan', 'f1'], ['mahkota', 'f2'], ['musik', 'f3'], ['kamera', 'f4']].map(([k, f]) => '<div class="fi"><span class="fc">' + SV(IKON[k], 20) + '</span><div><b>' + tx(f + 'j') + '</b><p>' + tx(f + 't') + '</p></div></div>').join('');
+  bangunLakon(); if(!$('s-kenal').hidden) tampilProfil(kenK); if(!$('tur').hidden) tampilTur();
+}
+function setBhs(b){ BHS = b; try{ localStorage.setItem('wayang-bhs', b); }catch(_){} applyLang(); }
+$('lang').onclick = () => setBhs(BHS === 'jv' ? 'id' : 'jv'); $('sBhs').onchange = () => setBhs($('sBhs').value);
+function bangunLakon(){ $('lk-list').innerHTML = ''; Object.entries(LAKON).forEach(([k, l]) => { const b = document.createElement('button'); b.className = 'mb'; const n = (BHS === 'jv' && l.jv ? l.jv : l.teks).split('\n').filter(x => x.trim()).length;
+  b.innerHTML = '<div><b>' + (BHS === 'jv' && l.nama_jv ? l.nama_jv : l.nama) + '</b><small>' + nm(l.kiri) + ' · ' + nm(l.kanan) + ' — ' + n + (BHS === 'jv' ? ' adegan diwaca dalang' : ' adegan dibacakan dalang') + '</small></div>'; b.onclick = () => { tutupDepan(); mainLakon(k); }; $('lk-list').appendChild(b); }); }
+[['m-kenal','orang'],['m-kuis','tanya'],['m-latih','tangan']].forEach(([id, k]) => { $(id).querySelector('.mi').innerHTML = SV(IKON[k]); });
+// ---- profil tokoh ----
+let kenK = 'gatotkaca';
+function tampilProfil(k){ kenK = k; const P0 = PROF[BHS][k]; document.querySelectorAll('#kg .tk').forEach(b => b.classList.toggle('on', b.dataset.k === k));
+  $('kd').innerHTML = '<h3>' + nm(k) + '</h3><i>' + P0.jl + '</i><p><b>' + tx('kwt') + ':</b> ' + P0.wt + '</p><p><b>' + tx('klk') + ':</b> ' + P0.lk + '</p><p><b>' + tx('kck') + ':</b> ' + P0.ck + '</p><p><b>' + tx('kfk') + '</b> ' + P0.fk + '</p>'; }
+function bangunKenal(){ const h = $('kg'); h.innerHTML = ''; Object.keys(PROF.id).forEach(k => { const b = document.createElement('button'); b.className = 'tk'; b.dataset.k = k; b.innerHTML = '<img alt="" src="' + (THUMB[k] || '') + '"><span>' + nm(k) + '</span>'; b.onclick = () => tampilProfil(k); h.appendChild(b); }); tampilProfil(kenK); }
+bangunKenal();
+// ---- kuis ----
+let kz = null;
+const acak = a => a.map(x => [Math.random(), x]).sort((u, v) => u[0] - v[0]).map(x => x[1]);
+function mulaiKuis(){ kz = {idx:acak(QZ.map((_, i) => i)).slice(0, 6), i:0, skor:0}; tampilScr('kuis'); renderKuis(); }
+function renderKuis(){
+  const box = $('kq'); if(kz.i >= kz.idx.length){ const g = kz.skor >= 6 ? 3 : kz.skor >= 4 ? 2 : kz.skor >= 2 ? 1 : 0;
+    box.innerHTML = '<div class="et" style="font-size:24px;margin:0 0 6px;color:#ffd36a">' + tx('qt') + '</div><div class="qs">' + kz.skor + '/' + kz.idx.length + '</div><div class="qq">' + tx('g' + g) + '</div><div class="two" style="width:100%"><button id="kq-b">' + tx('kembali') + '</button><button class="p" id="kq-u">' + tx('qul') + '</button></div>';
+    $('kq-b').onclick = () => tampilScr('menu'); $('kq-u').onclick = mulaiKuis; return; }
+  const Q = QZ[kz.idx[kz.i]], o = acak((BHS === 'jv' && Q.o2 ? Q.o2 : Q.o).map((v, i) => ({v, ok:i === 0})));
+  box.innerHTML = '<div class="qh"><span>' + tx('qs') + ' ' + (kz.i + 1) + '/' + kz.idx.length + '</span><span>' + tx('qskor') + ' ' + kz.skor + '</span></div>' + (Q.t ? '<div class="kb"><img alt="" src="' + SIL[Q.t] + '"></div>' : '') + '<div class="qq">' + Q.q[bi()] + '</div><div id="qo"></div><div class="qf" id="qf"></div><button class="mb qo" id="qn" hidden>' + (kz.i === kz.idx.length - 1 ? tx('qend') : tx('qn')) + '</button>';
+  o.forEach(x => { const b = document.createElement('button'); b.className = 'mb qo'; b.textContent = x.v; b.onclick = () => { if(kz.sudah) return; kz.sudah = true; document.querySelectorAll('#qo .qo').forEach((e, j) => { if(o[j].ok) e.classList.add('ok'); }); if(x.ok){ kz.skor++; bonang(1568, .08); setTimeout(() => bonang(2093, .06), 90); } else { b.classList.add('no'); tak(.2); dung(.15); }
+    $('qf').textContent = (x.ok ? tx('qb') : tx('qsal')) + ' ' + Q.e[bi()]; $('qn').hidden = false; }; $('qo').appendChild(b); });
+  kz.sudah = false; $('qn').onclick = () => { kz.i++; renderKuis(); };
+}
+$('m-kenal').onclick = () => { tampilScr('kenal'); bangunKenal(); }; $('kn-back').onclick = () => tampilScr('menu'); $('kn-uji').onclick = mulaiKuis; $('m-kuis').onclick = mulaiKuis;
+// ---- latihan gerak ----
+const lat = {on:false, i:0, t0:0, hold:0, skor:[], inv0:false}, NLAT = 7;
+function mulaiLatih(){ tutupDepan(); lat.on = true; lat.i = 0; lat.skor = []; langkahLatih(); $('lat').hidden = false; }
+function langkahLatih(){ lat.t0 = performance.now(); lat.hold = 0; lat.inv0 = P[0].inv; $('latT').textContent = tx('lt') + ' ' + (lat.i + 1) + '/' + NLAT; $('latS').textContent = tx('l' + lat.i) + (lat.i === 0 && !vid.srcObject ? ' — ' + tx('lcam') : ''); $('latB').style.width = (lat.i/NLAT*100) + '%'; }
+function selesaiLatih(){ const bt = lat.skor.reduce((a, b) => a + b, 0), r = bt/(NLAT*3); $('latT').textContent = tx('lsel') + '  ' + '★'.repeat(r > .8 ? 3 : r > .5 ? 2 : 1); $('latS').textContent = bt + '/' + NLAT*3; $('latB').style.width = '100%'; $('latSkip').hidden = true; lat.on = false; bonang(1568, .09); setTimeout(() => gong(.2), 150); }
+function cekLatih(now, dt){
+  const p = P[0]; if(!p.arms.length) return; const sx = j => keLayar(p, p.G, p.arms[j].S[0], p.arms[j].S[1])[0], kiri = p.arms.length > 1 && sx(0) > sx(1) ? 1 : 0, ang = j => p.arms[j] ? Math.abs(p.arms[j].a) : 0, i = lat.i;
+  const ok = i === 0 ? (!vid.srcObject || !!(p.cal && p.cal.ok)) : i === 1 ? ang(kiri) > 1 : i === 2 ? ang(p.arms.length > 1 ? 1 - kiri : 0) > 1 : i === 3 ? ang(0) < .4 && ang(1) < .4 : i === 4 ? p.x > .5 : i === 5 ? p.x < .36 : p.inv !== lat.inv0;
+  lat.hold = ok ? lat.hold + dt : 0; if(lat.hold > (i === 0 || i === 6 ? .1 : .45)) majuLatih(now);
+}
+function majuLatih(now){ const d = (now - lat.t0)/1000; lat.skor.push(d < 8 ? 3 : d < 16 ? 2 : 1); bonang(1568, .08); setTimeout(() => bonang(2093, .06), 90); lat.i++; if(lat.i >= NLAT) selesaiLatih(); else langkahLatih(); }
+$('m-latih').onclick = mulaiLatih; $('latSkip').onclick = () => { if(lat.on) majuLatih(performance.now() + 99999); }; $('latX').onclick = () => { lat.on = false; $('lat').hidden = true; $('latSkip').hidden = false; };
+// ---- suara dalang: cempala, keprak, suluk (rebab) & babak lakon ----
+const noiseBuf = d => { const n = Math.floor(ac.sampleRate*d), b = ac.createBuffer(1, n, ac.sampleRate), a = b.getChannelData(0); for(let i = 0; i < n; i++) a[i] = Math.random()*2 - 1; return b; };
+function cempala(v = .28){ if(!ac) return; const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain(); o.type = 'triangle'; o.frequency.setValueAtTime(300, t); o.frequency.exponentialRampToValueAtTime(95, t + .09); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + .16); o.connect(g); g.connect(mst); o.start(t); o.stop(t + .18);
+  const s = ac.createBufferSource(), gg = ac.createGain(); s.buffer = noiseBuf(.03); gg.gain.setValueAtTime(v*.5, t); gg.gain.exponentialRampToValueAtTime(.001, t + .03); s.connect(gg); gg.connect(mst); s.start(t); }
+function keprak(n = 3, v = .1){ if(!ac) return; for(let i = 0; i < n; i++){ const t = ac.currentTime + i*.06, s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain(); s.buffer = noiseBuf(.05); f.type = 'bandpass'; f.frequency.value = 3800 + Math.random()*1800; f.Q.value = 3; g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(.001, t + .05); s.connect(f); f.connect(g); g.connect(mst); s.start(t); } }
+function suluk(d = 3.4, v = .06){ if(!ac) return; const t = ac.currentTime, o = ac.createOscillator(), l = ac.createOscillator(), lg = ac.createGain(), f = ac.createBiquadFilter(), g = ac.createGain();
+  o.type = 'sawtooth'; [2, 3, 1, 2, 0].forEach((n, i) => o.frequency.setTargetAtTime(196*SLENDRO[n], t + i*d/5, .12)); l.frequency.value = 5.2; lg.gain.value = 5; l.connect(lg); lg.connect(o.frequency); f.type = 'lowpass'; f.frequency.value = 1100;
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .5); g.gain.setValueAtTime(v, t + d - .8); g.gain.linearRampToValueAtTime(0, t + d); o.connect(f); f.connect(g); g.connect(mst); o.start(t); l.start(t); o.stop(t + d + .1); l.stop(t + d + .1); }
+let babak = null, babakAktif = '';
+function aksiBabak(L, i, baris){
+  if(!L.babak) return; const baru = i === 0 || L.babak !== baris[i - 1].babak; babakAktif = L.babak; if(baru) babak = {nama:L.babak, t:performance.now()};
+  if(!$('gmlOn').checked) return;
+  if(baru && L.babak === 'jejer'){ suluk(); cempala(); setTimeout(() => cempala(.2), 300); }
+  else if(baru && L.babak === 'perang'){ keprak(7, .12); cempala(.34); kendang(); }
+  else if(baru && L.babak === 'penutup'){ gong(.26); suluk(3.2, .05); cempala(); }
+  else if(L.babak === 'perang') keprak(4, .09);
+}
+function lukisBabak(now){ if(!babak || now - babak.t > 2600) return; const a = Math.min(1, (now - babak.t)/300, (2600 - (now - babak.t))/500);
+  g.save(); g.globalAlpha = a; g.textAlign = 'center'; g.font = '400 ' + Math.round(Math.min(W, H)*.045) + 'px Marcellus,serif'; g.lineWidth = 5; g.strokeStyle = 'rgba(30,14,4,.85)'; g.fillStyle = '#ffd36a'; const tt = tx('babak') + ' · ' + tx({jejer:'bj', perang:'bp', penutup:'bt'}[babak.nama]); g.strokeText(tt, W/2, H*.12); g.fillText(tt, W/2, H*.12); g.restore(); }
 const isi = (el, o) => Object.entries(o).forEach(([v, t]) => el.add(new Option(t, v)));
 isi($('latar'), LATAR);
 function sinkPanel(){ segarKartu(); }
@@ -1361,10 +1522,11 @@ $('pclose').onclick = () => { $('pg').hidden = true; };
 async function mainLakon(k){
   const l = LAKON[k]; if(cerita) selesaiCerita(); if(pov) setPov(false, true);
   await setTokoh(0, l.kiri); await setTokoh(1, l.kanan); setLatar(l.latar); $('latar').value = l.latar;
-  const id = 'p_' + k; if(!db.daftar.some(c => c.id === id)) db.daftar.push({id, nama:l.nama, teks:l.teks});
+  const jv = BHS === 'jv' && l.jv, id = 'p_' + k + (jv ? '_jv' : ''); if(!db.daftar.some(c => c.id === id)) db.daftar.push({id, nama:jv ? l.nama_jv : l.nama, teks:jv ? l.jv : l.teks});
   db.aktif = id; tampilCerita(); simpanDB(); $('pg').hidden = true; initSfx(); gunungan('buka', mulaiCerita);
 }
 
+applyLang();
 setLatar('klasik'); $('latar').value = 'klasik';   // latar awal, dipasang setelah semua bagian siap
 say(W/H < 1.3 ? 'Seret badan untuk menggeser, seret tangan wayang untuk menggerakkan. Putar HP ke lanskap agar lebih lebar.' : 'Seret badan wayang untuk menggeser · seret tangannya untuk menggerakkan', 9000);
 </script>

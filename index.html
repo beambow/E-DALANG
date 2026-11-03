@@ -156,6 +156,17 @@ body.imersif #dock,body.imersif #volp{display:none!important}
 @media(max-width:600px){#dock .b span{display:none}#dock .b{padding:11px 13px}#dock{gap:5px}}
 @media(max-height:380px){.ic{width:34px;height:34px}#tools{gap:5px}#pip{width:clamp(80px,22vh*1.333,200px)}}
 @media(max-width:380px){.lc{padding:22px 18px}.et{font-size:clamp(44px,15vw,60px)}}
+.scr{padding-top:48px}
+#tur .kt{max-height:94dvh;max-height:94vh;overflow:auto}
+@media(max-height:480px){
+  .kb{height:84px;padding:6px 8px 0;margin-bottom:6px}.kb img{height:76px}
+  #tur .kt{padding:10px 14px;font-size:13.5px;line-height:1.45}#tur h3{font-size:16px;margin:2px 0 4px}#tur .bt{margin-top:8px}#turS{margin-top:6px;padding:6px}#turD{margin-top:6px!important}
+  .kp .et{font-size:clamp(32px,12vh,60px);margin:4px 0}.kp .eb{font-size:10px}.dv{margin:2px 0 6px}
+  #s-menu{flex-direction:row;flex-wrap:wrap;align-content:center;justify-content:center;gap:8px 10px}
+  #s-menu .kp,#s-menu .sub{flex:0 0 100%;display:flex;flex-direction:column;align-items:center;margin:0 0 4px}#s-menu .sub{font-size:12.5px;max-width:none;display:block;text-align:center}
+  #s-menu .mb{width:min(44vw,340px);margin:0;padding:8px 12px}#s-menu .mb small{display:none}#s-menu .mb b{font-size:17px}
+  .lc{padding:20px 26px}.lt{margin:6px 0 8px}.fg{margin:16px 0 12px;gap:12px 20px}
+}
 </style>
 </head>
 <body>
@@ -253,37 +264,37 @@ body.imersif #dock,body.imersif #volp{display:none!important}
 let BHS = 'id'; try{ BHS = localStorage.getItem('wayang-bhs') === 'jv' ? 'jv' : 'id'; }catch(_){}
 const TXT = {
 id:{lp:'Gerakkan Arjuna, Hanoman, Gatotkaca, dan sahabatnya dengan sentuhan jari — atau gerakan tanganmu di depan kamera. Lengan bersendi, badan menari, gamelan menyertai.',masuk:'Masuki Panggung ',eb:'Panggung kulit digital',eb2:'Panggung wayang kulit digital',
-f1j:'Kamera & gestur',f1t:'Jempol & telunjuk menggerakkan lengan wayang — kepalan ditahan 2 detik membalik arah.',f2j:'Enam tokoh wayang',f2t:'Arjuna, Hanoman, Semar, Gatotkaca, Werkudara, Rahwana — pilih lewat galeri tokoh.',f3j:'Gamelan menyertai',f3t:'Musik latar plus bunyi bonang, kendang, dan gong yang bereaksi pada tiap gerakan.',f4j:'Rekam & bagikan',f4t:'Ambil foto atau rekam video pertunjukanmu lengkap dengan musiknya.',fn:'Bisa dimainkan dengan sentuhan saja · Untuk mode kamera, izinkan akses kamera di browser',
+f1j:'Kamera & gestur',f1t:'Jempol & telunjuk menggerakkan lengan wayang — balikkan telapak tangan untuk membalik arah.',f2j:'Enam tokoh wayang',f2t:'Arjuna, Hanoman, Semar, Gatotkaca, Werkudara, Rahwana — pilih lewat galeri tokoh.',f3j:'Gamelan menyertai',f3t:'Musik latar plus bunyi bonang, kendang, dan gong yang bereaksi pada tiap gerakan.',f4j:'Rekam & bagikan',f4t:'Ambil foto atau rekam video pertunjukanmu lengkap dengan musiknya.',fn:'Bisa dimainkan dengan sentuhan saja · Untuk mode kamera, izinkan akses kamera di browser',
 sub:'Gerakkan wayang dengan tanganmu, biarkan sang dalang membawakan lakonnya.',m1b:'Mulai Pentas',m1s:'Main wayang bebas dengan tangan atau sentuhan',m2b:'Pilih Lakon',m2s:'Cerita bawaan yang dibacakan suara dalang',m3b:'Pilih Tokoh',m3s:'Tentukan wayang kiri dan kanan',m4b:'Kenali Tokoh',m4s:'Baca watak dan kisah tiap wayang',m5b:'Kuis Wayang',m5s:'Uji pengetahuanmu tentang wayang dan budaya Jawa',m6b:'Latihan Gerak',m6s:'Belajar menggerakkan wayang langkah demi langkah',
 pt:'Pilih Tokoh',wk:'Wayang kiri',wn:'Wayang kanan',kembali:'‹ Kembali',mulai2:'Mulai Pentas ›',pl:'Pilih Lakon',kt:'Kenali Tokoh',kjl:'Julukan',kwt:'Watak',klk:'Asal kisah',kck:'Ciri khas',kfk:'Tahukah kamu?',kuji:'Uji Pengetahuan ›',
 qt:'Kuis Wayang',qs:'Soal',qn:'Lanjut ›',qend:'Lihat hasil ›',qb:'Benar!',qsal:'Kurang tepat.',qskor:'Skor',qul:'Main lagi',g3:'Dalang Agung',g2:'Dalang Muda',g1:'Niyaga',g0:'Penonton Setia',
 lt:'Latihan',lskip:'Lewati',lx:'Keluar',lsel:'Latihan selesai',lcam:'Nyalakan kamera lewat tombol Kamera, atau lewati langkah ini.',
-l0:'Tahan tangan santai di depan kamera (kalibrasi)',l1:'Angkat lengan kiri wayang tinggi-tinggi (jempol dimiringkan ke luar)',l2:'Angkat lengan kanan wayang (telunjuk dimiringkan ke luar)',l3:'Turunkan kedua lengan (tekuk jari)',l4:'Geser wayang ke tengah layar',l5:'Geser wayang kembali ke kiri',l6:'Balik arah wayang (kepalan 2 detik atau tombol Balik arah)',
+l0:'Tahan tangan santai di depan kamera (kalibrasi)',l1:'Angkat lengan kiri wayang tinggi-tinggi (jempol dimiringkan ke luar)',l2:'Angkat lengan kanan wayang (telunjuk dimiringkan ke luar)',l3:'Turunkan kedua lengan (tekuk jari)',l4:'Geser wayang ke tengah layar',l5:'Geser wayang kembali ke kiri',l6:'Balik arah wayang (balikkan telapak tangan atau tombol Balik arah)',
 dKamera:'Kamera',dBalik:'Balik arah',dPandu:'Panduan',dMenu:'Menu',dPgg:'Panggung',dCerita:'Cerita',dHenti:'Henti',
 pKual:'Kualitas grafis',pUji:'Uji kecepatan model',sDekat:'Dekatkan tangan ke kamera agar terbaca lebih cepat',lcam2:'Nyalakan kamera dulu',uMenguji:'Menguji model',uHasil:'Dipilih',sIos:'Layar penuh di iPhone: ketuk Bagikan, pilih Tambah ke Layar Utama, lalu buka dari ikonnya. Sementara itu tombol bawah disembunyikan.',sImersif:'Mode layar bersih: tombol bawah disembunyikan (ketuk lagi untuk menampilkan)',sPutar:'Putar HP ke mode lanskap agar panggung lebih lebar',pPgg:'Panggung',pTk:'Tokoh kiri',pTn:'Tokoh kanan',pLatar:'Latar kelir',pBhs:'Bahasa',pTukar:'Tukar jempol ↔ telunjuk',pDua:'Mode dua pemain (kamera dibagi kiri / kanan)',pSet:'Penyetelan tangan',pAdu:'Mode adu (tenaga & pemenang)',pMdl:'Model tangan',pKal:'Kalibrasi ulang tangan',
 bj:'Jejer',bp:'Perang',bt:'Penutup',babak:'Babak',
-sKal:'Tahan tangan santai ±1 detik, posisi awal lengan dikunci',sSiap:'Siap! Miringkan & tekuk jempol / telunjuk',sPet:'Jempol = tangan kiri wayang · telunjuk = tangan kanan wayang',sFist:'Tahan terus… 2 detik untuk membalik wayang',sFlip:'Kepalan ditahan: wayang berbalik arah',sPovOn:'Sudut penonton: wayang jadi bayangan di kelir kertas',sPovOff:'Kembali ke sudut dalang',sAdu:'Mode adu! Pukul badan lawan atau adu lengan, tenaga habis = kalah',sAduOff:'Mode adu dimatikan',
+sKal:'Tahan tangan santai ±1 detik, posisi awal lengan dikunci',sSiap:'Siap! Miringkan & tekuk jempol / telunjuk',sPet:'Jempol = tangan kiri wayang · telunjuk = tangan kanan wayang',sFist:'Tahan terus… 2 detik untuk membalik wayang',sFlip:'Telapak dibalik: wayang berbalik arah',sPovOn:'Sudut penonton: wayang jadi bayangan di kelir kertas',sPovOff:'Kembali ke sudut dalang',sAdu:'Mode adu! Pukul badan lawan atau adu lengan, tenaga habis = kalah',sAduOff:'Mode adu dimatikan',
 tP:'‹ Kembali',tN:'Lanjut ›',tN2:'Mulai ›',tS:'Lewati panduan',
 tj0:'Selamat datang di Wayang Tangan',tt0:'Mainkan wayang digital dengan sentuhan atau gerakan tangan di depan kamera. Geser wayang dengan jari, atau nyalakan kamera lewat tombol Kamera di bawah.',
 tj1:'Kalibrasi dulu',tt1:'Saat kamera menyala, tahan tangan santai sekitar 1 detik. Lengan wayang dikunci di posisi awal, lalu mulai mengikuti. Tombol Kalibrasi ulang ada di menu Panggung.',
-tj2:'Jempol & telunjuk',tt2:'Jempol = tangan kiri wayang, telunjuk = tangan kanan wayang. Miringkan jari ke luar untuk mengangkat lengan, tekuk untuk menurunkan. Kepalan ditahan 2 detik membalik wayang.',
+tj2:'Jempol & telunjuk',tt2:'Jempol = tangan kiri wayang, telunjuk = tangan kanan wayang. Miringkan jari ke luar untuk mengangkat lengan, tekuk untuk menurunkan. Balikkan telapak tangan untuk membalik wayang.',
 tj3:'Mode adu & dua pemain',tt3:'Centang Mode adu di menu Panggung: pukul lawan dengan ayunan lengan sampai tenaganya habis. Mode dua pemain membagi kamera kiri dan kanan, satu tangan untuk tiap wayang.',
 tj4:'Cerita, rekam & bagikan',tt4:'Pilih lakon lewat menu E-DALANG atau tombol Cerita. Tombol Foto mengambil gambar dan tombol Rekam membuat video. Kalau tangan terasa lag, setel di Penyetelan tangan atau ganti model tangan.'},
 jv:{lp:'Obahna Arjuna, Hanoman, Gatotkaca, lan kanca-kancane nganggo ndemek layar — utawa obahna tanganmu ing ngarep kamera. Lengene bisa ketekuk, awake njoged, gamelan nyengkuyung.',masuk:'Mlebu Pentas ',eb:'Pentas kulit digital',eb2:'Pentas wayang kulit digital',
-f1j:'Kamera & obahan',f1t:'Jempol lan driji panuduh nggerakake lengen wayang — genggaman ditahan 2 detik kanggo walik arah.',f2j:'Enem tokoh wayang',f2t:'Arjuna, Hanoman, Semar, Gatotkaca, Werkudara, Rahwana — pilih saka dhaptar tokoh.',f3j:'Gamelan nyengkuyung',f3t:'Musik latar, bonang, kendhang, lan gong kang nanggapi saben obahan.',f4j:'Rekam & bagekake',f4t:'Jupuk foto utawa rekam video pagelaranmu lengkap karo musike.',fn:'Bisa dimainake mung nganggo ndemek layar · Kanggo mode kamera, idinana akses kamera ing browser',
+f1j:'Kamera & obahan',f1t:'Jempol lan driji panuduh nggerakake lengen wayang — walikna telapak tangan kanggo walik arah.',f2j:'Enem tokoh wayang',f2t:'Arjuna, Hanoman, Semar, Gatotkaca, Werkudara, Rahwana — pilih saka dhaptar tokoh.',f3j:'Gamelan nyengkuyung',f3t:'Musik latar, bonang, kendhang, lan gong kang nanggapi saben obahan.',f4j:'Rekam & bagekake',f4t:'Jupuk foto utawa rekam video pagelaranmu lengkap karo musike.',fn:'Bisa dimainake mung nganggo ndemek layar · Kanggo mode kamera, idinana akses kamera ing browser',
 sub:'Obahna wayang nganggo tanganmu, lan ki dalang bakal nggawa lakone.',m1b:'Miwiti Pentas',m1s:'Dolanan wayang bebas nganggo tangan utawa ndemek layar',m2b:'Pilih Lakon',m2s:'Crita pilihan kang diwaca swarane dalang',m3b:'Pilih Tokoh',m3s:'Tetepake wayang kiwa lan tengen',m4b:'Kenal Tokoh',m4s:'Waca watak lan kisahe saben wayang',m5b:'Kuis Wayang',m5s:'Ujia kawruhmu bab wayang lan budaya Jawa',m6b:'Latihan Obahan',m6s:'Sinau nggerakake wayang sithik mbaka sithik',
 pt:'Pilih Tokoh',wk:'Wayang kiwa',wn:'Wayang tengen',kembali:'‹ Bali',mulai2:'Miwiti Pentas ›',pl:'Pilih Lakon',kt:'Kenal Tokoh',kjl:'Sesebutan',kwt:'Watak',klk:'Asale crita',kck:'Ciri khas',kfk:'Apa kowe ngerti?',kuji:'Uji Kawruh ›',
 qt:'Kuis Wayang',qs:'Pitakon',qn:'Terusake ›',qend:'Deleng asil ›',qb:'Bener!',qsal:'Durung pas.',qskor:'Skor',qul:'Dolanan maneh',g3:'Dalang Agung',g2:'Dalang Enom',g1:'Niyaga',g0:'Penonton Setya',
 lt:'Latihan',lskip:'Liwati',lx:'Metu',lsel:'Latihan rampung',lcam:'Nyalakna kamera liwat tombol Kamera, utawa liwati langkah iki.',
-l0:'Tahan tangan santai ing ngarep kamera (kalibrasi)',l1:'Angkat lengen kiwa wayang dhuwur (jempol dimiringake metu)',l2:'Angkat lengen tengen wayang (driji panuduh dimiringake metu)',l3:'Mudhunake lengen loro (tekuk drijine)',l4:'Geser wayang menyang tengah layar',l5:'Geser wayang bali menyang kiwa',l6:'Walik arah wayang (genggaman 2 detik utawa tombol Walik arah)',
+l0:'Tahan tangan santai ing ngarep kamera (kalibrasi)',l1:'Angkat lengen kiwa wayang dhuwur (jempol dimiringake metu)',l2:'Angkat lengen tengen wayang (driji panuduh dimiringake metu)',l3:'Mudhunake lengen loro (tekuk drijine)',l4:'Geser wayang menyang tengah layar',l5:'Geser wayang bali menyang kiwa',l6:'Walik arah wayang (walikna telapak tangan utawa tombol Walik arah)',
 dKamera:'Kamera',dBalik:'Walik arah',dPandu:'Pituduh',dMenu:'Menu',dPgg:'Panggung',dCerita:'Crita',dHenti:'Mandheg',
 pKual:'Kualitas grafis',pUji:'Uji kacepetan model',sDekat:'Cedhakna tangan menyang kamera supaya luwih cepet diwaca',lcam2:'Nyalakna kamera dhisik',uMenguji:'Nyoba model',uHasil:'Dipilih',sIos:'Layar kebak ing iPhone: ketuk Bagikan, pilih Tambah menyang Layar Utama, banjur bukak saka ikone. Sauntara tombol ngisor didhelikake.',sImersif:'Mode layar resik: tombol ngisor didhelikake (ketuk maneh kanggo nuduhake)',sPutar:'Puteren HP menyang mode lanskap supaya panggung luwih amba',pPgg:'Panggung',pTk:'Tokoh kiwa',pTn:'Tokoh tengen',pLatar:'Latar kelir',pBhs:'Basa',pTukar:'Tukar jempol ↔ driji panuduh',pDua:'Mode pemain loro (kamera dibagi kiwa / tengen)',pSet:'Setelan tangan',pAdu:'Mode adu (tenaga & pemenang)',pMdl:'Model tangan',pKal:'Kalibrasi ulang tangan',
 bj:'Jejer',bp:'Perang',bt:'Penutup',babak:'Babak',
-sKal:'Tahan tangan santai ±1 detik, posisi wiwitan lengen dikunci',sSiap:'Siap! Miringake & tekuk jempol / driji panuduh',sPet:'Jempol = tangan kiwa wayang · driji panuduh = tangan tengen wayang',sFist:'Tahan terus… 2 detik kanggo walik arah',sFlip:'Genggaman ditahan: wayang walik arah',sPovOn:'Sudut penonton: wayang dadi bayangan ing kelir kertas',sPovOff:'Bali menyang sudut dalang',sAdu:'Mode adu! Pukulen awak lawan utawa adu lengen, tenaga entek = kalah',sAduOff:'Mode adu dipateni',
+sKal:'Tahan tangan santai ±1 detik, posisi wiwitan lengen dikunci',sSiap:'Siap! Miringake & tekuk jempol / driji panuduh',sPet:'Jempol = tangan kiwa wayang · driji panuduh = tangan tengen wayang',sFist:'Tahan terus… 2 detik kanggo walik arah',sFlip:'Telapak diwalik: wayang walik arah',sPovOn:'Sudut penonton: wayang dadi bayangan ing kelir kertas',sPovOff:'Bali menyang sudut dalang',sAdu:'Mode adu! Pukulen awak lawan utawa adu lengen, tenaga entek = kalah',sAduOff:'Mode adu dipateni',
 tP:'‹ Bali',tN:'Terusake ›',tN2:'Miwiti ›',tS:'Liwati pituduh',
 tj0:'Sugeng rawuh ing Wayang Tangan',tt0:'Dolanan wayang digital nganggo ndemek layar utawa obahan tangan ing ngarep kamera. Geser wayang nganggo driji, utawa nyalakna kamera liwat tombol Kamera ing ngisor.',
 tj1:'Kalibrasi dhisik',tt1:'Nalika kamera urip, tahan tangan santai watara 1 detik. Lengen wayang dikunci ing posisi wiwitan, banjur wiwit ngetutake. Tombol Kalibrasi ulang ana ing menu Panggung.',
-tj2:'Jempol & driji panuduh',tt2:'Jempol = tangan kiwa wayang, driji panuduh = tangan tengen wayang. Miringake driji metu kanggo ngangkat lengen, tekuk kanggo mudhunake. Genggaman ditahan 2 detik kanggo walik arah.',
+tj2:'Jempol & driji panuduh',tt2:'Jempol = tangan kiwa wayang, driji panuduh = tangan tengen wayang. Miringake driji metu kanggo ngangkat lengen, tekuk kanggo mudhunake. Walikna telapak tangan kanggo walik arah wayang.',
 tj3:'Mode adu & pemain loro',tt3:'Centhang Mode adu ing menu Panggung: pukulen lawan nganggo ayunan lengen nganti tenagane entek. Mode pemain loro mbagi kamera dadi kiwa lan tengen, siji tangan kanggo saben wayang.',
 tj4:'Crita, rekam & bagekake',tt4:'Pilih lakon liwat menu E-DALANG utawa tombol Crita. Tombol Foto njupuk gambar lan tombol Rekam gawe video. Yen tangan krasa kendho, setel ing Setelan tangan utawa ganti model tangan.'}};
 const tx = k => (TXT[BHS] && TXT[BHS][k]) || TXT.id[k] || k;
@@ -766,25 +777,28 @@ function proses(landmarks, tcap){
     const buka = [8,12,16,20].reduce((a,k) => a + dist(l[k], l[0]), 0)/4/size;       // telapak terbuka ≈ 1.9, mengepal ≈ 1.1
     const jari = [[8,6],[12,10],[16,14],[20,18]].filter(([tp, pp]) => dist(l[tp], l[0]) > dist(l[pp], l[0])*1.1).length;   // jari yang terulur (tanpa ibu jari)
     const tx = jari >= 2 ? ((1-l[8].x) + (1-l[12].x))/2 : (1-l[8].x), ty = jari >= 2 ? (l[8].y + l[12].y)/2 : l[8].y;
-    return {x:cx, y:cy, size, rot:Math.atan2((1-l[9].x)-(1-l[0].x), -(l[9].y-l[0].y)), pr: dist(l[4], l[8])/size, buka, jari, jem:{a:sudut(2,4), c:dist(l[4], l[5])/size}, tel:{a:sudut(5,8), c:dist(l[8], l[0])/dist(l[5], l[0])},
+    return {x:cx, y:cy, size, rot:Math.atan2((1-l[9].x)-(1-l[0].x), -(l[9].y-l[0].y)), pr: dist(l[4], l[8])/size, buka, jari, ori:((l[5].x - l[0].x)*(l[17].y - l[0].y) - (l[5].y - l[0].y)*(l[17].x - l[0].x))/(size*size), jem:{a:sudut(2,4), c:dist(l[4], l[5])/size}, tel:{a:sudut(5,8), c:dist(l[8], l[0])/dist(l[5], l[0])},
             tilt:Math.atan2(tx - (1-l[0].x), -(ty - l[0].y)), fvx:(tx - (1-l[0].x))/size, fvy:(ty - l[0].y)/size};
   });
   const ts = tcap/1000;
   if(hs.length && Math.min(...hs.map(h => h.size)) < .075 && now - (proses.hint || 0) > 6000){ proses.hint = now; say(tx('sDekat'), 2500); }
   for(const [i,h] of bagi(hs)){
     const p = P[i];
-    if(now - p.seen > 800){ p.o.forEach(f => f.reset()); p.cal = {t0:now, n:0, js:0, jc:0, ts:0, tc:0, je:0, te:0, ok:false}; say(tx('sKal'), 1300); }      // tangan baru muncul: jangan tarik dari posisi lama
+    if(now - p.seen > 800){ p.o.forEach(f => f.reset()); p.ori = undefined; p.oriN = 0; p.oriBaru = 0; p.cal = {t0:now, n:0, js:0, jc:0, ts:0, tc:0, je:0, te:0, ok:false}; say(tx('sKal'), 1300); }      // tangan baru muncul: jangan tarik dari posisi lama
     p.seen = now; p.hx = h.x; p.hy = h.y;
     const hx = SET.dua ? (h.x - i*.5)*2 : h.x, pr = SET.auto ? clamp(((trk.ms || 30) + 500/Math.max(trk.fps || 20, 10))/1000, .05, .13) : SET.pred; p.o[0].s = p.o[1].s = SET.resp;
     const fx = p.o[0].f((hx-.1)/.8, ts), fy = p.o[1].f((h.y-.15)/.7, ts);       // + prediksi 50 ms ke depan menutup jeda deteksi
     p.tx = .18 + .64*clamp(fx + p.o[0].dx*pr, 0, 1);
     p.ty = .4 + .12*clamp(fy + p.o[1].dx*pr, 0, 1);
     p.mode = 0; if(!petunjuk){ petunjuk = true; say(tx('sPet'), 3500); }
-    // kepalan ditahan ±0,8 detik = wayang berbalik arah (sekali; buka tangan lagi untuk mengulang)
-    if(h.jari === 0 && h.buka < 1.45){
-      if(!p.fistT){ p.fistT = now; setTimeout(() => { if(p.fistT && !p.fistDone) say(tx('sFist'), 1400); }, 600); }
-      else if(!p.fistDone && now - p.fistT > 2000){ p.fistDone = true; p.inv = !p.inv; say(tx('sFlip'), 1400); }
-    } else { p.fistT = 0; p.fistDone = false; }
+    // telapak tangan dibalik (telapak <-> punggung tangan) = wayang ikut berbalik arah
+    if(Math.abs(h.ori) > .14){
+      const sg = Math.sign(h.ori); p.oriN = p.oriBaru === sg ? p.oriN + 1 : 1; p.oriBaru = sg;
+      if(p.oriN >= 4){
+        if(p.ori === undefined || !(p.cal && p.cal.ok)) p.ori = sg;                          // selama kalibrasi: catat posisi telapak awal
+        else if(p.ori !== sg){ p.ori = sg; p.inv = !p.inv; tak(.2); say(tx('sFlip'), 1400); }
+      }
+    }
     p.tr = p.o[2].f(h.rot*.3, ts);
     p.ts = clamp(p.o[3].f(h.size/.16, ts), .75, 1.15);
     const u = clamp(p.o[4].f(clamp((h.buka - 1.2)/.7, 0, 1), ts), 0, 1);
@@ -1370,7 +1384,7 @@ const NATKIRI = ['gatotkaca', 'rahwana', 'werkudara', 'arjuna'];
 const TUR = [
   [[['gunungan']], 'Selamat datang di Wayang Tangan', 'Mainkan wayang digital dengan sentuhan atau gerakan tangan di depan kamera. Geser wayang dengan jari, atau nyalakan kamera lewat tombol Kamera di bawah.'],
   [[['semar', 'kanan']], 'Kalibrasi dulu', 'Saat kamera menyala, tahan tangan santai sekitar 1 detik. Lengan wayang dikunci di posisi awal, lalu mulai mengikuti. Tombol Kalibrasi ulang ada di menu Panggung.'],
-  [[['gatotkaca', 'kanan']], 'Jempol & telunjuk', 'Jempol = tangan kiri wayang, telunjuk = tangan kanan wayang. Miringkan jari ke luar untuk mengangkat lengan, tekuk untuk menurunkan. Kepalan ditahan 2 detik membalik wayang.'],
+  [[['gatotkaca', 'kanan']], 'Jempol & telunjuk', 'Jempol = tangan kiri wayang, telunjuk = tangan kanan wayang. Miringkan jari ke luar untuk mengangkat lengan, tekuk untuk menurunkan. Balikkan telapak tangan untuk membalik wayang.'],
   [[['rahwana', 'kanan'], ['werkudara', 'kiri']], 'Mode adu & dua pemain', 'Centang Mode adu di menu Panggung: pukul lawan dengan ayunan lengan sampai tenaganya habis. Mode dua pemain membagi kamera kiri dan kanan, satu tangan untuk tiap wayang.'],
   [[['arjuna', 'kanan'], ['hanoman', 'kiri']], 'Cerita, rekam & bagikan', 'Pilih lakon lewat menu E-DALANG atau tombol Cerita. Tombol Foto mengambil gambar dan tombol Rekam membuat video. Kalau tangan terasa lag, setel di Penyetelan tangan atau ganti model tangan.']
 ];

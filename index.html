@@ -665,7 +665,7 @@ function proses(landmarks, tcap){
     const jari = [[8,6],[12,10],[16,14],[20,18]].filter(([tp, pp]) => dist(l[tp], l[0]) > dist(l[pp], l[0])*1.1).length;
     const tx = jari >= 2 ? ((1-l[8].x) + (1-l[12].x))/2 : (1-l[8].x), ty = jari >= 2 ? (l[8].y + l[12].y)/2 : l[8].y;
     return {x:cx, y:cy, size, rot:Math.atan2((1-l[9].x)-(1-l[0].x), -(l[9].y-l[0].y)), pr: dist(l[4], l[8])/size, buka, jari, ori:((l[5].x - l[0].x)*(l[17].y - l[0].y) - (l[5].y - l[0].y)*(l[17].x - l[0].x))/(size*size), jem:{a:sudut(2,4), c:dist(l[4], l[5])/size}, tel:{a:sudut(5,8), c:dist(l[8], l[0])/dist(l[5], l[0])},
-            tilt:Math.atan2(tx - (1-l[0].x), -(ty - l[0].y)), fvx:(tx - (1-l[0].x))/size, fvy:(ty - l[0].y)/size};
+            tilt:Math.atan2(tx - (1-l[0].x), -(ty - l[0].y)), fvx:(tx - (1-l[0].x))/size, fvy:(tx - l[0].y)/size};
   });
   const ts = tcap/1000;
   if(hs.length && Math.min(...hs.map(h => h.size)) < .075 && now - (proses.hint || 0) > 6000){ proses.hint = now; say(tx('sDekat'), 2500); }
@@ -730,35 +730,79 @@ tampilCerita(); simpanDB();
 const NAMA_PRIA = /andika|ardi|male|pria|laki|bapak|rizki|jawa|java|jvd|idc|idd/i;
 const SUARA = {gatotkaca:[.55,.92], semar:[.38,.78], rahwana:[.28,.82], werkudara:[.42,.88], arjuna:[.62,.92], hanoman:[.68,1], gunungan:[.4,.8]};
 const semuaSuara = () => { try{ return speechSynthesis.getVoices(); }catch(_){ return []; } };
-function isiSuara(){ const all = semuaSuara(), sel = $('vnar'), lokal = v => /^(jv|id|in|ms)[-_]/i.test(v.lang); sel.innerHTML = ''; sel.add(new Option('Otomatis', '')); all.filter(lokal).concat(all.filter(v => !lokal(v))).forEach(v => sel.add(new Option(v.name + ' (' + v.lang + ')', v.name))); sel.value = vnarNama; if(sel.value !== vnarNama) sel.value = ''; }
-$('tesv').onclick = () => { try{ speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance('Sugeng ndalu, kulo Semar.'), v = pilihSuara(0), [pt, rt] = SUARA[CUR[0]] || [.5, .9]; if(v){ u.voice = v; u.lang = v.lang; } else u.lang = 'id-ID'; u.pitch = pt; u.rate = rt; speechSynthesis.speak(u); }catch(_){ say('Suara tidak didukung'); } };
+function isiSuara(){
+  const all = semuaSuara(), sel = $('vnar');
+  const lokal = v => /^(jv|id|in|ms)[-_]/i.test(v.lang);
+  const enhanced = v => /enhanced|premium|neural|natural|wavenet/i.test(v.name);
+  sel.innerHTML = '';
+  sel.add(new Option('Otomatis (dalang)', ''));
+  const list = all.filter(lokal).concat(all.filter(v => !lokal(v)));
+  list.forEach(v => {
+    const tag = (enhanced(v) ? ' ⭐' : '') + (lokal(v) ? '' : ' [asing]');
+    sel.add(new Option(v.name + ' (' + v.lang + ')' + tag, v.name));
+  });
+  sel.value = vnarNama;
+  if(sel.value !== vnarNama) sel.value = '';
+}
+$('tesv').onclick = () => {
+  try{
+    speechSynthesis.cancel();
+    const teks = 'Kocap kacarita, ing pinggiring wana Dandaka, ana kalih satriya pinunjul.';
+    const v = pilihSuara(-1);
+    const frasa = teks.replace(/([.,!?;:])\s+/g, '$1|').split('|').map(s => s.trim()).filter(Boolean);
+    let i = 0;
+    const play = () => {
+      if(i >= frasa.length) return;
+      const u = new SpeechSynthesisUtterance(frasa[i++]);
+      if(v){ u.voice = v; u.lang = v.lang; } else u.lang = 'id-ID';
+      u.pitch = 0.28 + (Math.random() - 0.5) * 0.05;
+      u.rate  = 0.66;
+      u.onend = () => setTimeout(play, /[.!?]$/.test(frasa[i-1]) ? 420 : 200);
+      u.onerror = () => setTimeout(play, 60);
+      try{ speechSynthesis.speak(u); }catch(_){}
+    };
+    cempala(.18);
+    setTimeout(play, 250);
+  }catch(_){ say('Suara tidak didukung'); }
+};
 $('vnar').onchange = () => { vnarNama = $('vnar').value; try{ localStorage.setItem(KUNCI_VNAR, vnarNama); }catch(_){} };
 try{ speechSynthesis.addEventListener('voiceschanged', isiSuara); }catch(_){}
 isiSuara();
 let cerita = null;
 function urai(txt){ const peta = new Map([['kiri', 0], ['kanan', 1], ...SISI]); let baru = 0; const out = []; for(const raw of txt.split(/\n/)){ const s = raw.trim(); if(!s) continue; const m = /^([^:：]{1,24})[:：]\s*(.+)$/.exec(s); if(!m){ out.push({who:-1, nama:'', teks:s}); continue; } const nama = m[1].trim(), kunci = nama.toLowerCase(); if(kunci === 'narator' || kunci === 'narasi' || kunci === 'dalang'){ out.push({who:-1, nama:'', teks:m[2].trim()}); continue; } if(!peta.has(kunci)) peta.set(kunci, baru++ % 2); out.push({who:peta.get(kunci), nama, teks:m[2].trim()}); } return out; }
 function mulaiCerita(){ const baris = urai($('stxt').value); if(!baris.length){ say('Tulis ceritanya dulu.'); return; } initSfx(); tandaiSuara(baris); cerita = {baris, i:0, t0:performance.now(), id:0}; $('story').hidden = true; $('nextb').hidden = false; $('ctl').textContent = tx('dHenti'); mulaiBaris(); }
-function pilihSuara(who){ const all = semuaSuara(), idv = all.filter(v => /^(id|in|ms)[-_]/i.test(v.lang)), jv = all.filter(v => /^jv/i.test(v.lang)), nG = v => !/google/i.test(v.name); const pilihan = vnarNama && all.find(v => v.name === vnarNama); if(pilihan) return pilihan; return jv.find(nG) || idv.find(v => NAMA_PRIA.test(v.name) && nG(v)) || idv.find(nG) || jv[0] || idv.find(v => NAMA_PRIA.test(v.name)) || idv[0] || null; }
+function pilihSuara(who){
+  const all = semuaSuara();
+  const pilihan = vnarNama && all.find(v => v.name === vnarNama);
+  if(pilihan) return pilihan;
+  const idv = all.filter(v => /^(id|in)[-_]/i.test(v.lang));
+  const jv  = all.filter(v => /^jv/i.test(v.lang));
+  const enhanced = v => /enhanced|premium|neural|natural|wavenet/i.test(v.name);
+  const pria = v => /andika|ardi|male|pria|laki|bapak|rizki|java|jvd|idc|idd/i.test(v.name);
+  const nonG = v => !/google/i.test(v.name);
+  return (
+    idv.find(v => enhanced(v) && pria(v)) ||
+    idv.find(enhanced) ||
+    idv.find(v => pria(v) && nonG(v)) ||
+    idv.find(nonG) ||
+    jv.find(enhanced) ||
+    jv[0] ||
+    idv.find(pria) || idv[0] || null
+  );
+}
 function mulaiBaris(){
   const L = cerita.baris[cerita.i]; aksiBabak(L, cerita.i, cerita.baris);
   Object.assign(cerita, {t0:performance.now(), id:cerita.id + 1, tts:false, ttsMulai:false, ttsSelesai:false, tm:0, tEnd:0, lastK:0, deg:Math.floor(Math.random()*5)});
   if($('gmlOn').checked){ if(L.who < 0) gong(.2); else kendang(); }
   try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(_){} try{ if(cerita && cerita.audio) cerita.audio.pause(); }catch(_){}
   ducked = false; terapVol();
-  if(L.src && $('ttsOn').checked){ mainkanSuara(L, cerita.id); }
-  else if($('ttsOn').checked && 'speechSynthesis' in window){
-    try{
-      const id = cerita.id, u = new SpeechSynthesisUtterance(L.teks), v = pilihSuara(L.who);
-      if(v){ u.voice = v; u.lang = v.lang; } else u.lang = 'id-ID';
-      const [pt, rt] = L.who < 0 ? [.35, .78] : (SUARA[CUR[L.who]] || [.5, .9]); u.pitch = pt; u.rate = rt;
-      u.onstart = () => { if(cerita && cerita.id === id){ cerita.ttsMulai = true; cerita.tm = performance.now(); ducked = true; terapVol(); } };
-      const akhir = () => { if(cerita && cerita.id === id && !cerita.ttsSelesai){ cerita.ttsSelesai = true; cerita.tEnd = performance.now(); ducked = false; terapVol(); } };
-      u.onend = akhir; u.onerror = akhir; cerita.tts = true; speechSynthesis.speak(u);
-    }catch(_){ cerita.tts = false; }
+  if($('ttsOn').checked){
+    if(L.src) mainkanSuara(L, cerita.id);
+    else ucapDalang(L, cerita.id);
   }
 }
 function hurufTampil(now){ const el = (now - cerita.t0)/1000; if(cerita.tts && cerita.ttsMulai) return Math.floor((now - cerita.tm)/1000*15); if(cerita.tts && el < 2.5) return 0; return Math.floor(el*30); }
-function selesaiCerita(pesan){ cerita = null; $('nextb').hidden = true; $('ctl').textContent = tx('dCerita'); P.forEach(p => { p.sp = false; }); try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(_){} ducked = false; terapVol(); if(pesan){ say(pesan, 2200); if($('gmlOn').checked) gong(.2); } }
+function selesaiCerita(pesan){ cerita = null; $('nextb').hidden = true; $('ctl').textContent = tx('dCerita'); P.forEach(p => { p.sp = false; }); try{ if('speechSynthesis' in window) speechSynthesis.cancel(); }catch(_){} dalangTTS = null; ducked = false; terapVol(); if(pesan){ say(pesan, 2200); if($('gmlOn').checked) gong(.2); } }
 function lanjutCerita(){ if(!cerita) return; cerita.i++; if(cerita.i >= cerita.baris.length) selesaiCerita('Cerita selesai.'); else mulaiBaris(); }
 $('cerita').onclick = () => { if(cerita) selesaiCerita(); else { $('story').hidden = !$('story').hidden; if(!$('story').hidden){ isiSuara(); simpanDB(); } } };
 $('splay').onclick = () => { if(cerita) return; if(!$('stxt').value.trim()){ say('Tulis dulu.'); return; } $('story').hidden = true; gunungan('buka', mulaiCerita); };
@@ -786,7 +830,7 @@ function lukisCerita(now){
   else {
     const p = P[L.who], G = p.G; if(!G) return;
     let tail;
-    if(port){ bx = clamp(G.px - bw/2, 6, W - bw - 62); by = Math.max(6, G.py - G.h*.5 - bh - 16); const tx = clamp(G.px, bx + 16, bx + bw - 16); tail = [[tx - 8, by + bh], [tx + 8, by + bh], [tx, by + bh + 12]]; }
+    if(port){ bx = clamp(G.px - bw/2, 6, W - bw - 62); by = Math.max(6, G.py - G.h*.5 - bh - 16); const tx2 = clamp(G.px, bx + 16, bx + bw - 16); tail = [[tx2 - 8, by + bh], [tx2 + 8, by + bh], [tx2, by + bh + 12]]; }
     else { const dir = p.ftx > 0 ? 1 : -1; bx = clamp(dir > 0 ? G.px + G.w*.34 : G.px - G.w*.34 - bw, 6, W - bw - 62); by = clamp(G.py - G.h*.46, 8, H*.8 - bh); const ty = by + Math.min(bh*.5, 28), ex = dir > 0 ? bx : bx + bw; tail = [[ex, ty - 8], [ex, ty + 8], [ex - dir*12, ty + 2]]; }
     g.fillStyle = 'rgba(255,246,222,.97)'; g.strokeStyle = '#7a4a1c'; kotak(bx, by, bw, bh, 12); g.fill(); g.stroke();
     g.beginPath(); g.moveTo(...tail[0]); g.lineTo(...tail[1]); g.lineTo(...tail[2]); g.closePath(); g.fill(); g.stroke();
@@ -954,6 +998,58 @@ function efekAksi(now){
 }
 function tandaiSuara(baris){ const a = db.daftar.find(c => c.id === db.aktif), m = a && /^p_(\w+?)(_jv)?$/.exec(a.id), k = m ? m[1] : '', jv = !!(m && m[2]), l = k && LAKON[k]; if(l && (jv ? l.jv : l.teks) === $('stxt').value) baris.forEach((b, i) => { b.src = 'suara/' + (jv ? 'jv/' : '') + k + '/' + (i + 1) + '.mp3'; b.babak = l.babak && l.babak[i]; }); }
 function mainkanSuara(L, id){ const a = new Audio(L.src); let mulai = false; a.preload = 'auto'; const akhir = () => { if(cerita && cerita.id === id && !cerita.ttsSelesai){ cerita.ttsSelesai = true; cerita.tEnd = performance.now(); ducked = false; terapVol(); } }; const cadangan = () => { if(mulai) return akhir(); L.src = ''; if(cerita && cerita.id === id) mulaiBaris(); }; a.onplaying = () => { mulai = true; if(cerita && cerita.id === id){ cerita.ttsMulai = true; cerita.tm = performance.now(); ducked = true; terapVol(); } }; a.onended = akhir; a.onerror = cadangan; try{ if(ac) ac.createMediaElementSource(a).connect(mst); }catch(_){} cerita.tts = true; cerita.audio = a; a.play().catch(cadangan); }
+let dalangTTS = null;
+function ucapDalang(L, id){
+  if(!('speechSynthesis' in window)){ if(cerita && cerita.id === id) cerita.tts = false; return; }
+  try{ speechSynthesis.cancel(); }catch(_){}
+  dalangTTS = id;
+  if(cerita) cerita.tts = true;
+  const v = pilihSuara(L.who);
+  const isNar = L.who < 0;
+  const basePitch = isNar ? 0.28 : (SUARA[CUR[L.who]] ? SUARA[CUR[L.who]][0] : 0.5);
+  const baseRate  = isNar ? 0.66 : (SUARA[CUR[L.who]] ? SUARA[CUR[L.who]][1] * 0.92 : 0.85);
+  const frasa = L.teks.replace(/([.,!?;:])\s+/g, '$1|').split('|').map(s => s.trim()).filter(Boolean);
+  if(!frasa.length) return;
+  if(isNar && $('gmlOn').checked) setTimeout(() => cempala(.18), 250);
+  let idx = 0, mulai = false;
+  const playNext = () => {
+    if(!cerita || cerita.id !== id || dalangTTS !== id) return;
+    if(idx >= frasa.length){
+      if(cerita && cerita.id === id && !cerita.ttsSelesai){
+        cerita.ttsSelesai = true; cerita.tEnd = performance.now();
+        ducked = false; terapVol();
+      }
+      dalangTTS = null;
+      return;
+    }
+    const teks = frasa[idx++];
+    const u = new SpeechSynthesisUtterance(teks);
+    if(v){ u.voice = v; u.lang = v.lang; } else u.lang = 'id-ID';
+    const pitchVar = (Math.random() - 0.5) * 0.05;
+    u.pitch = clamp(basePitch + pitchVar, 0.1, 1.0);
+    const rateVar = /[?!]$/.test(teks) ? -0.08 : 0;
+    u.rate  = clamp(baseRate + rateVar, 0.45, 1.15);
+    u.volume = 1;
+    if(!mulai){
+      u.onstart = () => {
+        mulai = true;
+        if(cerita && cerita.id === id){
+          cerita.ttsMulai = true; cerita.tm = performance.now();
+          ducked = true; terapVol();
+        }
+      };
+    }
+    u.onend = () => {
+      if(!cerita || cerita.id !== id) return;
+      const pause = /[.!?]$/.test(teks) ? 420 : /[;:]$/.test(teks) ? 280 : 180;
+      setTimeout(playNext, pause);
+    };
+    u.onerror = () => { if(cerita && cerita.id === id) setTimeout(playNext, 60); };
+    try { speechSynthesis.speak(u); }
+    catch(_){ setTimeout(playNext, 60); }
+  };
+  playNext();
+}
 const rc = document.createElement('canvas'), rg = rc.getContext('2d');
 let rec = null, recT = 0, recTick = 0, rdest = null;
 function komposit(){
@@ -1069,6 +1165,7 @@ werkudara:{jl:'Bima / Bratasena',wt:'Jujur, tegas',lk:'Mahabharata — Pandawa k
 arjuna:{jl:'Janaka / Permadi',wt:'Halus, tampan, pemanah',lk:'Mahabharata — Pandawa ketiga',ck:'Panah Pasopati',fk:'Murid terbaik Resi Drona; Bhagawadgita untuknya.'},
 hanoman:{jl:'Anoman / Maruti',wt:'Setia, gesit, berani',lk:'Ramayana — panglima kera putih',ck:'Bulu putih, bisa membesar',fk:'Membakar Alengka (Hanoman Obong).'}}};
 PROF.jv = PROF.id;
+
 const QZ = [
 {t:'semar',q:['Siapa punakawan tertua?','Sapa punakawan paling sepuh?'],o:['Semar','Petruk','Gareng','Bagong'],e:['Semar adalah punakawan tertua.','Semar iku punakawan paling sepuh.']},
 {t:'werkudara',q:['Kuku sakti Werkudara bernama...','Kuku sekti Werkudara jenenge...'],o:['Pancanaka','Pasopati','Konta','Cakra'],e:['Kuku Pancanaka adalah senjata andalannya.','Kuku Pancanaka gegaman andalane.']},
@@ -1080,8 +1177,24 @@ const QZ = [
 {q:['Lampu minyak sumber cahaya disebut...','Lampu lenga sumbere cahya diarani...'],o:['Blencong','Kelir','Cempala','Keprak'],e:['Blencong.','Blencong.']},
 {t:'arjuna',q:['Panah sakti Arjuna bernama...','Panah sekti Arjuna jenenge...'],o:['Pasopati','Pancanaka','Cakra','Trisula'],e:['Pasopati.','Pasopati.']},
 {t:'hanoman',q:['Panglima kera putih dalam Ramayana adalah...','Panglima kethek putih ing Ramayana yaiku...'],o:['Hanoman','Sugriwa','Anggada','Subali'],e:['Hanoman.','Hanoman.']},
-{q:['UNESCO menetapkan wayang sebagai warisan budaya dunia pada tahun...','UNESCO netepake wayang minangka warisan budaya donya ing taun...'],o:['2003','1999','2010','2015'],e:['UNESCO 2003.','UNESCO 2003.']},
-{q:['Pemukul kayu dalang untuk isyarat disebut...','Pamukul kayu dalang kanggo isyarat diarani...'],o:['Cempala','Kendang','Bonang','Gong'],e:['Cempala.','Cempala.']}];
+{q:['UNESCO menetapkan wayang sebagai warisan budaya dunia pada tahun...','UNESCO netepake wayang minangka warisan budaya donya ing taun...'],o:['2003','1999','2010','2015'],e:['UNESCO 7 November 2003.','UNESCO 7 November 2003.']},
+{q:['Pemukul kayu dalang untuk isyarat disebut...','Pamukul kayu dalang kanggo isyarat diarani...'],o:['Cempala','Kendang','Bonang','Gong'],e:['Cempala dipukulkan ke kotak wayang.','Cempala dipukulake ing kothak wayang.']},
+{t:'semar',q:['Berapa jumlah Punakawan?','Pira cacahe Punakawan?'],o:['4 (Semar, Gareng, Petruk, Bagong)','2','3','5'],e:['Empat punakawan setia.','Papat punakawan setya.']},
+{q:['Wayang kulit dibuat dari bahan...','Wayang kulit digawe saka bahan...'],o:['Kulit kerbau','Kulit kambing','Kertas','Kayu jati'],e:['Kulit kerbau diolah tipis.','Kulit kebo diolah tipis.']},
+{q:['Wayang dari boneka kayu khas Sunda disebut...','Wayang saka bonéka kayu kas Sunda diarani...'],o:['Wayang golek','Wayang klitik','Wayang beber','Wayang wong'],e:['Wayang golek dari Jawa Barat.','Wayang golek saka Jawa Barat.']},
+{t:'hanoman',q:['Ayah Hanoman adalah dewa...','Ramane Hanoman yaiku dewa...'],o:['Batara Bayu (angin)','Batara Guru','Batara Brahma','Batara Wisnu'],e:['Hanoman putra Batara Bayu, dewa angin.','Hanoman putrane Batara Bayu, dewa angin.']},
+{t:'gatotkaca',q:['Ibu Gatotkaca bernama...','Ibune Gatotkaca jenenge...'],o:['Dewi Arimbi','Dewi Sinta','Dewi Drupadi','Dewi Kunthi'],e:['Dewi Arimbi dari Pringgadani.','Dewi Arimbi saka Pringgadani.']},
+{q:['Senjata sakti milik Karna bernama...','Gegaman sekti duweke Karna jenenge...'],o:['Konta','Pancanaka','Pasopati','Cakra'],e:['Konta membunuh Gatotkaca.','Konta mateni Gatotkaca.']},
+{q:['Pemimpin pasukan Kurawa adalah...','Pemimpin pasukan Kurawa yaiku...'],o:['Duryodana','Dursasana','Karna','Sakuni'],e:['Duryodana raja Astina.','Duryodana ratu Astina.']},
+{q:['Pandawa yang paling tua bernama...','Pandhawa paling sepuh jenenge...'],o:['Yudistira','Werkudara','Arjuna','Nakula'],e:['Yudistira (Puntadewa) anak tertua.','Yudistira (Puntadewa) putra paling sepuh.']},
+{q:['Pandawa yang kembar adalah...','Pandhawa kang kembar yaiku...'],o:['Nakula & Sadewa','Arjuna & Werkudara','Yudistira & Arjuna','Semar & Petruk'],e:['Nakula-Sadewa kembar, anak Madrim.','Nakula-Sadewa kembar, putrane Madrim.']},
+{q:['Adik Rama dalam Ramayana bernama...','Rayine Rama ing Ramayana jenenge...'],o:['Laksmana','Bharata','Satrugna','Sugriwa'],e:['Laksmana setia menemani Rama.','Laksmana setya ngancani Rama.']},
+{q:['Istri Rama dalam Ramayana bernama...','Bojone Rama ing Ramayana jenenge...'],o:['Dewi Sinta','Dewi Drupadi','Dewi Kunthi','Dewi Arimbi'],e:['Dewi Sinta diculik Rahwana.','Dewi Sinta diculik Rahwana.']},
+{q:['Lakon Hanoman membakar Alengka disebut...','Lakon Hanoman ngobong Ngalengka diarani...'],o:['Hanoman Obong','Hanoman Maling','Hanoman Perang','Hanoman Sungsang'],e:['Hanoman Obong.','Hanoman Obong.']},
+{q:['Gunungan dipakai dalang untuk...','Gunungan dienggo dalang kanggo...'],o:['Membuka & menutup lakon','Menyembunyikan wayang','Memukul lawan','Menutup kelir'],e:['Pembuka, penutup, dan tanda babak.','Pambuka, panutup, lan tandha babak.']},
+{q:['Pertunjukan wayang kulit biasanya berlangsung...','Pagelaran wayang kulit biasane...'],o:['Semalam suntuk','30 menit','2 jam','Seharian'],e:['Malam hingga subuh, 8-9 jam.','Bengi nganti subuh, 8-9 jam.']},
+{q:['Wayang yang diperankan manusia disebut...','Wayang kang dipentasake manungsa diarani...'],o:['Wayang wong','Wayang golek','Wayang klitik','Wayang beber'],e:['Wayang wong dari Jawa Tengah.','Wayang wong saka Jawa Tengah.']}
+];
 const bi = () => BHS === 'jv' ? 1 : 0;
 function setTx(el, v){ if(!el) return; const n = [...el.childNodes].find(c => c.nodeType === 3 && c.textContent.trim()); if(n) n.textContent = (el.matches && el.matches('.chk') ? ' ' : '') + v + (el.matches && el.matches('.row') ? ' ' : ''); else el.textContent = v; }
 function applyLang(){
@@ -1107,17 +1220,109 @@ let kenK = 'gatotkaca';
 function tampilProfil(k){ kenK = k; const P0 = PROF[BHS][k]; document.querySelectorAll('#kg .tk').forEach(b => b.classList.toggle('on', b.dataset.k === k)); $('kd').innerHTML = '<h3>' + nm(k) + '</h3><i>' + P0.jl + '</i><p><b>' + tx('kwt') + ':</b> ' + P0.wt + '</p><p><b>' + tx('klk') + ':</b> ' + P0.lk + '</p><p><b>' + tx('kck') + ':</b> ' + P0.ck + '</p><p><b>' + tx('kfk') + '</b> ' + P0.fk + '</p>'; }
 function bangunKenal(){ const h = $('kg'); h.innerHTML = ''; Object.keys(PROF.id).forEach(k => { const b = document.createElement('button'); b.className = 'tk'; b.dataset.k = k; b.innerHTML = '<img alt="" src="' + (THUMB[k] || '') + '"><span>' + nm(k) + '</span>'; b.onclick = () => tampilProfil(k); h.appendChild(b); }); tampilProfil(kenK); }
 bangunKenal();
+
 let kz = null;
 const acak = a => a.map(x => [Math.random(), x]).sort((u, v) => u[0] - v[0]).map(x => x[1]);
-function mulaiKuis(){ kz = {idx:acak(QZ.map((_, i) => i)).slice(0, 6), i:0, skor:0, sudah:false}; tampilScr('kuis'); renderKuis(); }
-function renderKuis(){
-  const box = $('kq'); if(kz.i >= kz.idx.length){ const g = kz.skor >= 6 ? 3 : kz.skor >= 4 ? 2 : kz.skor >= 2 ? 1 : 0; box.innerHTML = '<div class="et" style="font-size:24px;margin:0 0 6px;color:#ffd36a">' + tx('qt') + '</div><div class="qs">' + kz.skor + '/' + kz.idx.length + '</div><div class="qq">' + tx('g' + g) + '</div><div class="two" style="width:100%"><button id="kq-b">' + tx('kembali') + '</button><button class="p" id="kq-u">' + tx('qul') + '</button></div>'; $('kq-b').onclick = () => tampilScr('menu'); $('kq-u').onclick = mulaiKuis; return; }
-  const Q = QZ[kz.idx[kz.i]], o = acak((BHS === 'jv' && Q.o2 ? Q.o2 : Q.o).map((v, i) => ({v, ok:i === 0})));
-  box.innerHTML = '<div class="qh"><span>' + tx('qs') + ' ' + (kz.i + 1) + '/' + kz.idx.length + '</span><span>' + tx('qskor') + ' ' + kz.skor + '</span></div>' + (Q.t ? '<div class="kb"><img alt="" src="' + SIL[Q.t] + '"></div>' : '') + '<div class="qq">' + Q.q[bi()] + '</div><div id="qo"></div><div class="qf" id="qf"></div><button class="mb qo" id="qn" hidden>' + (kz.i === kz.idx.length - 1 ? tx('qend') : tx('qn')) + '</button>';
-  o.forEach(x => { const b = document.createElement('button'); b.className = 'mb qo'; b.textContent = x.v; b.onclick = () => { if(kz.sudah) return; kz.sudah = true; document.querySelectorAll('#qo .qo').forEach((e, j) => { if(o[j].ok) e.classList.add('ok'); }); if(x.ok){ kz.skor++; bonang(1568, .08); } else { b.classList.add('no'); tak(.2); dung(.15); } $('qf').textContent = (x.ok ? tx('qb') : tx('qsal')) + ' ' + Q.e[bi()]; $('qn').hidden = false; }; $('qo').appendChild(b); });
-  kz.sudah = false; $('qn').onclick = () => { kz.i++; renderKuis(); };
+
+function mulaiKuis(){
+  kz = {idx:acak(QZ.map((_, i) => i)).slice(0, 8), i:0, skor:0, streak:0, streakMax:0, mulai:performance.now(), sudah:false};
+  tampilScr('kuis');
+  renderKuis();
 }
+
+function flashJawaban(ok){
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.4);font-size:140px;font-weight:900;pointer-events:none;z-index:999;opacity:0;transition:all .35s cubic-bezier(.2,.9,.3,1.4);font-family:system-ui';
+  el.textContent = ok ? '✓' : '✗';
+  el.style.color = ok ? '#7bd36a' : '#e0493a';
+  el.style.textShadow = '0 0 60px ' + (ok ? 'rgba(123,211,106,.7)' : 'rgba(224,73,58,.7)');
+  document.body.appendChild(el);
+  requestAnimationFrame(() => { el.style.opacity = '1'; el.style.transform = 'translate(-50%,-50%) scale(1.1)'; });
+  setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translate(-50%,-50%) scale(1.6)'; }, 400);
+  setTimeout(() => el.remove(), 800);
+}
+
+function renderKuis(){
+  const box = $('kq');
+
+  if(kz.i >= kz.idx.length){
+    const pct = kz.skor / kz.idx.length;
+    const g = pct >= 1 ? 3 : pct >= .66 ? 2 : pct >= .33 ? 1 : 0;
+    const detik = Math.round((performance.now() - kz.mulai)/1000);
+    box.innerHTML =
+      '<div class="et" style="font-size:24px;margin:0 0 6px;color:#ffd36a">' + tx('qt') + '</div>' +
+      '<div class="qs">' + kz.skor + '/' + kz.idx.length + (kz.streakMax >= 3 ? ' 🔥' : '') + '</div>' +
+      '<div class="qq">' + tx('g' + g) + '</div>' +
+      '<div style="text-align:center;font-size:12.5px;color:#cdb68e;margin:6px 0 14px;line-height:1.6">⏱ ' + detik + ' detik · 🔥 Streak tertinggi: <b style="color:#ff9040">' + kz.streakMax + '</b></div>' +
+      '<div class="two" style="width:100%"><button id="kq-b">' + tx('kembali') + '</button><button class="p" id="kq-u">' + tx('qul') + '</button></div>';
+    $('kq-b').onclick = () => tampilScr('menu');
+    $('kq-u').onclick = mulaiKuis;
+    if(pct >= .66){ gong(.22); setTimeout(() => bonang(1568, .1), 400); setTimeout(() => bonang(2093, .08), 600); setTimeout(() => bonang(2637, .06), 800); }
+    return;
+  }
+
+  const Q = QZ[kz.idx[kz.i]];
+  const opsi = acak((BHS === 'jv' && Q.o2 ? Q.o2 : Q.o).map((v, i) => ({v, ok:i === 0})));
+  const progress = (kz.i / kz.idx.length * 100).toFixed(0);
+  const streakHtml = kz.streak >= 2 ? '<span style="color:#ff9040"> 🔥×' + kz.streak + '</span>' : '';
+
+  box.innerHTML =
+    '<div class="qh"><span>' + tx('qs') + ' ' + (kz.i + 1) + '/' + kz.idx.length + '</span><span>' + tx('qskor') + ' ' + kz.skor + streakHtml + '</span></div>' +
+    '<div style="height:3px;background:rgba(225,175,95,.15);border-radius:2px;margin:0 0 12px;overflow:hidden"><div style="height:100%;width:' + progress + '%;background:linear-gradient(90deg,#e1af5f,#ffd36a);transition:width .35s ease"></div></div>' +
+    (Q.t ? '<div class="kb"><img alt="" src="' + SIL[Q.t] + '"></div>' : '') +
+    '<div class="qq">' + Q.q[bi()] + '</div>' +
+    '<div id="qo"></div>' +
+    '<div class="qf" id="qf"></div>' +
+    '<button class="mb qo" id="qn" hidden>' + (kz.i === kz.idx.length - 1 ? tx('qend') : tx('qn')) + '</button>';
+
+  let majuDone = false;
+  const maju = () => {
+    if(majuDone) return;
+    majuDone = true;
+    kz.i++;
+    renderKuis();
+  };
+
+  opsi.forEach(x => {
+    const b = document.createElement('button');
+    b.className = 'mb qo';
+    b.textContent = x.v;
+    b.dataset.ok = x.ok ? '1' : '0';
+    b.onclick = () => {
+      if(kz.sudah) return;
+      kz.sudah = true;
+
+      if(x.ok){
+        kz.skor++;
+        kz.streak++;
+        if(kz.streak > kz.streakMax) kz.streakMax = kz.streak;
+        b.classList.add('ok');
+        flashJawaban(true);
+        bonang(1568, .1);
+        setTimeout(() => bonang(2093, .08), 70);
+        if(kz.streak >= 3) setTimeout(() => bonang(2637, .06), 140);
+        $('qf').innerHTML = '<b style="color:#7bd36a">✓ ' + tx('qb') + '</b>';
+        setTimeout(maju, 850);
+      } else {
+        kz.streak = 0;
+        b.classList.add('no');
+        document.querySelectorAll('#qo .qo').forEach(e => { if(e.dataset.ok === '1') e.classList.add('ok'); });
+        flashJawaban(false);
+        tak(.2); setTimeout(() => dung(.15), 100);
+        $('qf').innerHTML = '<b style="color:#e0493a">' + tx('qsal') + '</b> ' + Q.e[bi()];
+        $('qn').hidden = false;
+        $('qn').onclick = maju;
+        setTimeout(maju, 3200);
+      }
+    };
+    $('qo').appendChild(b);
+  });
+
+  kz.sudah = false;
+}
+
 $('m-kenal').onclick = () => { tampilScr('kenal'); bangunKenal(); }; $('kn-back').onclick = () => tampilScr('menu'); $('kn-uji').onclick = mulaiKuis; $('m-kuis').onclick = mulaiKuis;
+
 const lat = {on:false, i:0, t0:0, hold:0, skor:[], inv0:false}, NLAT = 7;
 function mulaiLatih(){ tutupDepan(); lat.on = true; lat.i = 0; lat.skor = []; langkahLatih(); $('lat').hidden = false; }
 function langkahLatih(){ lat.t0 = performance.now(); lat.hold = 0; lat.inv0 = P[0].inv; $('latT').textContent = tx('lt') + ' ' + (lat.i + 1) + '/' + NLAT; $('latS').textContent = tx('l' + lat.i) + (lat.i === 0 && !vid.srcObject ? ' — ' + tx('lcam') : ''); $('latB').style.width = (lat.i/NLAT*100) + '%'; }

@@ -180,7 +180,7 @@ body.imersif #dock,body.imersif #volp{display:none!important}
 .toast-badge .tb-ic{font-size:24px;color:#ffd36a}
 .toast-badge b{display:block;font:400 18px Marcellus,serif;color:#ffd36a;margin-bottom:2px}
 .toast-badge span{display:block;font-size:12px;color:#e2d2b0;line-height:1.35}
-#prestasi{left:50%;top:50%;transform:translate(-50%,-50%);width:min(94vw,500px);max-height:86vh;max-height:86dvh;overflow:auto;background:linear-gradient(180deg,#2c1c11,#1a0f08);border:1px solid rgba(225,175,95,.42);border-radius:18px;padding:14px 18px 18px;z-index:7;color:#f3e4c4;touch-action:pan-y}
+#prestasi{left:50%;top:50%;transform:translate(-50%,-50%);width:min(94vw,500px);max-height:86vh;max-height:86dvh;overflow:auto;background:linear-gradient(180deg,#2c1c11,#1a0f08);border:1px solid rgba(225,175,95,.42);border-radius:18px;padding:14px 18px 18px;z-index:21;color:#f3e4c4;touch-action:pan-y;box-shadow:0 20px 60px rgba(0,0,0,.8)}
 #prestasi[hidden]{display:none}
 .ach-k{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;padding:10px 4px;border-radius:12px;border:1px solid rgba(225,175,95,.2);background:rgba(55,38,25,.5);text-align:center;opacity:.4;transition:all .2s}
 .ach-k.on{opacity:1;background:linear-gradient(180deg,#8f4113,#5a2308);border-color:#e1af5f;box-shadow:0 0 12px rgba(255,211,106,.3)}
@@ -192,11 +192,15 @@ body.imersif #dock,body.imersif #volp{display:none!important}
 #menuCepat[hidden]{display:none}
 @keyframes mcIn{from{opacity:0;transform:translate(-50%,-50%) scale(.85)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
 .mc-h{display:flex;align-items:center;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid rgba(225,175,95,.3);margin-bottom:12px;font:400 20px Marcellus,serif;color:#ffd36a}
+.mc-h div span:last-child{font:500 11px 'Plus Jakarta Sans';color:#a8916a;letter-spacing:0;margin-top:4px;display:block}
 .mc-h button{background:none;border:0;color:#f3e4c4;font-size:24px;cursor:pointer;padding:0 6px;line-height:1}
 .mc-g{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.mc-k{display:flex;flex-direction:column;align-items:center;gap:4px;height:92px;padding:8px 4px;border-radius:12px;border:1.5px solid rgba(225,175,95,.28);background:rgba(55,38,25,.9);color:#f3e4c4;font:500 11.5px 'Plus Jakarta Sans';cursor:pointer;transition:all .15s;position:relative}
-.mc-k:hover,.mc-k.hover{border-color:#ffd36a;background:rgba(143,65,19,.9);box-shadow:0 0 16px rgba(255,211,106,.6);transform:scale(1.02)}
-.mc-k.on{border-color:#ffd36a;background:rgba(143,65,19,.9);box-shadow:0 0 12px rgba(255,211,106,.4)}
+.mc-k{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:92px;padding:8px 4px;border-radius:12px;border:1.5px solid rgba(225,175,95,.28);background:rgba(55,38,25,.9);color:#f3e4c4;font:500 11.5px 'Plus Jakarta Sans';cursor:pointer;transition:all .15s;position:relative;overflow:hidden}
+.mc-k .mc-p{position:absolute;inset:0;background:rgba(255,211,106,.15);transform-origin:left;transform:scaleX(0);pointer-events:none;z-index:0}
+.mc-k.hover{border-color:#ffd36a;background:rgba(143,65,19,.9);box-shadow:0 0 16px rgba(255,211,106,.6);transform:scale(1.02)}
+.mc-k.hover .mc-p{animation:mc-progress .8s linear forwards}
+.mc-k img,.mc-k span{position:relative;z-index:1}
+@keyframes mc-progress{from{transform:scaleX(0)}to{transform:scaleX(1)}}
 .mc-k img{height:58px;max-width:100%;object-fit:contain}
 @media(max-height:480px){
   .kb{height:84px;padding:6px 8px 0;margin-bottom:6px}.kb img{height:76px}
@@ -271,7 +275,10 @@ body.imersif #dock,body.imersif #volp{display:none!important}
     <div id="achGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px"></div>
   </div>
   <div id="menuCepat" class="ov" hidden>
-    <div class="mc-h"><span id="mcTitle">Ganti Wayang</span><button id="mcClose">×</button></div>
+    <div class="mc-h">
+      <div><span id="mcTitle">Ganti Wayang</span><span>Gerakkan tangan ke arah wayang, tahan.</span></div>
+      <button id="mcClose">×</button>
+    </div>
     <div class="mc-g" id="mcList"></div>
   </div>
   <div id="lat" hidden><div class="lh"><b id="latT"></b><span id="latS"></span></div><div class="lb"><i id="latB"></i></div><div class="lr"><button class="b" id="latSkip"></button><button class="b" id="latX"></button></div></div>
@@ -491,19 +498,20 @@ function gerakLengan(p, a, dt, t, now){
 
 let handsOn = -1e9, armTouched = false; const ptr = new Map();
 let menuCepatOn = false;
-let mcHover = { el: null, t: 0 };
+let mcHover = { el: null };
 function bukaMenuCepat(i){
   if(menuCepatOn) return;
   menuCepatOn = true;
-  mcHover = { el: null, t: 0 };
+  mcHover = { el: null };
   $('mcTitle').textContent = 'Ganti Wayang ' + (i === 0 ? 'Kiri' : 'Kanan');
   const list = $('mcList');
   list.innerHTML = '';
   Object.keys(TOKOH).forEach(k => {
     const b = document.createElement('button');
     b.className = 'mc-k' + (CUR[i] === k ? ' on' : '');
-    b.innerHTML = '<img alt="" src="' + (THUMB[k] || '') + '"><span>' + nm(k) + '</span>';
+    b.innerHTML = '<div class="mc-p"></div><img alt="" src="' + (THUMB[k] || '') + '"><span>' + nm(k) + '</span>';
     b.onclick = async () => { await setTokoh(i, k); tutupMenuCepat(); dung(.2); setTimeout(() => bonang(1568, .08), 80); };
+    b.querySelector('.mc-p').onanimationend = () => { if(!menuCepatOn) return; b.click(); };
     list.appendChild(b);
   });
   $('menuCepat').hidden = false;
@@ -738,16 +746,27 @@ function proses(landmarks, tcap){
   if(menuCepatOn){
     const h = hs[0];
     if(h){
-      const cx = h.x * window.innerWidth;
-      const cy = h.y * window.innerHeight;
-      const el = document.elementFromPoint(cx, cy);
-      if(el && el.closest('.mc-k')){
-        const btn = el.closest('.mc-k');
-        if(mcHover.el !== btn){ mcHover.el = btn; mcHover.t = now; document.querySelectorAll('.mc-k').forEach(b => b.classList.remove('hover')); btn.classList.add('hover'); }
-        else if(now - mcHover.t > 850){ btn.click(); mcHover.el = null; mcHover.t = 0; }
+      const hx = clamp((h.x - 0.15) / 0.7, 0, 0.999);
+      const hy = clamp((h.y - 0.15) / 0.7, 0, 0.999);
+      const col = Math.floor(hx * 3);
+      const row = Math.floor(hy * 2);
+      const idx = row * 3 + col;
+      
+      const buttons = document.querySelectorAll('.mc-k');
+      if(buttons[idx]){
+        const btn = buttons[idx];
+        if(mcHover.el !== btn){
+          mcHover.el = btn;
+          buttons.forEach(b => b.classList.remove('hover'));
+          btn.classList.add('hover');
+        }
       } else {
-        mcHover.el = null; mcHover.t = 0; document.querySelectorAll('.mc-k').forEach(b => b.classList.remove('hover'));
+        mcHover.el = null;
+        buttons.forEach(b => b.classList.remove('hover'));
       }
+    } else {
+      mcHover.el = null;
+      document.querySelectorAll('.mc-k').forEach(b => b.classList.remove('hover'));
     }
   }
 
@@ -1035,23 +1054,7 @@ function loop(t){
         g.restore();
       }
     });
-
-    // Kursor Hand Tracking di menu
-    if(menuCepatOn){
-      const h = P.find(p => p.seen > now - 500);
-      if(h && h.hx !== undefined){
-        const cx = h.hx * W;
-        const cy = h.hy * H;
-        g.save();
-        g.strokeStyle = 'rgba(255,211,106,.8)';
-        g.lineWidth = 2;
-        g.beginPath(); g.arc(cx, cy, 16, 0, Math.PI*2); g.stroke();
-        g.fillStyle = 'rgba(255,211,106,.3)';
-        g.beginPath(); g.arc(cx, cy, 6, 0, Math.PI*2); g.fill();
-        g.restore();
-      }
-    }
-
+    
     g.restore();
     lukisCerita(now); lukisGunung(now); lukisPercik(now); lukisAdu(now); lukisBabak(now);
   }
@@ -1118,8 +1121,8 @@ function tampilPrestasi(){
     grid.appendChild(div);
   });
 }
-$('m-prestasi').onclick = () => { tampilPrestasi(); $('prestasi').hidden = false; };
-$('achClose').onclick = () => { $('prestasi').hidden = true; };
+$('m-prestasi').onclick = () => { tampilPrestasi(); $('prestasi').hidden = false; $('depan').hidden = true; };
+$('achClose').onclick = () => { $('prestasi').hidden = true; $('depan').hidden = false; tampilScr('menu'); };
 if('serviceWorker' in navigator && /^https?:/.test(location.protocol)) navigator.serviceWorker.register('sw.js').catch(() => {});
 const GUNIM = new Image(); GUNIM.src = 'aset/gunungan.webp';
 function lukisTokoh(){ const c = document.createElement('canvas'); c.width = GUNIM.naturalWidth || 360; c.height = GUNIM.naturalHeight || 620; c.getContext('2d').drawImage(GUNIM, 0, 0); return c; }
@@ -1331,8 +1334,7 @@ const IKON = {menu:'<path d="M4 7h16M4 12h16M4 17h16"/>', musik:'<path d="M9 18V
   tanya:'<circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.6-1.5 1.1-1.5 2.3M12 17h.01"/>', cerita:'<path d="M4 5h16v11H9l-5 4z"/>', rumah:'<path d="M3 11l9-8 9 8M5 10v10h14V10"/>', main:'<path d="M7 4l13 8-13 8z" fill="currentColor"/>', buku:'<path d="M3 5h7a2 2 0 012 2v13a2 2 0 00-2-2H3zM21 5h-7a2 2 0 00-2 2v13a2 2 0 012-2h7z"/>',
   tokoh:'<path d="M12 3l9 17H3z"/><path d="M12 9v5M12 17h.01"/>', tangan:'<path d="M8 13V5.5a1.5 1.5 0 013 0V12M11 11V4a1.5 1.5 0 013 0v8M14 11.5V6a1.5 1.5 0 013 0v7M17 11a1.5 1.5 0 013 0v4a7 7 0 01-7 7h-1a7 7 0 01-5.6-2.8L4 14.5a1.6 1.6 0 012.5-2L8 14"/>',
   mahkota:'<path d="M3 18h18M4 18L3 7l5 4 4-6 4 6 5-4-1 11"/>', panah:'<path d="M5 12h14M13 6l6 6-6 6"/>',
-  piala:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0V4zM7 4H4v2a3 3 0 003 3M17 4h3v2a3 3 0 01-3 3"/>',
-  jam:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>'
+  piala:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 01-10 0V4zM7 4H4v2a3 3 0 003 3M17 4h3v2a3 3 0 01-3 3"/>'
 };
 function ikon(el, p, label){ if(label) el.title = label; [...el.childNodes].forEach(n => n.nodeType === 3 && n.remove()); el.insertAdjacentHTML('afterbegin', SV(p) + (label ? '<span' + (el.id === 'cerita' ? ' id="ctl"' : '') + '>' + label + '</span>' : '')); }
 [['menu','menu'], ['snd','musik'], ['fs','penuh'], ['shot','kamera'], ['recb','rekam'], ['pov','pov'], ['nextb','next']].forEach(([id, k]) => ikon($(id), IKON[k]));

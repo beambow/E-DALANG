@@ -444,7 +444,7 @@ $('flip').onclick = () => P.forEach(p => p.inv = !p.inv);
 function geo(p, t, i){
   const now = performance.now(), idle = now - handsOn > 500;
   const sway = idle ? Math.sin(t/900 + i*2)*.04 : 0;
-  const h = Math.min(H*.6, W*.6)*p.s;
+  const h = Math.min(H*.6, W*.6)*p.s*(1 + .006*Math.sin(t/1100 + i*1.7));
   return {h, w:h*p.iw/p.ih, k:h/p.ih, pv:h*.3, px:(p.x + (p.kb || 0))*W, py:p.y*H + (p.sp ? Math.sin(t/85)*H*.004 : 0), rot:p.r + sway + p.sw + (p.jt || 0), sc:p.nat*p.fx*(p.inv ? -1 : 1)};
 }
 function keLayar(p, G, x, y){
@@ -485,13 +485,16 @@ function gerakLengan(p, a, dt, t, now){
   else { const idle = now - handsOn > 500; tg = idle ? .12 + .13*Math.sin(t/820 + a.ph) : .06; }
   tg = et !== null ? clamp(tg, -a.lim[0], a.lim[1]) : clamp(tg, -a.rng[0], a.rng[1]);
   const kt = now - a.ikT < 500;
-  const k1 = kt ? 1600 : 520;
-  const c1 = 2*Math.sqrt(k1)*(kt ? .92 : .74);
-  a.va = (a.va + k1*(tg - a.a)*dt)/(1 + c1*dt); a.a += a.va*dt;
+  if(a.tgs === undefined){ a.tgs = tg; a.ets = a.e; }
+  const kl = 1 - Math.exp(-dt*(kt ? 16 : 10));
+  a.tgs += (tg - a.tgs)*kl; if(et !== null) a.ets += (et - a.ets)*kl; else a.ets = a.e;
+  const k1 = kt ? 820 : 360;
+  const c1 = 2*Math.sqrt(k1)*(kt ? .86 : .62);
+  a.va = (a.va + k1*(a.tgs - a.a)*dt)/(1 + c1*dt); a.a += a.va*dt;
   a.a = clamp(a.a, -a.lim[0]*1.1, a.lim[1]*1.1);
-  const etg = (et !== null ? clamp(et, -1.5, 1.5) : -.55*a.a) - (kt ? 0 : .04*a.va);
-  const k2 = kt ? 900 : 320;
-  const c2 = 2*Math.sqrt(k2)*(kt ? .9 : .68);
+  const etg = (et !== null ? clamp(a.ets, -1.5, 1.5) : -.55*a.a) - (kt ? 0 : .09*a.va);
+  const k2 = kt ? 480 : 220;
+  const c2 = 2*Math.sqrt(k2)*(kt ? .8 : .52);
   a.ve = (a.ve + k2*(etg - a.e)*dt)/(1 + c2*dt); a.e += a.ve*dt;
   a.e = clamp(a.e, -1.6, 1.6);
 }
@@ -955,6 +958,13 @@ function lukisCerita(now){
 }
 
 function batang(x1, y1, x2, y2, w1, w2, warna){ const dx = x2 - x1, dy = y2 - y1, l = Math.hypot(dx, dy) || 1, nx = -dy/l, ny = dx/l; g.fillStyle = warna; g.beginPath(); g.moveTo(x1 + nx*w1/2, y1 + ny*w1/2); g.lineTo(x2 + nx*w2/2, y2 + ny*w2/2); g.lineTo(x2 - nx*w2/2, y2 - ny*w2/2); g.lineTo(x1 - nx*w1/2, y1 - ny*w1/2); g.closePath(); g.fill(); }
+function sendi(g, r, gelap){
+  if(gelap){ g.fillStyle = 'rgba(255,238,196,.6)'; g.beginPath(); g.arc(0, 0, r*.5, 0, 6.2832); g.fill(); g.strokeStyle = 'rgba(20,10,4,.92)'; g.lineWidth = Math.max(1, r*.3); g.beginPath(); g.arc(0, 0, r, 0, 6.2832); g.stroke(); return; }
+  const gr = g.createRadialGradient(-r*.3, -r*.35, r*.1, 0, 0, r); gr.addColorStop(0, '#ffe9a6'); gr.addColorStop(.55, '#c8963a'); gr.addColorStop(1, '#6b4313');
+  g.fillStyle = gr; g.beginPath(); g.arc(0, 0, r, 0, 6.2832); g.fill(); g.strokeStyle = 'rgba(30,14,4,.85)'; g.lineWidth = Math.max(1, r*.22); g.stroke();
+  g.fillStyle = '#140803'; g.beginPath(); g.arc(0, 0, r*.38, 0, 6.2832); g.fill();
+  g.fillStyle = 'rgba(255,240,200,.55)'; g.beginPath(); g.arc(-r*.12, -r*.14, r*.12, 0, 6.2832); g.fill();
+}
 function bayang(p, G, t){
   if(siluet) return;
   const s = p.sh, sg = s.g, ko = s.ko, iw = p.iw, ih = p.ih;
@@ -985,6 +995,8 @@ function gambar(p, G, t){
     g.translate((a.E[0]-a.S[0])*k, (a.E[1]-a.S[1])*k); g.rotate(a.e*a.dir);
     g.drawImage(SI ? SI.arms[j].L : a.L.im, (a.L.x-a.E[0])*k, (a.L.y-a.E[1])*k, a.L.w*k, a.L.h*k); g.restore();
   });
+  const rs = clamp(G.h*.0145, 3, 10);
+  p.arms.forEach(a => { const [ex, ey] = rotPt(a.E[0], a.E[1], a.S[0], a.S[1], a.a*a.dir); [[a.S[0], a.S[1]], [ex, ey]].forEach(([qx, qy], n) => { g.save(); g.translate((qx - iw/2)*k, (qy - ih/2)*k); sendi(g, n ? rs*.9 : rs, !!SI); g.restore(); }); });
   g.restore();
   if(!armTouched){ p.arms.forEach(a => { const r = 13 + 4*Math.sin(t/260 + a.ph); g.strokeStyle = 'rgba(255,236,170,.9)'; g.lineWidth = 2.5; g.beginPath(); g.arc(a.sx, a.sy, r, 0, 6.2832); g.stroke(); }); }
 }
@@ -993,16 +1005,16 @@ function loop(t){
   fpsHit(t); const raw = t - lt, dt = Math.min(.033, raw/1000 || .016); lt = t;
   if(!pakaiRVFC){ try{ if(hl) kirimLite(); else if(wReady) kirimFrame(); else baca(); }catch(err){ say('Error: ' + err.message, 0); lm = null; } }
   const now = performance.now(), idle = now - handsOn > 500;
-  const kp = 1 - Math.exp(-dt*((now - handsOn < 500) ? 90 : 38));
-  const kr = 1 - Math.exp(-dt*38);
-  const ks = 1 - Math.exp(-dt*22);
+  const kp = 1 - Math.exp(-dt*((now - handsOn < 500) ? 34 : 20));
+  const kr = 1 - Math.exp(-dt*22);
+  const ks = 1 - Math.exp(-dt*14);
   const kf = 1 - Math.exp(-dt*16);
   P.forEach((p, i) => {
     const dx = P[1-i].x - p.x; if(Math.abs(dx) > .04) p.ftx = dx > 0 ? 1 : -1;
     p.x += (p.tx-p.x)*kp; p.y += (p.ty-p.y)*kp; p.r += (p.tr-p.r)*kr; p.s += (p.ts-p.s)*ks; p.fx += (p.ftx-p.fx)*kf;
     if(idle) p.tr *= .96;
     const vx = (p.x - p.x0)/Math.max(dt, .001); p.x0 = p.x; p.vxs += (vx - p.vxs)*(1 - Math.exp(-dt*18));
-    const tgt = -clamp(p.vxs*.32, -.4, .4), w0 = 10, z0 = .3;
+    const tgt = -clamp(p.vxs*.42, -.5, .5), w0 = 10, z0 = .3;
     p.sv += (-w0*w0*(p.sw - tgt) - 2*z0*w0*p.sv)*dt; p.sw = clamp(p.sw + p.sv*dt, -.6, .6);
     p.arms.forEach((a, j) => { if(a.grab && ![...ptr.values()].some(q => q.t === 'arm' && q.i === i && q.j === j)) a.grab = false; gerakLengan(p, a, dt, t, now); });
   });
@@ -1017,7 +1029,7 @@ function loop(t){
     }
   }
   efekAksi(now);
-  g.clearRect(0, 0, W, H);
+  g.clearRect(0, 0, W, H); g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
   if(P.every(p => p.body && p.sh)){
     g.save(); g.beginPath(); g.rect(0, 0, W, H*LEDGE + H*.035); g.clip();
     const Gs = P.map((p, i) => (p.G = geo(p, t, i)));
@@ -1066,7 +1078,7 @@ requestAnimationFrame(loop);
 const TOKOH = {gatotkaca:'Gatotkaca', semar:'Semar', rahwana:'Rahwana (Dasamuka)', werkudara:'Werkudara (Bima)', arjuna:'Arjuna', hanoman:'Hanoman'};
 const LATAR = {asli:'Kelir asli', klasik:'Pentas klasik', malam:'Pentas malam', sogan:'Pentas sogan', kertas:'Kertas kuno', hutan:'Hutan rimba'};
 const BGI = {};
-for(const k of ['kertas', 'hutan']){ const im = new Image(); im.src = 'aset/' + k + '.jpg'; BGI[k] = im; }
+for(const k of ['kertas', 'hutan', 'sogan']){ const im = new Image(); im.src = 'aset/' + k + '.jpg'; BGI[k] = im; }
 const CUR = ['gatotkaca', 'semar'];
 const GOLD = '#d9a441';
 const ACH_KEY = 'wayang-ach';
